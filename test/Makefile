@@ -7,7 +7,7 @@ TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 
 # Verilog source files for Cartesian to Cylindrical Conversion IC
-PROJECT_SOURCES = tt_um_example.v sqrt_approx.v atan2_lut.v
+PROJECT_SOURCES = project.v sqrt_approx.v atan2_lut.v
 
 ifneq ($(GATES),yes)
 
