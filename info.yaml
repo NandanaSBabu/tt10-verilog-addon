@@ -2,8 +2,8 @@
 project:
   title:        "Cartesian to Cylindrical Conversion"  # Project title
   author:       "Nandana"  # Your name
-  discord:      ""  # Your discord username (optional)
-  description:  "Converts Cartesian coordinates (x, y) to Cylindrical (r, θ)"  # One line description
+  discord:      ""  # Your Discord username (optional)
+  description:  "Converts Cartesian coordinates (x, y, z) to Cylindrical (r, θ, z_out)"  # Updated to include z
   language:     "Verilog"  # HDL used (Verilog)
   clock_hz:     100000  # Clock frequency in Hz (100 kHz for this project)
 
@@ -44,15 +44,15 @@ pinout:
   uo[6]: "theta2"
   uo[7]: "theta3"
 
-  # Bidirectional pins (not used)
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  # Bidirectional pins (Now using for Z input and output)
+  uio[0]: "z0"
+  uio[1]: "z1"
+  uio[2]: "z2"
+  uio[3]: "z3"
+  uio[4]: "z_out0"
+  uio[5]: "z_out1"
+  uio[6]: "z_out2"
+  uio[7]: "z_out3"
 
 # Do not change!
 yaml_version: 6
