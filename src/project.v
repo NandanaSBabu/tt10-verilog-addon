@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module project (
+module tt_um_cartesian_to_cylindrical(
     input signed [7:0] x,   // X coordinate
     input signed [7:0] y,   // Y coordinate
     output reg signed [7:0] r,  // Radius
