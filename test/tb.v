@@ -1,58 +1,41 @@
-`timescale 1ns / 1ps
+# SPDX-License-Identifier: Apache-2.0
 
-module project_tb;
-    reg clk;
-    reg rst_n;
-    reg ena;
-    reg [7:0] ui_in;   // X input
-    reg [7:0] uio_in;  // Y input
-    reg [7:0] z_in;    // Z input
-    wire [7:0] uo_out;   // R output
-    wire [7:0] uio_out;  // Theta output
-    wire [7:0] uio_oe;   // Output enable
-    wire [7:0] z_out;    // Z output
-    
-    // Instantiate the project module
-    project uut (
-        .ui_in  (ui_in),    // X input
-        .uo_out (uo_out),   // R output
-        .uio_in (uio_in),   // Y input
-        .uio_out(uio_out),  // Theta output
-        .uio_oe (uio_oe),   // Output enable
-        .z_in   (z_in),     // Z input
-        .z_out  (z_out),    // Z output
-        .ena    (ena),      // Enable signal
-        .clk    (clk),      // Clock
-        .rst_n  (rst_n)     // Active-low reset
-    );
-    
-    initial begin
-        // Initialize inputs
-        clk = 0;
-        rst_n = 0;
-        ena = 0;
-        ui_in = 8'd10; uio_in = 8'd10; z_in = 8'd5;
-        #10;
-        
-        rst_n = 1;
-        ena = 1;
-        ui_in = -8'd15; uio_in = 8'd20; z_in = 8'd8;
-        #10;
-        
-        ui_in = 8'd30; uio_in = -8'd25; z_in = 8'd12;
-        #10;
-        
-        ui_in = 8'd0; uio_in = 8'd0; z_in = 8'd10;
-        #10;
-        
-        $finish;
-    end
-    
-    always #5 clk = ~clk; // Clock generation
-    
-    initial begin
-        $dumpfile("tb.vcd");
-        $dumpvars(0, project_tb);
-    end
-    
-endmodule
+import cocotb
+from cocotb.clock import Clock
+from cocotb.triggers import ClockCycles
+import math
+
+
+@cocotb.test()
+async def test_project(dut):
+    """Test Cartesian to Cylindrical Conversion"""
+    dut._log.info("Starting test")
+
+    # Initialize signals
+    dut.x.value = 0
+    dut.y.value = 0
+
+    test_cases = [
+        (3, 4),
+        (-6, -8),
+        (0, 5),
+        (7, 0),
+        (-5, 5)
+    ]
+
+    for x, y in test_cases:
+        dut.x.value = x
+        dut.y.value = y
+        await ClockCycles(dut.clk, 1)
+
+        expected_r = int(math.sqrt(x**2 + y**2))
+        expected_theta = int(math.degrees(math.atan2(y, x)))
+
+        actual_r = int(dut.r.value)
+        actual_theta = int(dut.theta.value)
+
+        dut._log.info(f"Input (x, y) = ({x}, {y}) -> Output (r, θ) = ({actual_r}, {actual_theta})")
+        assert actual_r == expected_r, f"Mismatch in r: expected {expected_r}, got {actual_r}"
+        assert actual_theta == expected_theta, f"Mismatch in θ: expected {expected_theta}, got {actual_theta}"
+
+    dut._log.info("All tests passed!")
