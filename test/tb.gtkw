@@ -1,13 +1,13 @@
-[*] GTKWave Analyzer
-[dumpfile] "tb.vcd"
-[timestart] 0
-[size] 1376 600
-[treeopen] tb.
-@28
-tb.project.x
-@28
-tb.project.y
-@28
-tb.project.r
-@28
-tb.project.theta
+[Savefile]
+version 1.0
+[Dumpfile]
+tb.vcd
+[Signals]
+tb.clk
+tb.rst
+tb.x
+tb.y
+tb.z
+tb.r
+tb.theta
+tb.z_out
