@@ -1,37 +1,52 @@
-`default_nettype none
-
-module tt_um_example (
-    input  wire [7:0] ui_in,    // X input
-    output wire [7:0] uo_out,   // R output
-    input  wire [7:0] uio_in,   // Y input
-    output wire [7:0] uio_out,  // Theta output
-    output wire [7:0] uio_oe,   // IO Enable path
-    input  wire       ena,      // Always 1 when powered
-    input  wire       clk,      // Clock (unused)
-    input  wire       rst_n     // Active-low reset (unused)
+module RectToCylConverter(
+    input  signed [15:0] x, // 16-bit signed input for x
+    input  signed [15:0] y, // 16-bit signed input for y
+    input  signed [15:0] z, // 16-bit signed input for z
+    output signed [15:0] r, // 16-bit signed output for r
+    output signed [15:0] theta, // 16-bit signed output for theta
+    output signed [15:0] z_out // 16-bit signed output for z
 );
-
-    wire [15:0] x_sq, y_sq, sum_xy;
-    wire [7:0] sqrt_r;
-    wire [7:0] atan_theta;
-
-    // Compute x^2 and y^2
-    assign x_sq = ui_in * ui_in;
-    assign y_sq = uio_in * uio_in;
-    assign sum_xy = x_sq + y_sq;
-
-    // Compute r = sqrt(x^2 + y^2)
-    sqrt_approx sqrt_inst (.in(sum_xy), .out(sqrt_r));
-
-    // Compute theta = atan2(y, x)
-    atan2_lut atan_inst (.x(ui_in), .y(uio_in), .theta(atan_theta));
-
-    // Assign outputs
-    assign uo_out  = sqrt_r;       // r output
-    assign uio_out = atan_theta;   // theta output
-    assign uio_oe  = 8'b11111111;  // Enable all outputs
-
-    // Prevent warnings for unused signals
-    wire _unused = &{ena, clk, rst_n, 1'b0};
-
+    
+    wire signed [31:0] x_sq, y_sq, sum_sq;
+    wire signed [15:0] sqrt_r;
+    
+    // Squaring x and y (x^2 and y^2)
+    assign x_sq = x * x;
+    assign y_sq = y * y;
+    
+    // Sum of squares
+    assign sum_sq = x_sq + y_sq;
+    
+    // Compute r using a simple square root approximation
+    function [15:0] sqrt_approx;
+        input [31:0] num;
+        integer i;
+        reg [15:0] result;
+        begin
+            result = 0;
+            for (i = 15; i >= 0; i = i - 1) begin
+                if ((result | (1 << i)) * (result | (1 << i)) <= num)
+                    result = result | (1 << i);
+            end
+            sqrt_approx = result;
+        end
+    endfunction
+    
+    assign sqrt_r = sqrt_approx(sum_sq);
+    assign r = sqrt_r;
+    
+    // Compute theta using atan2 approximation (CORDIC is recommended for FPGA)
+    function [15:0] atan2_approx;
+        input signed [15:0] y, x;
+        begin
+            if (x == 0)
+                atan2_approx = (y > 0) ? 16'h4000 : 16'hC000; // Approximate ±π/2
+            else
+                atan2_approx = (y * 16384) / x; // Basic division-based approximation
+        end
+    endfunction
+    
+    assign theta = atan2_approx(y, x);
+    assign z_out = z;
+    
 endmodule
