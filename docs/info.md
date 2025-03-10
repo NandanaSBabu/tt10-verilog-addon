@@ -1,42 +1,43 @@
 ## How it works
 
-This project performs a conversion from Cartesian coordinates (x, y) to Cylindrical coordinates (r, θ). It takes in the x and y values as inputs and computes:
-- **r**: The radial distance using the formula \( r = \sqrt{x^2 + y^2} \)
-- **θ (theta)**: The angle using \( \theta = \tan^{-1}(y / x) \) converted to degrees.
+This project converts Cartesian coordinates (x, y) to Cylindrical coordinates (r, θ). It takes x and y as inputs and computes:
+- **r**: The radial distance using \( r = \sqrt{x^2 + y^2} \)
+- **θ (theta)**: The angle using \( \theta = \tan^{-1}(y / x) \), converted to degrees.
 
-The conversion allows easy representation of 2D positions in polar form.
+This conversion helps in representing 2D positions in polar form.
 
 ## How to test
 
-1. **Simulation using Cocotb:**
-   - Run the testbench with `make test`.
-   - The test will apply random values of `x` and `y` and check whether the computed `r` and `θ` match expected values.
-   - If the results match within a small margin, the test passes.
+### Simulation using Cocotb:
+1. Run `make test` to execute the testbench.
+2. The test applies random `x` and `y` values and verifies if the computed `r` and `θ` are correct.
+3. The test passes if results match expected values within a small margin.
 
-2. **Hardware verification:**
-   - Load the synthesized design onto the FPGA or ASIC.
-   - Provide binary inputs representing `x` and `y` values.
-   - Verify the output `r` and `θ` using an oscilloscope or logic analyzer.
+### Hardware verification:
+1. Load the synthesized design onto an FPGA or ASIC.
+2. Provide binary inputs for `x` and `y` values.
+3. Verify `r` and `θ` outputs using an oscilloscope or logic analyzer.
 
 ## External hardware
 
-- This project does not require additional external hardware apart from a suitable FPGA or ASIC testing environment.
+- No additional external hardware is required apart from an FPGA or ASIC testing setup.
 
 ## Constraints
 
-- The inputs `x` and `y` are 4-bit values, limiting the coordinate range.
-- Integer-based calculations introduce small errors due to rounding.
-- The angle output is in degrees but represented in a limited 4-bit format.
+- **4-bit input limitation:** The `x` and `y` values are limited to a 4-bit range.
+- **Integer-based calculations:** Small errors may occur due to rounding.
+- **Limited θ representation:** The angle is in degrees but restricted to a 4-bit format.
+- **No z-axis conversion:** This version does not account for the z-component.
 
 ## Applications
 
-- Robotics: Position tracking using polar coordinates.
-- Signal processing: Coordinate transformations in image processing.
-- Navigation systems: Converting GPS Cartesian data to polar form for pathfinding.
+- **Robotics:** Position tracking using polar coordinates.
+- **Signal Processing:** Coordinate transformations in image processing.
+- **Navigation Systems:** Converting GPS Cartesian data to polar form for pathfinding.
 
 ## Future improvements
 
-- Increase bit-width to support higher precision.
-- Implement floating-point calculations for improved accuracy.
-- Extend to full 3D conversion (Cartesian to Spherical).
+- Increase bit-width for higher precision.
+- Implement floating-point calculations for better accuracy.
+- Extend functionality to support full 3D conversion (Cartesian to Spherical).
 
