@@ -1,24 +1,41 @@
-`timescale 1ns / 1ps
-
 module tt_um_cartesian_to_cylindrical (
-    input signed [7:0] x,   // X coordinate
-    input signed [7:0] y,   // Y coordinate
-    output reg signed [7:0] r,  // Radius
-    output reg signed [7:0] theta // Angle in degrees
+    input logic clk,
+    input logic rst,
+    input logic [15:0] x,  // 16-bit input for x-coordinate
+    input logic [15:0] y,  // 16-bit input for y-coordinate
+    output logic [15:0] r, // Output radius
+    output logic [15:0] theta // Output angle (approx)
 );
 
-    always @(*) begin
-        // Compute r using an approximation
-        r = $sqrt(x * x + y * y);
+    logic [31:0] x_sq, y_sq, sum;
+    logic [15:0] r_temp;
+    logic [15:0] theta_temp;
 
-        // Compute theta using simple lookup method
-        if (x == 0 && y == 0) begin
-            theta = 0;
-        end else if (x >= 0) begin
-            theta = $rtoi($atan2(y, x) * 180.0 / 3.14159);
+    // Squaring x and y
+    assign x_sq = x * x;
+    assign y_sq = y * y;
+    assign sum = x_sq + y_sq;
+
+    // Approximate Square Root using Newton-Raphson Iteration
+    function automatic [15:0] sqrt_approx(input [31:0] num);
+        integer i;
+        reg [15:0] x;
+        x = num[31:16]; // Initial guess
+        for (i = 0; i < 5; i = i + 1) begin
+            x = (x + num / x) >> 1;
+        end
+        return x;
+    endfunction
+
+    always_ff @(posedge clk or posedge rst) begin
+        if (rst) begin
+            r <= 16'd0;
+            theta <= 16'd0;
         end else begin
-            theta = 180 + $rtoi($atan2(y, x) * 180.0 / 3.14159);
+            r_temp = sqrt_approx(sum); // Compute radius
+            theta_temp = (y > 0) ? (x << 8) / r_temp : ((x << 8) / r_temp) + 16'd180;
+            r <= r_temp;
+            theta <= theta_temp;
         end
     end
-
 endmodule
