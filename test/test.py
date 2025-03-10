@@ -1,37 +1,52 @@
-# SPDX-License-Identifier: Apache-2.0
-
 import cocotb
-import math
 from cocotb.triggers import Timer
-
+from cocotb.result import TestFailure
+import math
 
 @cocotb.test()
-async def test_project(dut):
-    """Test Cartesian to Cylindrical Conversion"""
-    dut._log.info("Starting test")
+async def test_cartesian_to_cylindrical(dut):
+    """Test Rectangular to Cylindrical Conversion"""
+    
+    # Set initial values
+    dut.x.value = 0
+    dut.y.value = 0
+    dut.z.value = 0
+    
+    # Wait for some time
+    await Timer(10, units="ns")
 
+    # Define test cases (x, y, z) -> Expected (r, theta, z)
     test_cases = [
-        (3, 4),
-        (-6, -8),
-        (0, 5),
-        (7, 0),
-        (-5, 5)
+        (3, 4, 5, 5, math.atan2(4, 3), 5),  # (3,4,5) -> (5, 0.927, 5)
+        (1, 1, 2, math.sqrt(2), math.atan2(1, 1), 2),
+        (0, 5, -3, 5, math.atan2(5, 0), -3),
+        (-4, -4, 1, math.sqrt(32), math.atan2(-4, -4), 1),
     ]
 
-    for x, y in test_cases:
+    for x, y, z, expected_r, expected_theta, expected_z in test_cases:
         dut.x.value = x
         dut.y.value = y
+        dut.z.value = z
 
-        await Timer(10, units="ns")
+        await Timer(10, units="ns")  # Wait for response
 
-        expected_r = int(math.sqrt(x**2 + y**2))
-        expected_theta = int(math.degrees(math.atan2(y, x)))
+        # Read outputs
+        r = dut.r.value.signed_integer
+        theta = dut.theta.value.signed_integer
+        z_out = dut.z_out.value.signed_integer  # Assuming your output signal for z
 
-        actual_r = int(dut.r.value.signed_integer)
-        actual_theta = int(dut.theta.value.signed_integer)
+        # Verify results (theta scaled by a factor if fixed-point representation is used)
+        theta_scaled = expected_theta if abs(expected_theta) < 3.14 else expected_theta - 6.28  # Adjust for 2π wrapping
 
-        dut._log.info(f"Input (x, y) = ({x}, {y}) -> Output (r, θ) = ({actual_r}, {actual_theta})")
-        assert actual_r == expected_r, f"Mismatch in r: expected {expected_r}, got {actual_r}"
-        assert actual_theta == expected_theta, f"Mismatch in θ: expected {expected_theta}, got {actual_theta}"
+        # Allow small tolerance for rounding errors
+        r_tolerance = 1
+        theta_tolerance = 0.1
 
-    dut._log.info("All tests passed!")
+        if abs(r - expected_r) > r_tolerance or abs(theta - theta_scaled) > theta_tolerance or z_out != expected_z:
+            raise TestFailure(
+                f"Test failed for x={x}, y={y}, z={z} -> r={r}, theta={theta}, z_out={z_out}, expected: ({expected_r}, {expected_theta}, {expected_z})"
+            )
+        else:
+            cocotb.log.info(f"Passed: x={x}, y={y}, z={z} -> r={r}, theta={theta}, z_out={z_out}")
+
+    cocotb.log.info("All test cases passed!")
