@@ -1,41 +1,25 @@
 module tt_um_cartesian_to_cylindrical (
-    input logic clk,
-    input logic rst,
-    input logic [15:0] x,  // 16-bit input for x-coordinate
-    input logic [15:0] y,  // 16-bit input for y-coordinate
-    output logic [15:0] r, // Output radius
-    output logic [15:0] theta // Output angle (approx)
+    input [3:0] x,
+    input [3:0] y,
+    output reg [3:0] r,
+    output reg [3:0] theta
 );
 
-    logic [31:0] x_sq, y_sq, sum;
-    logic [15:0] r_temp;
-    logic [15:0] theta_temp;
-
-    // Squaring x and y
-    assign x_sq = x * x;
-    assign y_sq = y * y;
-    assign sum = x_sq + y_sq;
-
-    // Approximate Square Root using Newton-Raphson Iteration
-    function automatic [15:0] sqrt_approx(input [31:0] num);
-        integer i;
-        reg [15:0] x;
-        x = num[31:16]; // Initial guess
-        for (i = 0; i < 5; i = i + 1) begin
-            x = (x + num / x) >> 1;
-        end
-        return x;
-    endfunction
-
-    always_ff @(posedge clk or posedge rst) begin
-        if (rst) begin
-            r <= 16'd0;
-            theta <= 16'd0;
-        end else begin
-            r_temp = sqrt_approx(sum); // Compute radius
-            theta_temp = (y > 0) ? (x << 8) / r_temp : ((x << 8) / r_temp) + 16'd180;
-            r <= r_temp;
-            theta <= theta_temp;
-        end
+    always @(*) begin
+        // Approximate r = sqrt(x^2 + y^2) using bit-shifting (avoiding floating point operations)
+        r = (x > y) ? x + (y >> 1) : y + (x >> 1);
+        
+        // Approximate theta = atan(y/x) using lookup table for 4-bit inputs
+        case ({x, y})
+            8'b00010000: theta = 4'd0;   // 0°
+            8'b00010001: theta = 4'd7;   // ~7°
+            8'b00010010: theta = 4'd14;  // ~14°
+            8'b00010100: theta = 4'd27;  // ~27°
+            8'b00011000: theta = 4'd45;  // ~45°
+            8'b00011100: theta = 4'd63;  // ~63°
+            8'b00100000: theta = 4'd90;  // 90°
+            default: theta = 4'd0;       // Default case
+        endcase
     end
+    
 endmodule
