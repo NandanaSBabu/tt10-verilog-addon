@@ -1,4 +1,4 @@
-module RectToCylConverter(
+module project(
     input  signed [15:0] x, // 16-bit signed input for x
     input  signed [15:0] y, // 16-bit signed input for y
     input  signed [15:0] z, // 16-bit signed input for z
