@@ -3,22 +3,22 @@
 module project (
     input signed [7:0] x,   // X coordinate
     input signed [7:0] y,   // Y coordinate
-    output signed [7:0] r,  // Radius
-    output signed [7:0] theta // Angle in degrees
+    output reg signed [7:0] r,  // Radius
+    output reg signed [7:0] theta // Angle in degrees
 );
-    wire signed [15:0] x_sq, y_sq, sum;
-    wire signed [7:0] atan_val;
 
-    assign x_sq = x * x;
-    assign y_sq = y * y;
-    assign sum = x_sq + y_sq;
+    always @(*) begin
+        // Compute r using an approximation
+        r = $sqrt(x * x + y * y);
 
-    // Approximate square root (basic Newton-Raphson iteration)
-    assign r = sum[15:8]; // Simple bit shift approximation
+        // Compute theta using simple lookup method
+        if (x == 0 && y == 0) begin
+            theta = 0;
+        end else if (x >= 0) begin
+            theta = $rtoi($atan2(y, x) * 180.0 / 3.14159);
+        end else begin
+            theta = 180 + $rtoi($atan2(y, x) * 180.0 / 3.14159);
+        end
+    end
 
-    // Approximate atan2 using lookup table
-    assign atan_val = (x == 0 && y == 0) ? 8'd0 : (y * 45 / x); // Rough approximation
-
-    assign theta = (x >= 0) ? atan_val : (8'd180 + atan_val);
-    
 endmodule
