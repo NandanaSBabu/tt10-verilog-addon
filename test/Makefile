@@ -8,7 +8,7 @@ SRC_DIR = $(PWD)/../src
 VERILOG_SOURCES = $(SRC_DIR)/project.v
 
 # Simulation settings
-TOPLEVEL = project
+TOPLEVEL = tt_um_cartesian_to_cylindrical
 MODULE = test_project
 SIM_BUILD = sim_build
 
