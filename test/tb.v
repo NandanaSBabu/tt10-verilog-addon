@@ -1,12 +1,12 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
-module tb ();
+module project_tb ();
 
   // Dump the signals to a VCD file for waveform debugging
   initial begin
     $dumpfile("tb.vcd");
-    $dumpvars(0, tb);
+    $dumpvars(0, project_tb);
     #1;
   end
 
@@ -16,9 +16,11 @@ module tb ();
   reg ena;
   reg [7:0] ui_in;   // X input
   reg [7:0] uio_in;  // Y input
+  reg [7:0] z_in;    // Z input
   wire [7:0] uo_out;   // R output
   wire [7:0] uio_out;  // Theta output
   wire [7:0] uio_oe;   // Output enable
+  wire [7:0] z_out;    // Z output
 
 `ifdef GL_TEST
   wire VPWR = 1'b1;
@@ -26,7 +28,7 @@ module tb ();
 `endif
 
   // Instantiate the Cartesian-to-Cylindrical module
-  tt_um_example user_project (
+  project uut (
 
 `ifdef GL_TEST
       .VPWR(VPWR),
@@ -38,6 +40,8 @@ module tb ();
       .uio_in (uio_in),   // Y input
       .uio_out(uio_out),  // Theta output
       .uio_oe (uio_oe),   // Output enable
+      .z_in   (z_in),     // Z input
+      .z_out  (z_out),    // Z output
       .ena    (ena),      // Enable signal
       .clk    (clk),      // Clock
       .rst_n  (rst_n)     // Active-low reset
