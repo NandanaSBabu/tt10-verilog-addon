@@ -1,30 +1,17 @@
 # Tiny Tapeout project information
 project:
-  title:        "Cartesian to Cylindrical Conversion"  # Project title
-  author:       "Nandana"  # Your name
-  discord:      ""  # Your Discord username (optional)
-  description:  "Converts Cartesian coordinates (x, y, z) to Cylindrical (r, θ, z_out)"  # Updated to include z
-  language:     "Verilog"  # HDL used (Verilog)
-  clock_hz:     100000  # Clock frequency in Hz (100 kHz for this project)
-
-  # How many tiles your design occupies? A single tile is about 167x108 µM.
-  tiles: "1x1"  # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2, or 8x2
-
-  # Keeping module name same as before: `tt_um_example`
-  top_module:  "tt_um_example"
-
-  # List your project's source files here.
-  # Source files must be in ./src and you must list each source file separately, one per line.
-  # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
+  title:        "Cartesian to Cylindrical Conversion"
+  author:       "Nandana"
+  discord:      ""
+  description:  "Converts Cartesian coordinates (x, y) to Cylindrical (r, θ)"
+  language:     "Verilog"
+  clock_hz:     100000
+  tiles: "1x1"
+  top_module:  "project"
   source_files:
     - "project.v"
-    - "sqrt_approx.v"
-    - "atan2_lut.v"
 
-# The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
-# This section is for the datasheet/website. Use descriptive names.
 pinout:
-  # Inputs (Cartesian coordinates)
   ui[0]: "x0"
   ui[1]: "x1"
   ui[2]: "x2"
@@ -34,7 +21,6 @@ pinout:
   ui[6]: "y2"
   ui[7]: "y3"
 
-  # Outputs (Cylindrical coordinates)
   uo[0]: "r0"
   uo[1]: "r1"
   uo[2]: "r2"
@@ -44,15 +30,13 @@ pinout:
   uo[6]: "theta2"
   uo[7]: "theta3"
 
-  # Bidirectional pins (Now using for Z input and output)
-  uio[0]: "z0"
-  uio[1]: "z1"
-  uio[2]: "z2"
-  uio[3]: "z3"
-  uio[4]: "z_out0"
-  uio[5]: "z_out1"
-  uio[6]: "z_out2"
-  uio[7]: "z_out3"
+  uio[0]: ""
+  uio[1]: ""
+  uio[2]: ""
+  uio[3]: ""
+  uio[4]: ""
+  uio[5]: ""
+  uio[6]: ""
+  uio[7]: ""
 
-# Do not change!
 yaml_version: 6
