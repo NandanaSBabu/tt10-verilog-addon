@@ -1,37 +1,22 @@
 [*]
-[*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
-[*] Mon Mar 10 16:00:28 2025
+[*] GTKWave Analyzer v3.4.0
 [*]
 [dumpfile] "tb.vcd"
 [timestart] 0
 [size] 1376 600
 [pos] -1 -1
-[treeopen] project_tb.
+[treeopen] tb.
 [sst_width] 297
 [signals_width] 230
 [sst_expanded] 1
 [sst_vpaned_height] 158
 @28
-project_tb.ena
-@29
-project_tb.clk
+tb.project.x
 @28
-project_tb.rst_n
-@200
--Inputs
-@22
-project_tb.ui_in
-project_tb.uio_in
-project_tb.z_in
-@200
--Bidirectional Pins
-@22
-project_tb.uio_oe
-project_tb.uio_out
-@200
--Output Pins
-@22
-project_tb.uo_out
-project_tb.z_out
+tb.project.y
+@28
+tb.project.r
+@28
+tb.project.theta
 [pattern_trace] 1
 [pattern_trace] 0
