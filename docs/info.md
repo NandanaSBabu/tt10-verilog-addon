@@ -9,7 +9,7 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-simple addition
+conversion 
 
 ## How to test
 
