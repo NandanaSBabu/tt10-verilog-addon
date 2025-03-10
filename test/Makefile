@@ -1,5 +1,3 @@
-# Makefile for running tests with Icarus Verilog and Cocotb
-
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
