@@ -1,4 +1,4 @@
 cocotb
 numpy
-pytest
 matplotlib
+gtkwave
