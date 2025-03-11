@@ -1,20 +1,20 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
-/* This testbench just instantiates the module and makes some convenient wires
-   that can be driven / tested by the cocotb test.py.
-*/
 module tb ();
 
-  // Dump the signals to a VCD file. You can view it with gtkwave or surfer.
+  // Dump the signals to a VCD file for waveform analysis.
   initial begin
     $dumpfile("tb.vcd");
     $dumpvars(0, tb);
     #1;
   end
 
-  // Wire up the inputs and outputs:
+  // Clock generation
   reg clk;
+  always #5 clk = ~clk;  // 10ns clock period (100MHz)
+
+  // Declare inputs and outputs
   reg rst_n;
   reg ena;
   reg [7:0] ui_in;
@@ -22,13 +22,14 @@ module tb ();
   wire [7:0] uo_out;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
+
 `ifdef GL_TEST
   wire VPWR = 1'b1;
   wire VGND = 1'b0;
 `endif
 
   // Instantiate the module under test
-  tt_um_addon user_project (
+  tt_um_rect_cyl uut (
 `ifdef GL_TEST
       .VPWR(VPWR),
       .VGND(VGND),
@@ -42,5 +43,28 @@ module tb ();
       .clk    (clk),      // clock signal
       .rst_n  (rst_n)     // active-low reset
   );
+
+  // Test sequence
+  initial begin
+    // Initialize signals
+    clk = 0;
+    rst_n = 0;
+    ena = 0;
+    ui_in = 0;
+    uio_in = 0;
+    #20;
+    
+    rst_n = 1;  // Release reset
+    ena = 1;    // Enable module
+    
+    // Apply test inputs
+    #10 ui_in = 8'd3; uio_in = 8'd4;  // Expect r ≈ 5, theta ≈ atan(4/3)
+    #20 ui_in = 8'd6; uio_in = 8'd8;  // Expect r ≈ 10, theta ≈ atan(8/6)
+    #20 ui_in = 8'd10; uio_in = 8'd0; // Expect r ≈ 10, theta ≈ 90
+    #20 ui_in = 8'd0; uio_in = 8'd10; // Expect r ≈ 10, theta ≈ 0
+    #20;
+    
+    $finish;
+  end
 
 endmodule
