@@ -12,7 +12,16 @@ project:
     - "project.v"
 
 pinout:
-  uio[0]: "unused"
+  # 8 bidirectional pins (uio[0] to uio[7])
+  uio[0]: "unused"   # Change if needed
+  uio[1]: "unused"
+  uio[2]: "unused"
+  uio[3]: "unused"
+  uio[4]: "unused"
+  uio[5]: "unused"
+  uio[6]: "unused"
+  uio[7]: "unused"
+
   # 8-bit input x (ui[7:0])
   ui[0]:  "x0"
   ui[1]:  "x1"
