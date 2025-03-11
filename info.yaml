@@ -1,56 +1,53 @@
 # Tiny Tapeout project information
 project:
-  title:        "Rectangular to Cylindrical Converter"      # Project title
-  author:       "Joanna"      # Your name
-  discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "Converts rectangular coordinates to cylindrical coordinates"      # One line description of what your project does
-  language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
+  title:        "Rectangular to Cylindrical Converter"  # Project title
+  author:       "Nandana"  # Your name
+  discord:      ""  # Your Discord username (optional)
+  description:  "Converts rectangular coordinates (x, y, z) to cylindrical coordinates (r, θ, z)"  
+  language:     "Verilog"  
+  clock_hz:     0  # No clock required (if applicable)
 
-  # How many tiles your design occupies? A single tile is about 167x108 uM.
-  tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
+  # Tile size for layout placement
+  tiles: "1x1"  # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2, or 8x2
 
-  # Your top module name must start with "tt_um_". Make it unique by including your github username:
+  # Top module name (must start with "tt_um_")
   top_module:  "tt_um_rect_cyl"
 
-  # List your project's source files here.
-  # Source files must be in ./src and you must list each source file separately, one per line.
-  # Don't forget to also update PROJECT_SOURCES in test/Makefile.
+  # List of Verilog source files (must be inside ./src/)
   source_files:
     - "project.v"
 
-# The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
-# This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
+# Pinout definition for datasheet/website
 pinout:
   # Inputs
-  ui[0]: "x"
-  ui[1]: "y"
-  ui[2]: "z"
-  ui[3]: ""
-  ui[4]: ""
-  ui[5]: ""
-  ui[6]: ""
-  ui[7]: ""
+  ui[0]: "x"       # X-coordinate input
+  ui[1]: "y"       # Y-coordinate input
+  ui[2]: "z"       # Z-coordinate input
+  ui[3]: ""  
+  ui[4]: ""  
+  ui[5]: ""  
+  ui[6]: ""  
+  ui[7]: ""  
 
   # Outputs
-  uo[0]: "r"
-  uo[1]: "theta"
-  uo[2]: "z_out"
-  uo[3]: ""
-  uo[4]: ""
-  uo[5]: ""
-  uo[6]: ""
-  uo[7]: ""
+  uo[0]: "r"       # Radial distance output
+  uo[1]: "theta"   # Angle (θ) output
+  uo[2]: "z_out"   # Z-coordinate output
+  uo[3]: ""  
+  uo[4]: ""  
+  uo[5]: ""  
+  uo[6]: ""  
+  uo[7]: ""  
 
-  # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  # Bidirectional pins (not used)
+  uio[0]: ""  
+  uio[1]: ""  
+  uio[2]: ""  
+  uio[3]: ""  
+  uio[4]: ""  
+  uio[5]: ""  
+  uio[6]: ""  
+  uio[7]: ""  
 
 # Do not change!
 yaml_version: 6
