@@ -5,12 +5,13 @@ project:
   discord:      ""  # Optional: Add your Discord handle
   description:  "Converts Cartesian coordinates (x, y, z) to Cylindrical (r, θ, z)"
   language:     "Verilog"
-  clock_hz:     10000000  # 10 MHz (Recommended for TinyTapeout)
+  clock_hz:     10000000  # 10 MHz recommended for TinyTapeout
   tiles:        "1x1"
-  top_module:   "tt_um_project"
+  top_module:   "tt_um_rect_to_cyl"
   source_files:
     - "project.v"
-
+    - "sqrt.v"
+    - "atan.v"
 
   # 8-bit input x (ui[7:0])
   ui[0]: "x0"
@@ -38,48 +39,3 @@ project:
   ui[18]: "z2"
   ui[19]: "z3"
   ui[20]: "z4"
-  ui[21]: "z5"
-  ui[22]: "z6"
-  ui[23]: "z7"
-
-  # 8-bit output r (uo[7:0])
-  uo[0]: "r0"
-  uo[1]: "r1"
-  uo[2]: "r2"
-  uo[3]: "r3"
-  uo[4]: "r4"
-  uo[5]: "r5"
-  uo[6]: "r6"
-  uo[7]: "r7"
-
-  # 8-bit output theta (uo[15:8])
-  uo[8]: "theta0"
-  uo[9]: "theta1"
-  uo[10]: "theta2"
-  uo[11]: "theta3"
-  uo[12]: "theta4"
-  uo[13]: "theta5"
-  uo[14]: "theta6"
-  uo[15]: "theta7"
-
-  # 8-bit output z_out (uo[23:16])
-  uo[16]: "z_out0"
-  uo[17]: "z_out1"
-  uo[18]: "z_out2"
-  uo[19]: "z_out3"
-  uo[20]: "z_out4"
-  uo[21]: "z_out5"
-  uo[22]: "z_out6"
-  uo[23]: "z_out7"
-
-  # No bidirectional IOs used
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
-
-yaml_version: 6
