@@ -1,17 +1,12 @@
-[savefile]
-version=1
-[expr]
-[win_prop]
-posx=100
-posy=100
-sizx=1200
-sizy=800
-zoom=10
-[sst_expanded]
+[date] Tue Mar 11 12:00:00 2025
+[dumpfile] tb.vcd
+[timescale] 1ns
+[treeopen] tb
 [signals]
-tt_um_cartesian_to_cylindrical.clk 1 0
-tt_um_cartesian_to_cylindrical.reset 1 0
-tt_um_cartesian_to_cylindrical.x 1 0
-tt_um_cartesian_to_cylindrical.y 1 0
-tt_um_cartesian_to_cylindrical.r 1 0
-tt_um_cartesian_to_cylindrical.theta 1 0
+tb.x
+tb.y
+tb.z
+tb.r
+tb.theta
+tb.z_out
+[savefile] tb.gtkw
