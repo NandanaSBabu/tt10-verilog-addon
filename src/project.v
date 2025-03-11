@@ -1,30 +1,77 @@
-module tt_um_cartesian_to_cylindrical (
-    input  wire        clk,       // Clock
-    input  wire        rst_n,     // Active-low reset
-    input  wire [7:0]  ui_in,     // 8-bit input (x, y, ena)
-    output wire [7:0]  uo_out     // 8-bit output (r, theta)
+module tt_um_project(
+    input  [7:0] x, y, z,  // 8-bit inputs for x, y, z
+    output [7:0] r, theta, z_out // 8-bit outputs for r, theta, z_out
 );
 
-    wire ena;
-    wire [3:0] x, y;
-    reg [3:0] r, theta;
+    wire [15:0] x_sq, y_sq, sum_sq;
+    wire [7:0] sqrt_r;
+    wire [7:0] atan_theta;
 
-    // Assign inputs
-    assign ena = ui_in[7];  // MSB as enable
-    assign x = ui_in[3:0];  // Lower 4 bits as X
-    assign y = ui_in[6:4];  // Middle 3 bits as Y (adjust width as needed)
+    // Compute x^2 and y^2 (using 8-bit multiplication, result is 16-bit)
+    assign x_sq = x * x;
+    assign y_sq = y * y;
+    assign sum_sq = x_sq + y_sq;
 
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            r <= 0;
-            theta <= 0;
-        end else if (ena) begin
-            r <= (x > y) ? (x - y) : (y - x);  // Approximate magnitude
-            theta <= (x + y) >> 1;             // Approximate angle
+    // Compute square root using a simple approximation
+    SquareRoot sqrt_unit(
+        .in(sum_sq[15:8]), // Use upper 8 bits for approximation
+        .out(sqrt_r)
+    );
+    
+    // Compute arctan(y/x) using lookup table
+    ArctanLUT atan_unit(
+        .x(x), .y(y),
+        .theta(atan_theta)
+    );
+    
+    assign r = sqrt_r;
+    assign theta = atan_theta;
+    assign z_out = z; // Pass z unchanged
+
+endmodule
+
+// Square Root Approximation using a small LUT
+module SquareRoot(
+    input  [7:0] in,
+    output reg [7:0] out
+);
+    always @(*) begin
+        case (in)
+            8'd0: out = 8'd0;
+            8'd1: out = 8'd1;
+            8'd4: out = 8'd2;
+            8'd9: out = 8'd3;
+            8'd16: out = 8'd4;
+            8'd25: out = 8'd5;
+            8'd36: out = 8'd6;
+            8'd49: out = 8'd7;
+            8'd64: out = 8'd8;
+            default: out = 8'd8; // Approximate for larger values
+        endcase
+    end
+endmodule
+
+// Arctan Approximation using a LUT
+module ArctanLUT(
+    input  [7:0] x, y,
+    output reg [7:0] theta
+);
+    reg [7:0] ratio;
+    always @(*) begin
+        if (x == 0)
+            theta = 8'd90; // 90 degrees if x is zero
+        else begin
+            ratio = (y << 8) / x; // Compute y/x scaled to 8-bit
+            case (ratio)
+                8'd0:   theta = 8'd0;
+                8'd26:  theta = 8'd15;
+                8'd46:  theta = 8'd26;
+                8'd77:  theta = 8'd45;
+                8'd129: theta = 8'd63;
+                8'd198: theta = 8'd75;
+                8'd255: theta = 8'd85;
+                default: theta = 8'd90; // Approximated for high values
+            endcase
         end
     end
-
-    // Assign outputs
-    assign uo_out = {theta, r};  // Combine r and theta as 8-bit output
-
 endmodule
