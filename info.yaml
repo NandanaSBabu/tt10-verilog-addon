@@ -11,7 +11,7 @@ project:
   source_files:
     - "project.v"
 
-pinout:
+
   # 8-bit input x (ui[7:0])
   ui[0]: "x0"
   ui[1]: "x1"
