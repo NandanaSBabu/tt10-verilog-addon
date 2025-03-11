@@ -13,16 +13,15 @@ async def test_cartesian_to_cylindrical(dut):
         y = random.randint(0, 255)
         z = random.randint(0, 255)
 
-        # Apply inputs (assuming ui[0-7] maps to x, y in 4-bit segments)
-        dut.ui.value = (y << 8) | x  # Assign x and y into the input bus
-        dut.uio.value = z  # Assign z separately
+        # Apply inputs
+        dut.ui.value = (z << 16) | (y << 8) | x  # Combine x, y, z into the input bus
 
         await Timer(2, units="ns")  # Wait for processing
 
         # Extract outputs
         r = dut.uo.value & 0xFF  # Lower 8 bits for r
         theta = (dut.uo.value >> 8) & 0xFF  # Next 8 bits for theta
-        z_out = dut.uio.value  # Extract z directly
+        z_out = (dut.uo.value >> 16) & 0xFF  # Extract z_out from upper bits
 
         # Expected values
         expected_r = min(int(math.sqrt(x**2 + y**2)), 255)  # Clamp to 8-bit range
