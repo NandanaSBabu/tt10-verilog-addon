@@ -12,7 +12,7 @@ module tt_um_project(
     assign y_sq = y * y;
     assign sum_sq = x_sq + y_sq;
 
-    // Compute square root using a simple approximation
+    // Compute square root using improved approximation
     SquareRoot sqrt_unit(
         .in(sum_sq[15:8]), // Use upper 8 bits for approximation
         .out(sqrt_r)
@@ -30,7 +30,7 @@ module tt_um_project(
 
 endmodule
 
-// Square Root Approximation using a small LUT
+// Improved Square Root Approximation
 module SquareRoot(
     input  [7:0] in,
     output reg [7:0] out
@@ -46,21 +46,21 @@ module SquareRoot(
             8'd36: out = 8'd6;
             8'd49: out = 8'd7;
             8'd64: out = 8'd8;
-            default: out = 8'd8; // Approximate for larger values
+            default: out = (in >> 4) + 1; // Basic interpolation for unknown values
         endcase
     end
 endmodule
 
-// Arctan Approximation using a LUT
+// Improved Arctan Approximation with Safe Division Handling
 module ArctanLUT(
     input  [7:0] x, y,
     output reg [7:0] theta
 );
     reg [7:0] ratio;
     always @(*) begin
-        if (x == 0)
-            theta = 8'd90; // 90 degrees if x is zero
-        else begin
+        if (x == 0) begin
+            theta = (y == 0) ? 8'd0 : 8'd90; // Handle (0,0) safely
+        end else begin
             ratio = (y << 8) / x; // Compute y/x scaled to 8-bit
             case (ratio)
                 8'd0:   theta = 8'd0;
@@ -70,7 +70,7 @@ module ArctanLUT(
                 8'd129: theta = 8'd63;
                 8'd198: theta = 8'd75;
                 8'd255: theta = 8'd85;
-                default: theta = 8'd90; // Approximated for high values
+                default: theta = (ratio < 8'd26) ? 8'd10 : 8'd90; // Improved fallback
             endcase
         end
     end
