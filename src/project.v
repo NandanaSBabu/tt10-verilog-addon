@@ -1,18 +1,25 @@
 module tt_um_project (
-    input  [7:0] ui,    // 8-bit input x
-    inout  [7:0] uio,   // 8-bit bidirectional y
-    output [7:0] uo     // 8-bit output (r)
+    input  wire [7:0] ui,    // 8-bit input x
+    inout  wire [7:0] uio,   // 8-bit bidirectional y
+    output wire [7:0] uo,    // 8-bit output (r)
+    input  wire clk,         // Clock signal
+    input  wire rst_n        // Active-low reset
 );
 
     wire [7:0] x = ui;  // x comes from input
     wire [7:0] y = uio; // y comes from bidirectional pins
 
-    wire [15:0] x2, y2, sum; // Squaring wires
-    assign x2 = x * x;
-    assign y2 = y * y;
-    assign sum = x2 + y2;
+    reg [7:0] r_reg;
 
-    // Approximate sqrt(x² + y²) using bit shift
-    assign uo = sum[15:8]; // r output (approximate)
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) 
+            r_reg <= 8'd0;
+        else begin
+            // Compute r = sqrt(x^2 + y^2) (approximate)
+            r_reg <= (x * x + y * y) >> 8; 
+        end
+    end
+
+    assign uo = r_reg; // Output register
 
 endmodule
