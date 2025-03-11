@@ -5,7 +5,7 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = tt_um_rect_cyl.v
+PROJECT_SOURCES = project.v
 
 ifneq ($(GATES),yes)
 
@@ -53,3 +53,14 @@ include $(shell cocotb-config --makefiles)/Makefile.sim
 .PHONY: view_waveform
 view_waveform:
 	gtkwave $(VCD_DUMP) $(GTKW_FILE)
+
+# Ensure the required source file exists
+.PHONY: check_sources
+check_sources:
+	@if [ ! -f $(SRC_DIR)/$(PROJECT_SOURCES) ]; then \
+		echo "Error: Source file $(SRC_DIR)/$(PROJECT_SOURCES) not found!"; \
+		exit 1; \
+	fi
+
+# Modify simulation rule to check sources first
+sim: check_sources
