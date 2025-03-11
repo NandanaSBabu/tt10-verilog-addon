@@ -7,11 +7,9 @@ project:
   language:     "Verilog"
   clock_hz:     10000000  # 10 MHz recommended for TinyTapeout
   tiles:        "1x1"
-  top_module:   "tt_um_rect_to_cyl"
+  top_module:   "tt_um_project"
   source_files:
     - "project.v"
-    - "sqrt.v"
-    - "atan.v"
 
   # 8-bit input x (ui[7:0])
   ui[0]: "x0"
