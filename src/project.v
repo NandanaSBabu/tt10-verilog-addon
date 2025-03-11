@@ -1,22 +1,24 @@
 module tt_um_project (
-    input [7:0] x, y,  // 8-bit Cartesian coordinates
-    input [7:0] z,     // 8-bit z-coordinate (unchanged)
-    output [7:0] r,    // 8-bit radius r = sqrt(x^2 + y^2)
-    output [7:0] theta, // 8-bit angle θ = atan(y/x)
-    output [7:0] z_out // Unchanged z-coordinate
+    input [7:0] ui,     // 8-bit input x
+    inout [7:0] uio,    // 8-bit bidirectional y
+    output [7:0] uo     // 8-bit output r
 );
-    
+
+    wire [7:0] x = ui;    // Assign input x
+    wire [7:0] y = uio;   // Use bidirectional pins for y
+    wire [7:0] z = uio;   // Reuse bidirectional pins for z
+
     wire [15:0] x2, y2, sum; // Squaring wires
 
     assign x2 = x * x;
     assign y2 = y * y;
     assign sum = x2 + y2;
 
-    // Approximate sqrt(x² + y²) using a simple bit shift (faster for FPGA)
-    assign r = sum[15:8]; // Rough sqrt approximation
+    // Approximate sqrt(x² + y²)
+    assign uo = sum[15:8]; // Rough sqrt approximation assigned to r
 
     // Approximate atan(y/x) using a lookup table
-    reg [7:0] atan_lut [0:15];  // Smaller LUT
+    reg [7:0] atan_lut [0:15];
     initial begin
         atan_lut[0] = 8'd0;  
         atan_lut[1] = 8'd14;  
@@ -38,11 +40,9 @@ module tt_um_project (
 
     always @(*) begin
         if (x == 0)
-            theta = 8'd90;  // If x = 0, theta = 90°
+            uio = 8'd90;  // If x = 0, theta = 90°
         else
-            theta = atan_lut[(y >> 4) / (x >> 4)];  // Approximate using 4-bit shifts
+            uio = atan_lut[(y >> 4) / (x >> 4)];  // Approximate using 4-bit shifts
     end
-
-    assign z_out = z; // z remains unchanged
 
 endmodule
