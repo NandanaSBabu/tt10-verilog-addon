@@ -12,29 +12,31 @@ project:
     - "project.v"
 
   # 8-bit input x (ui[7:0])
-  ui[0]: "x0"
-  ui[1]: "x1"
-  ui[2]: "x2"
-  ui[3]: "x3"
-  ui[4]: "x4"
-  ui[5]: "x5"
-  ui[6]: "x6"
-  ui[7]: "x7"
-  
-  # 8-bit input y (ui[15:8])
-  ui[8]: "y0"
-  ui[9]: "y1"
-  ui[10]: "y2"
-  ui[11]: "y3"
-  ui[12]: "y4"
-  ui[13]: "y5"
-  ui[14]: "y6"
-  ui[15]: "y7"
+  io:
+    - name: x
+      direction: input
+      bits: 8
+    - name: y
+      direction: input
+      bits: 8
+    - name: z
+      direction: input
+      bits: 8
+    - name: r
+      direction: output
+      bits: 8
+    - name: theta
+      direction: output
+      bits: 8
+    - name: z_out
+      direction: output
+      bits: 8
 
-  # 8-bit input z (ui[23:16])
-  ui[16]: "z0"
-  ui[17]: "z1"
-  ui[18]: "z2"
-  ui[19]: "z3"
-  ui[20]: "z4"
+  tags:
+    - TinyTapeout
+    - Coordinate Conversion
+    - Verilog
+  github: https://github.com/your-repo-name
+  license: MIT
+
 yaml_version: 6
