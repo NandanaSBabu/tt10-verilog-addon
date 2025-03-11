@@ -3,6 +3,7 @@ module tt_um_project (
     input  wire [7:0] uio_in,   // 8-bit input (y)
     output wire [7:0] uio_out,  // 8-bit output (theta)
     output wire [7:0] uo_out,   // 8-bit output (r)
+    output wire [7:0] uio_oe,   // Output enable for uio_out
     input  wire clk,            // Clock signal
     input  wire rst_n,          // Active-low reset
     input  wire ena             // Enable signal
@@ -11,9 +12,9 @@ module tt_um_project (
     wire [15:0] x2, y2, sum;
     reg  [7:0] r_reg, theta_reg;
 
-    assign x2 = ui_in * ui_in;  // Compute x^2
-    assign y2 = uio_in * uio_in; // Compute y^2
-    assign sum = x2 + y2;  // x^2 + y^2
+    assign x2 = ui_in * ui_in;
+    assign y2 = uio_in * uio_in;
+    assign sum = x2 + y2;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -27,5 +28,6 @@ module tt_um_project (
 
     assign uo_out = r_reg;      // r output
     assign uio_out = theta_reg; // θ output
+    assign uio_oe = 8'b11111111; // Enable all bits of uio_out
 
 endmodule
