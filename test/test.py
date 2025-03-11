@@ -4,8 +4,8 @@ import math
 import random
 
 @cocotb.test()
-async def test_cartesian_to_cylindrical(dut):
-    """Test Cartesian to Cylindrical coordinate conversion"""
+async def test_rectangular_to_cylindrical(dut):
+    """Test Rectangular to Cylindrical coordinate conversion"""
 
     for _ in range(20):  # Run multiple test cases
         # Generate random 8-bit values for x, y, z
