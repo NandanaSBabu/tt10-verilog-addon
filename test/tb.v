@@ -1,33 +1,53 @@
-module tt_um_project (
-    input  wire [7:0] ui_in,    // 8-bit input (x)
-    input  wire [7:0] uio_in,   // 8-bit input (y)
-    output wire [7:0] uio_out,  // 8-bit output (theta)
-    output wire [7:0] uo_out,   // 8-bit output (r)
-    output wire [7:0] uio_oe,   // Output enable for bidirectional pins
-    input  wire clk,            // Clock signal
-    input  wire rst_n,          // Active-low reset
-    input  wire ena             // Enable signal
-);
+`timescale 1ns / 1ps
 
-    wire [15:0] x2, y2, sum;
-    reg  [7:0] r_reg, theta_reg;
+module tb;
 
-    assign x2 = ui_in * ui_in;
-    assign y2 = uio_in * uio_in;
-    assign sum = x2 + y2;
+    reg [7:0] ui_in, uio_in;
+    wire [7:0] uio_out, uo_out;
+    wire [7:0] uio_oe; // Output Enable
+    reg clk, rst_n, ena;
 
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            r_reg <= 8'd0;
-            theta_reg <= 8'd0;
-        end else if (ena) begin
-            r_reg <= sum[15:8];  // Approximate sqrt(x² + y²)
-            theta_reg <= (uio_in == 0) ? 8'd90 : (ui_in / uio_in); // Approximate atan(y/x)
-        end
+    // Instantiate DUT (Device Under Test)
+    tt_um_project dut (
+        .ui_in(ui_in),
+        .uio_in(uio_in),
+        .uio_out(uio_out),
+        .uio_oe(uio_oe),
+        .uo_out(uo_out),
+        .clk(clk),
+        .rst_n(rst_n),
+        .ena(ena)
+    );
+
+    // Clock generation
+    always #5 clk = ~clk; // 10ns clock period (100MHz)
+
+    initial begin
+        // Dump waveform file
+        $dumpfile("dump.vcd");
+        $dumpvars(0, tb);
+        
+        // Initialize signals
+        clk = 0;
+        rst_n = 0;
+        ena = 0;
+        ui_in = 8'd0;
+        uio_in = 8'd0;
+
+        // Reset sequence
+        #20 rst_n = 1;  // Release reset
+
+        // Enable processing
+        #10 ena = 1;
+
+        // Apply test cases
+        #10 ui_in = 8'd10; uio_in = 8'd20; #20;
+        #10 ui_in = 8'd30; uio_in = 8'd40; #20;
+        #10 ui_in = 8'd0;  uio_in = 8'd0;  #20;  // Zero division case
+        #10 ui_in = 8'd100; uio_in = 8'd100; #20;
+
+        // Finish simulation
+        #10 $finish;
     end
-
-    assign uo_out = r_reg;      // r output
-    assign uio_out = theta_reg; // θ output
-    assign uio_oe = 8'b11111111; // Enable all uio pins
 
 endmodule
