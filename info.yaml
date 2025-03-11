@@ -3,7 +3,7 @@ project:
   title:        "Rectangular to Cylindrical Conversion"
   author:       "Nandana"
   discord:      ""  # Optional: Add your Discord handle
-  description:  "Converts Cartesian coordinates (x, y, z) to Cylindrical (r, θ, z)"
+  description:  "Converts Cartesian coordinates (x, y) to Cylindrical (r, θ)"
   language:     "Verilog"
   clock_hz:     10000000  # 10 MHz recommended for TinyTapeout
   tiles:        "1x1"
@@ -12,7 +12,7 @@ project:
     - "project.v"
 
 pinout:
-  # 8-bit input x (ui[7:0])
+  # 8-bit input x (ui_in[7:0])
   ui[0]:  "x0"
   ui[1]:  "x1"
   ui[2]:  "x2"
@@ -22,7 +22,17 @@ pinout:
   ui[6]:  "x6"
   ui[7]:  "x7"
 
-  # 8-bit output r (uo[7:0])
+  # 8-bit input y (uio_in[7:0])
+  uio_in[0]: "y0"
+  uio_in[1]: "y1"
+  uio_in[2]: "y2"
+  uio_in[3]: "y3"
+  uio_in[4]: "y4"
+  uio_in[5]: "y5"
+  uio_in[6]: "y6"
+  uio_in[7]: "y7"
+
+  # 8-bit output r (uo_out[7:0])
   uo[0]:  "r0"
   uo[1]:  "r1"
   uo[2]:  "r2"
@@ -32,14 +42,19 @@ pinout:
   uo[6]:  "r6"
   uo[7]:  "r7"
 
-  # Bidirectional pins (if needed)
-  uio[0]: "y0"
-  uio[1]: "y1"
-  uio[2]: "y2"
-  uio[3]: "y3"
-  uio[4]: "y4"
-  uio[5]: "y5"
-  uio[6]: "y6"
-  uio[7]: "y7"
+  # 8-bit output θ (uio_out[7:0])
+  uio_out[0]: "theta0"
+  uio_out[1]: "theta1"
+  uio_out[2]: "theta2"
+  uio_out[3]: "theta3"
+  uio_out[4]: "theta4"
+  uio_out[5]: "theta5"
+  uio_out[6]: "theta6"
+  uio_out[7]: "theta7"
+
+  # Control signals
+  clk:    "Clock"
+  rst_n:  "Reset (active low)"
+  ena:    "Enable"
 
 yaml_version: 6
