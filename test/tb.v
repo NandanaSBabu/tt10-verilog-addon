@@ -28,7 +28,7 @@ module tb ();
 `endif
 
   // Instantiate the module under test
-  tt_um_addon user_project (
+  tt_um_rect_cyl user_project (
 `ifdef GL_TEST
       .VPWR(VPWR),
       .VGND(VGND),
