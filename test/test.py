@@ -9,8 +9,8 @@ from cocotb.triggers import ClockCycles
 async def test_project(dut):
     dut._log.info("Start")
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, units="us")
+    # Set the clock period to 10 ns (100 MHz)
+    clock = Clock(dut.clk, 10, units="ns")
     cocotb.start_soon(clock.start())
 
     # Reset
@@ -27,5 +27,11 @@ async def test_project(dut):
     for x, y in test_cases:
         dut.ui_in.value = x
         dut.uio_in.value = y
-        await ClockCycles(dut.clk, 1)
+        await ClockCycles(dut.clk, 2)
         dut._log.info(f"Inputs: x={x}, y={y} -> Outputs: r={dut.uo_out.value}, theta={dut.uio_out.value}")
+
+    # Final test case to check stability
+    dut.ui_in.value = 100
+    dut.uio_in.value = 200
+    await ClockCycles(dut.clk, 5)
+    dut._log.info(f"Final Inputs: x=100, y=200 -> Outputs: r={dut.uo_out.value}, theta={dut.uio_out.value}")
