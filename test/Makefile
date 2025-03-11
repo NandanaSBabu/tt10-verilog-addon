@@ -5,7 +5,7 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = project.v
+PROJECT_SOURCES = tt_um_rect_cyl.v
 
 ifneq ($(GATES),yes)
 
@@ -40,5 +40,16 @@ TOPLEVEL = tb
 # MODULE is the basename of the Python test file
 MODULE = test
 
-# include cocotb's make rules to take care of the simulator setup
+# Generate the VCD dump file for waveform analysis
+VCD_DUMP = test/tb.vcd
+
+# GTKWave configuration
+GTKW_FILE = test/tb.gtkw
+
+# Include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
+
+# Additional GTKWave setup
+.PHONY: view_waveform
+view_waveform:
+	gtkwave $(VCD_DUMP) $(GTKW_FILE)
