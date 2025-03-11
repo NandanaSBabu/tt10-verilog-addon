@@ -1,26 +1,37 @@
 import cocotb
-from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge
+from cocotb.triggers import Timer
+import math
+import random
 
 @cocotb.test()
 async def test_cartesian_to_cylindrical(dut):
-    """Test Cartesian to Cylindrical conversion"""
-    
-    # Create a clock on the clk signal
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    """Test Cartesian to Cylindrical coordinate conversion"""
 
-    # Initialize inputs
-    dut.ena.value = 1  # Enable the module
-    dut.x.value = 0
-    dut.y.value = 0
+    for _ in range(20):  # Run multiple test cases
+        # Generate random 8-bit values for x, y, z
+        x = random.randint(0, 255)
+        y = random.randint(0, 255)
+        z = random.randint(0, 255)
 
-    # Apply test cases with rising edge synchronization
-    for x, y in [(1, 0), (1, 1), (2, 1), (4, 2), (8, 8)]:
-        dut.x.value = x
-        dut.y.value = y
-        await RisingEdge(dut.clk)  # Wait for the clock edge
-        await RisingEdge(dut.clk)  # Allow time for the computation
+        # Apply inputs (assuming ui[0-7] maps to x, y in 4-bit segments)
+        dut.ui.value = (y << 8) | x  # Assign x and y into the input bus
+        dut.uio.value = z  # Assign z separately
 
-        r_val = dut.r.value.integer
-        theta_val = dut.theta.value.integer
-        print(f"x={x}, y={y} -> r={r_val}, theta={theta_val}")
+        await Timer(2, units="ns")  # Wait for processing
+
+        # Extract outputs
+        r = dut.uo.value & 0xFF  # Lower 8 bits for r
+        theta = (dut.uo.value >> 8) & 0xFF  # Next 8 bits for theta
+        z_out = dut.uio.value  # Extract z directly
+
+        # Expected values
+        expected_r = min(int(math.sqrt(x**2 + y**2)), 255)  # Clamp to 8-bit range
+        expected_theta = min(int(math.degrees(math.atan2(y, x))), 255)  # Convert atan2 result
+        expected_z = z
+
+        # Check results
+        assert r == expected_r, f"Failed: x={x}, y={y}, expected r={expected_r}, got {r}"
+        assert theta == expected_theta, f"Failed: x={x}, y={y}, expected θ={expected_theta}, got {theta}"
+        assert z_out == expected_z, f"Failed: z={z}, expected z={expected_z}, got {z_out}"
+
+        cocotb.log.info(f"PASS: x={x}, y={y}, z={z} -> r={r}, θ={theta}, z={z_out}")
