@@ -12,6 +12,7 @@ project:
     - "project.v"
 
 pinout:
+  uio[0]: "unused"
   # 8-bit input x (ui[7:0])
   ui[0]:  "x0"
   ui[1]:  "x1"
