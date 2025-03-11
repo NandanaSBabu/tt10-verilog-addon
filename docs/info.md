@@ -1,39 +1,54 @@
-# Tiny Tapeout Project Information
+# Tiny Tapeout Project: Rectangular to Cylindrical Conversion
 
-## How it Works
-This project converts Cartesian coordinates (x, y, z) to Cylindrical coordinates (r, θ, z). It takes x, y, and z as inputs and computes:
-- **r**: The radial distance using \( r = \sqrt{x^2 + y^2} \)
-- **θ (theta)**: The angle using \( \theta = \tan^{-1}(y / x) \), converted to degrees.
-- **z**: The height remains unchanged.
+## Overview
+This project performs coordinate transformation from **Rectangular (Cartesian) to Cylindrical coordinates** using **Verilog**. It takes 8-bit inputs `x`, `y`, and `z`, and computes:
+- **r (radius)**: Using \( r = \sqrt{x^2 + y^2} \)
+- **θ (theta)**: Using \( 	heta = 	an^{-1}(y / x) \), represented in degrees
+- **z_out**: Passes `z` unchanged
 
-This conversion helps in representing 3D positions in a cylindrical form.
+This conversion helps in robotics, navigation, and signal processing applications.
 
-## How to Test
+## Hardware Implementation
+### **Modules**
+- `tt_um_project`: Top module integrating all operations.
+- `SquareRoot`: Computes \( \sqrt{x^2 + y^2} \) using a lookup table and approximation.
+- `ArctanLUT`: Uses a lookup table for **arctan(y/x)** calculation.
 
-### Simulation using Cocotb:
+### **Pin Mapping**
+| Pin Name | Description |
+|----------|-------------|
+| `ui[7:0]` | 8-bit `x` input |
+| `ui[15:8]` | 8-bit `y` input |
+| `ui[23:16]` | 8-bit `z` input |
+| `uo[7:0]` | 8-bit `r` output |
+| `uo[15:8]` | 8-bit `θ` output |
+| `uo[23:16]` | 8-bit `z_out` output |
+
+## Simulation & Testing
+### **Software Simulation (Cocotb)**
 1. Run `make test` to execute the testbench.
-2. The test applies random `x`, `y`, and `z` values and verifies if the computed `r`, `θ`, and `z` are correct.
-3. The test passes if results match expected values within a small margin.
+2. The test applies different `x`, `y`, and `z` values.
+3. Passes if computed values match expected results within a margin.
 
-### Hardware Verification:
-1. Load the synthesized design onto an FPGA or ASIC.
-2. Provide binary inputs for `x`, `y`, and `z` values.
-3. Verify `r`, `θ`, and `z` outputs using an oscilloscope or logic analyzer.
+### **Hardware Testing**
+1. Load the synthesized design onto an FPGA or TinyTapeout ASIC.
+2. Provide binary inputs for `x`, `y`, `z`.
+3. Verify `r`, `θ`, `z_out` outputs using an oscilloscope or logic analyzer.
 
-## External Hardware
-- No additional external hardware is required apart from an FPGA or ASIC testing setup.
-
-## Constraints
-- **8-bit input limitation:** The `x`, `y`, and `z` values are limited to an 8-bit range.
-- **Integer-based calculations:** Small errors may occur due to rounding.
-- **Limited θ representation:** The angle is in degrees but restricted to an 8-bit format.
+## Constraints & Limitations
+- **8-bit integer precision** may cause small rounding errors.
+- **θ (angle) limited to 8-bit representation.**
+- **Fixed lookup table for square root and arctan calculations.**
 
 ## Applications
-- **Robotics:** Position tracking using cylindrical coordinates.
-- **Signal Processing:** Coordinate transformations in image processing.
-- **Navigation Systems:** Converting GPS Cartesian data to cylindrical form for pathfinding.
+- **Robotics**: Position tracking in cylindrical coordinates.
+- **Navigation**: GPS coordinate transformations.
+- **Signal Processing**: Geometric transformations in image processing.
 
 ## Future Improvements
 - Increase bit-width for higher precision.
 - Implement floating-point calculations for better accuracy.
-- Extend functionality to support full 3D conversion (Cartesian to Spherical).
+- Extend the design for **Cartesian to Spherical** conversion.
+
+### Author: **Nandana**
+
