@@ -1,12 +1,14 @@
-module tt_um_project (
-    input  wire [7:0] ui_in,    // 8-bit input (x)
-    input  wire [7:0] uio_in,   // 8-bit input (y)
-    output wire [7:0] uio_out,  // 8-bit output (theta)
-    output wire [7:0] uo_out,   // 8-bit output (r)
-    output wire [7:0] uio_oe,   // Output enable for uio_out
-    input  wire clk,            // Clock signal
-    input  wire rst_n,          // Active-low reset
-    input  wire ena             // Enable signal
+`default_nettype none
+
+module tt_um_rect_cyl (
+    input  wire [7:0] ui_in,    // x input
+    input  wire [7:0] uio_in,   // y input
+    output wire [7:0] uio_out,  // theta output
+    output wire [7:0] uo_out,   // r output
+    output wire [7:0] uio_oe,   // IO enable (all set to 0 for input mode)
+    input  wire       ena,      // Enable signal
+    input  wire       clk,      // Clock signal
+    input  wire       rst_n     // Active-low reset
 );
 
     wire [15:0] x2, y2, sum;
@@ -27,7 +29,7 @@ module tt_um_project (
     end
 
     assign uo_out = r_reg;      // r output
-    assign uio_out = theta_reg; // θ output
-    assign uio_oe = 8'b11111111; // Enable all bits of uio_out
+    assign uio_out = theta_reg; // theta output
+    assign uio_oe = 8'b00000000; // Set all IOs to input mode
 
 endmodule
