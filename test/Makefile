@@ -1,46 +1,41 @@
-# Makefile
-# See https://docs.cocotb.org/en/stable/quickstart.html for more info
-# defaults
-SIM ?= icarus
-TOPLEVEL_LANG ?= verilog
-SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = project.v
+# GTKWave save file for tt_um_rect_cyl
 
-ifneq ($(GATES),yes)
-
-# RTL simulation:
-SIM_BUILD = sim_build/rtl
-VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
-
-else
-
-# Gate level simulation:
-SIM_BUILD = sim_build/gl
-COMPILE_ARGS    += -DGL_TEST
-COMPILE_ARGS    += -DFUNCTIONAL
-COMPILE_ARGS    += -DUSE_POWER_PINS
-COMPILE_ARGS    += -DSIM
-COMPILE_ARGS    += -DUNIT_DELAY=\#1
-VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v
-VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
-
-# this gets copied in by the GDS action workflow
-VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
-
-endif
-
-# Allow sharing configuration between design and testbench via include:
-COMPILE_ARGS += -I$(SRC_DIR)
-
-# Include the testbench sources:
-VERILOG_SOURCES += $(PWD)/tb.v
-TOPLEVEL = tb
-
-# MODULE is the basename of the Python test file
-MODULE = test
-
-# Fix reference to module name:
-COMPILE_ARGS += -DTT_UM_MODULE=tt_um_rect_cyl
-
-# include cocotb's make rules to take care of the simulator setup
-include $(shell cocotb-config --makefiles)/Makefile.sim
+[*]
+[*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
+[*] Mon Nov 20 16:00:28 2023
+[*]
+[dumpfile] "/home/uri/p/tt-rect-cyl/test/tb.vcd"
+[dumpfile_mtime] "Mon Nov 20 15:58:34 2023"
+[dumpfile_size] 1110
+[savefile] "/home/uri/p/tt-rect-cyl/test/tb.gtkw"
+[timestart] 0
+[size] 1376 600
+[pos] -1 -1
+*-24.534533 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb.
+[sst_width] 297
+[signals_width] 230
+[sst_expanded] 1
+[sst_vpaned_height] 158
+@28
+tb.tt_um_rect_cyl.ena
+@29
+tb.tt_um_rect_cyl.clk
+@28
+tb.tt_um_rect_cyl.rst_n
+@200
+-Inputs
+@22
+tb.tt_um_rect_cyl.ui_in[7:0]
+@200
+-Bidirectional Pins
+@22
+tb.tt_um_rect_cyl.uio_in[7:0]
+tb.tt_um_rect_cyl.uio_oe[7:0]
+tb.tt_um_rect_cyl.uio_out[7:0]
+@200
+-Output Pins
+@22
+tb.tt_um_rect_cyl.uo_out[7:0]
+[pattern_trace] 1
+[pattern_trace] 0
