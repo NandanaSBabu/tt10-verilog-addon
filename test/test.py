@@ -1,36 +1,49 @@
-import cocotb
-from cocotb.triggers import Timer
-import math
-import random
+`default_nettype none
+`timescale 1ns / 1ps
 
-@cocotb.test()
-async def test_rectangular_to_cylindrical(dut):
-    """Test Rectangular to Cylindrical coordinate conversion"""
+/* This testbench just instantiates the module and makes some convenient wires
+   that can be driven / tested by the cocotb test.py.
+*/
+module tb ();
 
-    for _ in range(20):  # Run multiple test cases
-        # Generate random 8-bit values for x, y, z
-        x = random.randint(0, 255)
-        y = random.randint(0, 255)
-        z = random.randint(0, 255)
+  // Dump the signals to a VCD file. You can view it with gtkwave or surfer.
+  initial begin
+    $dumpfile("tb.vcd");
+    $dumpvars(0, tb);
+    #1;
+  end
 
-        # Apply inputs
-        dut.ui.value = (z << 16) | (y << 8) | x  # Combine x, y, z into the input bus
+  // Wire up the inputs and outputs:
+  reg clk;
+  reg rst_n;
+  reg ena;
+  reg [7:0] ui_in;
+  reg [7:0] uio_in;
+  wire [7:0] uo_out;
+  wire [7:0] uio_out;
+  wire [7:0] uio_oe;
+`ifdef GL_TEST
+  wire VPWR = 1'b1;
+  wire VGND = 1'b0;
+`endif
 
-        await Timer(2, units="ns")  # Wait for processing
+  // Replace tt_um_example with your module name:
+  tt_um_rect_cyl user_project (
 
-        # Extract outputs
-        r = dut.uo.value & 0xFF  # Lower 8 bits for r
-        theta = (dut.uo.value >> 8) & 0xFF  # Next 8 bits for theta
-        z_out = (dut.uo.value >> 16) & 0xFF  # Extract z_out from upper bits
+      // Include power ports for the Gate Level test:
+`ifdef GL_TEST
+      .VPWR(VPWR),
+      .VGND(VGND),
+`endif
 
-        # Expected values
-        expected_r = min(int(math.sqrt(x**2 + y**2)), 255)  # Clamp to 8-bit range
-        expected_theta = min(int(math.degrees(math.atan2(y, x))), 255)  # Convert atan2 result
-        expected_z = z
+      .ui_in  (ui_in),    // Dedicated inputs
+      .uo_out (uo_out),   // Dedicated outputs
+      .uio_in (uio_in),   // IOs: Input path
+      .uio_out(uio_out),  // IOs: Output path
+      .uio_oe (uio_oe),   // IOs: Enable path (active high: 0=input, 1=output)
+      .ena    (ena),      // enable - goes high when design is selected
+      .clk    (clk),      // clock
+      .rst_n  (rst_n)     // not reset
+  );
 
-        # Check results
-        assert r == expected_r, f"Failed: x={x}, y={y}, expected r={expected_r}, got {r}"
-        assert theta == expected_theta, f"Failed: x={x}, y={y}, expected θ={expected_theta}, got {theta}"
-        assert z_out == expected_z, f"Failed: z={z}, expected z={expected_z}, got {z_out}"
-
-        cocotb.log.info(f"PASS: x={x}, y={y}, z={z} -> r={r}, θ={theta}, z={z_out}")
+endmodule
