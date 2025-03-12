@@ -1,53 +1,55 @@
 # Tiny Tapeout project information
 project:
   title:        "Rectangular to Cylindrical Converter"  # Project title
-  author:       "Joanna"  # Your name
+  author:       "Nandana"  # Replace with your actual name
   discord:      ""  # Your Discord username (optional)
-  description:  "Converts rectangular coordinates (x, y, z) to cylindrical coordinates (r, θ, z)"  
-  language:     "Verilog"  
-  clock_hz:     0  # No clock required (if applicable)
+  description:  "Converts rectangular coordinates (x, y) to cylindrical (r, theta)"  
+  language:     "Verilog"  # HDL used (e.g., Verilog, SystemVerilog, VHDL)
+  clock_hz:     100000000  # Clock frequency in Hz (100 MHz)
 
-  # Tile size for layout placement
-  tiles: "1x1"  # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2, or 8x2
+  # How many tiles your design occupies? A single tile is about 167x108 µm.
+  tiles: "1x1"  # Valid values: 1x1, 1x2, 2x2, etc.
 
-  # Top module name (must start with "tt_um_")
+  # Your top module name must start with "tt_um_". Make it unique.
   top_module:  "tt_um_rect_cyl"
 
-  # List of Verilog source files (must be inside ./src/)
+  # List your project's source files (must be in ./src)
   source_files:
     - "project.v"
 
-# Pinout definition for datasheet/website
+# The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
+# Use descriptive names for the datasheet/website.
+
 pinout:
   # Inputs
-  ui[0]: "x"       # X-coordinate input
-  ui[1]: "y"       # Y-coordinate input
-  ui[2]: "z"       # Z-coordinate input
-  ui[3]: ""  
-  ui[4]: ""  
-  ui[5]: ""  
-  ui[6]: ""  
-  ui[7]: ""  
+  ui[0]: "x[0]"  
+  ui[1]: "x[1]"  
+  ui[2]: "x[2]"  
+  ui[3]: "x[3]"  
+  ui[4]: "x[4]"  
+  ui[5]: "x[5]"  
+  ui[6]: "x[6]"  
+  ui[7]: "x[7]"  
 
   # Outputs
-  uo[0]: "r"       # Radial distance output
-  uo[1]: "theta"   # Angle (θ) output
-  uo[2]: "z_out"   # Z-coordinate output
-  uo[3]: ""  
-  uo[4]: ""  
-  uo[5]: ""  
-  uo[6]: ""  
-  uo[7]: ""  
+  uo[0]: "r[0]"  
+  uo[1]: "r[1]"  
+  uo[2]: "r[2]"  
+  uo[3]: "r[3]"  
+  uo[4]: "r[4]"  
+  uo[5]: "r[5]"  
+  uo[6]: "r[6]"  
+  uo[7]: "r[7]"  
 
-  # Bidirectional pins (not used)
-  uio[0]: ""  
-  uio[1]: ""  
-  uio[2]: ""  
-  uio[3]: ""  
-  uio[4]: ""  
-  uio[5]: ""  
-  uio[6]: ""  
-  uio[7]: ""  
+  # Bidirectional pins
+  uio[0]: "y[0]"  
+  uio[1]: "y[1]"  
+  uio[2]: "y[2]"  
+  uio[3]: "y[3]"  
+  uio[4]: "y[4]"  
+  uio[5]: "y[5]"  
+  uio[6]: "y[6]"  
+  uio[7]: "y[7]"  
 
 # Do not change!
 yaml_version: 6
