@@ -1,40 +1,49 @@
+# Tiny Tapeout project information
 project:
-  name: "Rectangular to Cylindrical Converter"
-  author: "Your Name"
-  description: "A TinyTapeout project to convert rectangular coordinates (x, y) to cylindrical (r, θ)"
-  version: "1.0"
-  license: "Apache-2.0"
-  repository: "https://github.com/YourUsername/tt10-rect-cyl"
+  title:        "Rectangular to Cylindrical Converter"
+  author:       "Nandana"
+  discord:      ""  
+  description:  "Converts rectangular (x, y) coordinates to cylindrical (r, θ)"
+  language:     "Verilog"
+  clock_hz:     0 
 
-# Module information
-module:
-  name: "tt_um_rect_cyl"
-  type: "user_project"
-  language: "verilog"
-  clock: "clk"
-  reset: "rst_n"
-  enable: "ena"
+  tiles: "1x1"        
 
-# I/O Configuration
-pins:
-  - name: "ui_in"
-    direction: "input"
-    width: 8
-  - name: "uio_in"
-    direction: "input"
-    width: 8
-  - name: "uio_out"
-    direction: "output"
-    width: 8
-  - name: "uo_out"
-    direction: "output"
-    width: 8
-  - name: "uio_oe"
-    direction: "output"
-    width: 8
-  - name: "clk"
-    direction: "input"
-  - name: "rst_n"
-    direction: "input"
-  - name: "ena"
-    direction: "input"
+  top_module:  "tt_um_rect_to_cyl"
+
+  source_files:
+    - "project.v"
+
+pinout:
+  # Inputs
+  ui[0]: "x0"
+  ui[1]: "x1"
+  ui[2]: "x2"
+  ui[3]: "x3"
+  ui[4]: "y0"
+  ui[5]: "y1"
+  ui[6]: "y2"
+  ui[7]: "y3"
+
+  # Outputs
+  uo[0]: "r0"
+  uo[1]: "r1"
+  uo[2]: "r2"
+  uo[3]: "r3"
+  uo[4]: "theta0"
+  uo[5]: "theta1"
+  uo[6]: "theta2"
+  uo[7]: "theta3"
+
+  # Bidirectional pins
+  uio[0]: ""
+  uio[1]: ""
+  uio[2]: ""
+  uio[3]: ""
+  uio[4]: ""
+  uio[5]: ""
+  uio[6]: ""
+  uio[7]: ""
+
+# Required field to prevent errors
+yaml_version: 6
