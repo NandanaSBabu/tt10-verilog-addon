@@ -1,19 +1,13 @@
 `timescale 1ns / 1ps
-`default_nettype none
 
 module tb;
 
-    reg  [7:0] ui_in;     // x input
-    reg  [7:0] uio_in;    // y input
-    reg  [7:0] uio_extra; // z input
-    reg        ena;       // Enable
-    reg        clk;       // Clock
-    reg        rst_n;     // Reset (Active Low)
-
-    wire [7:0] uio_out;       // Theta output
-    wire [7:0] uo_out;        // r output
-    wire [7:0] uo_extra_out;  // Phi output
-    wire [7:0] uio_oe;        // IO enable
+    reg [7:0] ui_in;    // x input
+    reg [7:0] uio_in;   // y input
+    wire [7:0] uio_out; // theta output
+    wire [7:0] uo_out;  // r output
+    reg ena, clk, rst_n;
+    wire [7:0] uio_oe;
 
     // Instantiate the module
     tt_um_rect_cyl uut (
@@ -28,37 +22,39 @@ module tb;
     );
 
     // Clock generation
-    always #5 clk = ~clk;  // 10ns clock period (50 MHz)
+    always #5 clk = ~clk; // 10ns period, 100MHz clock
 
     initial begin
-        // Initialize signals
+        // Initialize
         clk = 0;
         rst_n = 0;
         ena = 0;
-        ui_in = 0;
-        uio_in = 0;
-        uio_extra = 0;
+        ui_in = 8'd0;
+        uio_in = 8'd0;
         
-        // Reset sequence
+        // Reset
         #10 rst_n = 1;
-        #10 ena = 1;
 
-        // Test cases
-        #10 ui_in = 8'd10; uio_in = 8'd10; uio_extra = 8'd5; // Example: x=10, y=10, z=5
-        #10 ui_in = 8'd20; uio_in = 8'd15; uio_extra = 8'd7; // Example: x=20, y=15, z=7
-        #10 ui_in = 8'd30; uio_in = 8'd25; uio_extra = 8'd10; // Example: x=30, y=25, z=10
-        #10 ui_in = 8'd0; uio_in = 8'd0; uio_extra = 8'd0;  // Edge case: all inputs zero
+        // Test case 1: (3,4) -> Expect r ≈ 5, theta ≈ 53°
+        #10 ena = 1; ui_in = 8'd3; uio_in = 8'd4;
+        #20 ena = 0;
 
-        // Finish simulation
+        // Test case 2: (6,8) -> Expect r ≈ 10, theta ≈ 53°
+        #10 ena = 1; ui_in = 8'd6; uio_in = 8'd8;
+        #20 ena = 0;
+
+        // Test case 3: (0, 7) -> Expect r ≈ 7, theta ≈ 90°
+        #10 ena = 1; ui_in = 8'd0; uio_in = 8'd7;
+        #20 ena = 0;
+
+        // Stop Simulation
         #50 $finish;
     end
 
-    // Monitor output values
+    // Dump waveforms
     initial begin
-        $dumpfile("tb.vcd");
+        $dumpfile("testbench.vcd");
         $dumpvars(0, tb);
-        $monitor("Time=%0t | x=%d y=%d z=%d | r=%d theta=%d phi=%d",
-                  $time, ui_in, uio_in, uio_extra, uo_out, uio_out, uo_extra_out);
     end
 
 endmodule
