@@ -1,15 +1,1 @@
-[save]
-version=1
-[timescale]
-1ns
-[expr]
-[opt]
-[treeopen] tb
-[signals]
-tb.clk
-tb.rst_n
-tb.ena
-tb.ui_in
-tb.uio_in
-tb.uio_out
-tb.uo_out
+
