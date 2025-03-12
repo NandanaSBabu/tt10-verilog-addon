@@ -1,49 +1,26 @@
-# Makefile
-# See https://docs.cocotb.org/en/stable/quickstart.html for more info
+SHELL := /bin/bash
 
-# Defaults
-SIM ?= icarus
-TOPLEVEL_LANG ?= verilog
-SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = project.v
+# Project variables
+TOP_MODULE = tt_um_rect_cyl
+VERILOG_FILES = ../src/project.v
 
-# Check if Gate-Level (GL) simulation is enabled
-ifneq ($(GATES),yes)
+# Simulation files
+TB_FILE = tb.v
+VCD_FILE = tb.vcd
 
-# RTL Simulation
-SIM_BUILD = sim_build/rtl
-VERILOG_SOURCES += $(addprefix $(SRC_DIR)/, $(PROJECT_SOURCES))
+# Simulation command
+SIM_CMD = iverilog -o sim.out $(VERILOG_FILES) $(TB_FILE) && vvp sim.out
 
-else
+# Default target
+all: sim
 
-# Gate-Level Simulation
-SIM_BUILD = sim_build/gl
-COMPILE_ARGS += -DGL_TEST
-COMPILE_ARGS += -DFUNCTIONAL
-COMPILE_ARGS += -DUSE_POWER_PINS
-COMPILE_ARGS += -DSIM
-COMPILE_ARGS += -DUNIT_DELAY=\#1
+# Run simulation
+sim:
+	$(SIM_CMD)
+	gtkwave $(VCD_FILE) &
 
-# Add Skywater 130nm PDK standard cell libraries for gate-level simulation
-VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v
-VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
+# Clean simulation files
+clean:
+	rm -f sim.out $(VCD_FILE)
 
-# Include synthesized netlist (copied by GDS action workflow)
-VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
-
-endif
-
-# Allow sharing configuration between design and testbench via include
-COMPILE_ARGS += -I$(SRC_DIR)
-
-# Include the testbench sources
-VERILOG_SOURCES += $(PWD)/tb.v
-
-# Set the top-level module for simulation
-TOPLEVEL = tb
-
-# MODULE is the basename of the Python test file
-MODULE = test
-
-# Include Cocotb's make rules to handle simulator setup
-include $(shell cocotb-config --makefiles)/Makefile.sim
+.PHONY: all sim clean
