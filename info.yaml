@@ -1,7 +1,7 @@
 # Tiny Tapeout project information
 project:
   title:        "Rectangular to Cylindrical Converter"  # Project title
-  author:       "Nandana"  # Your name
+  author:       "Joanna"  # Your name
   discord:      ""  # Your Discord username (optional)
   description:  "Converts rectangular coordinates (x, y, z) to cylindrical coordinates (r, θ, z)"  
   language:     "Verilog"  
