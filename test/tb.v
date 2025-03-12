@@ -1,70 +1,64 @@
-`default_nettype none
 `timescale 1ns / 1ps
+`default_nettype none
 
-module tb ();
+module tb;
 
-  // Dump the signals to a VCD file for waveform analysis.
-  initial begin
-    $dumpfile("tb.vcd");
-    $dumpvars(0, tb);
-    #1;
-  end
+    reg  [7:0] ui_in;     // x input
+    reg  [7:0] uio_in;    // y input
+    reg  [7:0] uio_extra; // z input
+    reg        ena;       // Enable
+    reg        clk;       // Clock
+    reg        rst_n;     // Reset (Active Low)
 
-  // Clock generation
-  reg clk;
-  always #5 clk = ~clk;  // 10ns clock period (100MHz)
+    wire [7:0] uio_out;       // Theta output
+    wire [7:0] uo_out;        // r output
+    wire [7:0] uo_extra_out;  // Phi output
+    wire [7:0] uio_oe;        // IO enable
 
-  // Declare inputs and outputs
-  reg rst_n;
-  reg ena;
-  reg [7:0] ui_in;
-  reg [7:0] uio_in;
-  wire [7:0] uo_out;
-  wire [7:0] uio_out;
-  wire [7:0] uio_oe;
+    // Instantiate the module
+    tt_um_rect_cyl uut (
+        .ui_in(ui_in),
+        .uio_in(uio_in),
+        .uio_out(uio_out),
+        .uo_out(uo_out),
+        .uio_oe(uio_oe),
+        .ena(ena),
+        .clk(clk),
+        .rst_n(rst_n)
+    );
 
-`ifdef GL_TEST
-  wire VPWR = 1'b1;
-  wire VGND = 1'b0;
-`endif
+    // Clock generation
+    always #5 clk = ~clk;  // 10ns clock period (50 MHz)
 
-  // Instantiate the module under test
-  tt_um_rect_cyl uut (
-`ifdef GL_TEST
-      .VPWR(VPWR),
-      .VGND(VGND),
-`endif
-      .ui_in  (ui_in),    // x input
-      .uio_in (uio_in),   // y input
-      .uio_out(uio_out),  // theta output
-      .uo_out (uo_out),   // r output
-      .uio_oe (uio_oe),   // IO enable (all set to 0 for input mode)
-      .ena    (ena),      // enable signal
-      .clk    (clk),      // clock signal
-      .rst_n  (rst_n)     // active-low reset
-  );
+    initial begin
+        // Initialize signals
+        clk = 0;
+        rst_n = 0;
+        ena = 0;
+        ui_in = 0;
+        uio_in = 0;
+        uio_extra = 0;
+        
+        // Reset sequence
+        #10 rst_n = 1;
+        #10 ena = 1;
 
-  // Test sequence
-  initial begin
-    // Initialize signals
-    clk = 0;
-    rst_n = 0;
-    ena = 0;
-    ui_in = 0;
-    uio_in = 0;
-    #20;
-    
-    rst_n = 1;  // Release reset
-    ena = 1;    // Enable module
-    
-    // Apply test inputs
-    #10 ui_in = 8'd3; uio_in = 8'd4;  // Expect r ≈ 5, theta ≈ atan(4/3)
-    #20 ui_in = 8'd6; uio_in = 8'd8;  // Expect r ≈ 10, theta ≈ atan(8/6)
-    #20 ui_in = 8'd10; uio_in = 8'd0; // Expect r ≈ 10, theta ≈ 90
-    #20 ui_in = 8'd0; uio_in = 8'd10; // Expect r ≈ 10, theta ≈ 0
-    #20;
-    
-    $finish;
-  end
+        // Test cases
+        #10 ui_in = 8'd10; uio_in = 8'd10; uio_extra = 8'd5; // Example: x=10, y=10, z=5
+        #10 ui_in = 8'd20; uio_in = 8'd15; uio_extra = 8'd7; // Example: x=20, y=15, z=7
+        #10 ui_in = 8'd30; uio_in = 8'd25; uio_extra = 8'd10; // Example: x=30, y=25, z=10
+        #10 ui_in = 8'd0; uio_in = 8'd0; uio_extra = 8'd0;  // Edge case: all inputs zero
+
+        // Finish simulation
+        #50 $finish;
+    end
+
+    // Monitor output values
+    initial begin
+        $dumpfile("tb.vcd");
+        $dumpvars(0, tb);
+        $monitor("Time=%0t | x=%d y=%d z=%d | r=%d theta=%d phi=%d",
+                  $time, ui_in, uio_in, uio_extra, uo_out, uio_out, uo_extra_out);
+    end
 
 endmodule
