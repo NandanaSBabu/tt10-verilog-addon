@@ -55,7 +55,6 @@
 
   "//": "Absolute die size",
   "FP_SIZING": "absolute",
-
   "GRT_ALLOW_CONGESTION": 1,
 
   "FP_IO_HLENGTH": 2,
