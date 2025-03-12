@@ -1,53 +1,40 @@
-# Tiny Tapeout project information
 project:
-  title:        "Rectangular to Cylindrical Converter"  # Project title
-  author:       "Joanna"  # Your name
-  discord:      ""  # Your Discord username (optional)
-  description:  "Converts rectangular coordinates (x, y, z) to cylindrical coordinates (r, θ, z)"  
-  language:     "Verilog"  
-  clock_hz:     0  # No clock required (if applicable)
+  name: "Rectangular to Cylindrical Converter"
+  author: "Your Name"
+  description: "A TinyTapeout project to convert rectangular coordinates (x, y) to cylindrical (r, θ)"
+  version: "1.0"
+  license: "Apache-2.0"
+  repository: "https://github.com/YourUsername/tt10-rect-cyl"
 
-  # Tile size for layout placement
-  tiles: "1x1"  # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2, or 8x2
+# Module information
+module:
+  name: "tt_um_rect_cyl"
+  type: "user_project"
+  language: "verilog"
+  clock: "clk"
+  reset: "rst_n"
+  enable: "ena"
 
-  # Top module name (must start with "tt_um_")
-  top_module:  "tt_um_rect_cyl"
-
-  # List of Verilog source files (must be inside ./src/)
-  source_files:
-    - "project.v"
-
-# Pinout definition for datasheet/website
-pinout:
-  # Inputs
-  ui[0]: "x"       # X-coordinate input
-  ui[1]: "y"       # Y-coordinate input
-  ui[2]: "z"       # Z-coordinate input
-  ui[3]: ""  
-  ui[4]: ""  
-  ui[5]: ""  
-  ui[6]: ""  
-  ui[7]: ""  
-
-  # Outputs
-  uo[0]: "r"       # Radial distance output
-  uo[1]: "theta"   # Angle (θ) output
-  uo[2]: "z_out"   # Z-coordinate output
-  uo[3]: ""  
-  uo[4]: ""  
-  uo[5]: ""  
-  uo[6]: ""  
-  uo[7]: ""  
-
-  # Bidirectional pins (not used)
-  uio[0]: ""  
-  uio[1]: ""  
-  uio[2]: ""  
-  uio[3]: ""  
-  uio[4]: ""  
-  uio[5]: ""  
-  uio[6]: ""  
-  uio[7]: ""  
-
-# Do not change!
-yaml_version: 6
+# I/O Configuration
+pins:
+  - name: "ui_in"
+    direction: "input"
+    width: 8
+  - name: "uio_in"
+    direction: "input"
+    width: 8
+  - name: "uio_out"
+    direction: "output"
+    width: 8
+  - name: "uo_out"
+    direction: "output"
+    width: 8
+  - name: "uio_oe"
+    direction: "output"
+    width: 8
+  - name: "clk"
+    direction: "input"
+  - name: "rst_n"
+    direction: "input"
+  - name: "ena"
+    direction: "input"
