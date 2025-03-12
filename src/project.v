@@ -23,11 +23,11 @@ module tt_um_rect_cyl (
             r_reg <= 8'd0;
             theta_reg <= 8'd0;
         end else if (ena) begin
-            r_reg <= (sum[15:8] + sum[14:7]) >> 1;  
+            r_reg <= sum[15:8];  // Approximate sqrt(sum) by shifting
             if (uio_in == 0)
-                theta_reg <= 8'd90;
+                theta_reg <= (ui_in == 0) ? 8'd0 : 8'd90; // Handle x=0 and y=0 cases
             else
-                theta_reg <= (ui_in << 4) / uio_in;
+                theta_reg <= (ui_in * 45) / uio_in; // Avoid shifting issues
         end
     end
 
