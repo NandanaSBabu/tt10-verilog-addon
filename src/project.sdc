@@ -1,11 +1,8 @@
-# Define the clock signal with a 50 MHz frequency (20 ns period)
-create_clock -name clk -period 20 [get_ports clk]
+# Set clock constraints
+create_clock -name clk -period 10 [get_ports clk]
 
-# Set input delay (adjust if needed)
-set_input_delay 1 [all_inputs] -clock clk
+# Input delays
+set_input_delay -clock clk 0.2 [get_ports {ui_in uio_in ena rst_n}]
 
-# Set output delay (adjust if needed)
-set_output_delay 1 [all_outputs] -clock clk
-
-# Define reset as a false path (active-low reset should not affect timing analysis)
-set_false_path -from [get_ports rst_n]
+# Output delays
+set_output_delay -clock clk 0.2 [get_ports {uo_out uio_out uio_oe}]
