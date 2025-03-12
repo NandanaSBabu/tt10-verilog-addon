@@ -1,21 +1,44 @@
-[save]
-version=1
-expr="tb"
-posx=0
-posy=0
-sizex=1000
-sizey=800
-expr_end
-[treeopen] tb
-[signals]
+[date] Tue Mar 11 12:00:00 2025
+[dumpfile] tb.vcd
+[timescale] 1ns
+[savefile] tb.gtkw
+[timestart] 0
+[size] 1376 600
+[pos] -1 -1
+[treeopen] tb.
+[sst_width] 297
+[signals_width] 230
+[sst_expanded] 1
+[sst_vpaned_height] 158
+
+# Clock and Reset
+@28
 tb.clk
 tb.rst_n
-tb.ena
-tb.ui_in
-tb.uio_in
-tb.uio_extra
-tb.uo_out
-tb.uio_out
-tb.uo_extra_out
-tb.uio_oe
-[end]
+
+# Inputs
+@200
+-Inputs
+@22
+tb.x[7:0]
+tb.y[7:0]
+tb.z[7:0]
+
+# Bidirectional Pins
+@200
+-Bidirectional Pins
+@22
+tb.uio_in[7:0]
+tb.uio_oe[7:0]
+tb.uio_out[7:0]
+
+# Outputs
+@200
+-Output Pins
+@22
+tb.r[7:0]
+tb.theta[7:0]
+tb.z_out[7:0]
+
+[pattern_trace] 1
+[pattern_trace] 0
