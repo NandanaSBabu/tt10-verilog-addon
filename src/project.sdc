@@ -1,8 +1,6 @@
-# Set clock constraints
-create_clock -name clk -period 10 [get_ports clk]
-
-# Input delays
-set_input_delay -clock clk 0.2 [get_ports {ui_in uio_in ena rst_n}]
-
-# Output delays
-set_output_delay -clock clk 0.2 [get_ports {uo_out uio_out uio_oe}]
+create_clock -name clk -period 20 {clk}  ;# 50MHz clock
+set_input_delay -clock clk 2 [all_inputs]
+set_output_delay -clock clk 2 [all_outputs]
+set_driving_cell -lib_cell INV [all_inputs]
+set_load 0.1 [all_outputs]
+set_max_fanout 5 [all_outputs]
