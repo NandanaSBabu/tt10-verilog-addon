@@ -1,4 +1,4 @@
-`default_nettype none
+default_nettype none
 
 module tt_um_rect_cyl (
     input  wire [7:0] ui_in,    // x input
