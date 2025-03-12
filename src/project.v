@@ -26,8 +26,10 @@ module tt_um_rect_cyl (
             // Approximate square root using bit shift method
             r_reg <= (sum[15:8] + sum[14:7]) >> 1;  
 
-            // Approximate atan(y/x) using scaled division
-            if (uio_in == 0)
+            // Fix divide-by-zero issue in theta calculation
+            if (ui_in == 0 && uio_in == 0)
+                theta_reg <= 8'd0;  // Undefined case, set to 0
+            else if (uio_in == 0)
                 theta_reg <= 8'd90;  // Vertical line, angle = 90°
             else
                 theta_reg <= (ui_in << 4) / uio_in; // Scale by 16 for better precision
