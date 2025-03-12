@@ -1,4 +1,4 @@
-default_nettype none
+`default_nettype none
 
 module tt_um_rect_cyl (
     input  wire [7:0] ui_in,    // x input
@@ -23,19 +23,16 @@ module tt_um_rect_cyl (
             r_reg <= 8'd0;
             theta_reg <= 8'd0;
         end else if (ena) begin
-            // Approximate square root using bit shift method
             r_reg <= (sum[15:8] + sum[14:7]) >> 1;  
-
-            // Approximate atan(y/x) using scaled division
             if (uio_in == 0)
-                theta_reg <= 8'd90;  // Vertical line, angle = 90°
+                theta_reg <= 8'd90;
             else
-                theta_reg <= (ui_in << 4) / uio_in; // Scale by 16 for better precision
+                theta_reg <= (ui_in << 4) / uio_in;
         end
     end
 
-    assign uo_out = r_reg;      // r output (magnitude)
-    assign uio_out = theta_reg; // theta output (angle)
-    assign uio_oe = 8'b11111111; // Set all IOs to output mode
+    assign uo_out = r_reg;      
+    assign uio_out = theta_reg; 
+    assign uio_oe = 8'b11111111;
 
 endmodule
