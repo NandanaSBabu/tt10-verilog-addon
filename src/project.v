@@ -1,41 +1,85 @@
-default_nettype none
+/*
+ * Copyright (c) 2024
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-module tt_um_rect_cyl (
-    input  wire [7:0] ui_in,    // x input
-    input  wire [7:0] uio_in,   // y input
-    output wire [7:0] uio_out,  // theta output
-    output wire [7:0] uo_out,   // r output
-    output wire [7:0] uio_oe,   // IO enable (set to output mode)
-    input  wire       ena,      // Enable signal
-    input  wire       clk,      // Clock signal
-    input  wire       rst_n     // Active-low reset
+`default_nettype none
+
+module tt_um_rect_to_cyl (
+    input  wire [7:0] ui_in,    // Input: Encoded x, y, z values
+    output wire [7:0] uo_out,   // Output: Encoded r, theta, z_out
+    input  wire [7:0] uio_in,   // IOs (Not used in this design)
+    output wire [7:0] uio_out,  // IOs Output (Not used in this design)
+    output wire [7:0] uio_oe,   // IOs Enable (Not used in this design)
+    input  wire       ena,      // Enable
+    input  wire       clk,      // Clock
+    input  wire       rst_n     // Active low reset
 );
 
-    wire [15:0] x2, y2, sum;
-    reg  [7:0] r_reg, theta_reg;
+    reg signed [7:0] x, y, z;
+    reg [7:0] r;
+    reg signed [7:0] theta;
+    reg [4:0] iter;
+    reg signed [15:0] X, Y, Z;
+    reg flip;
+    reg done;
 
-    assign x2 = ui_in * ui_in;
-    assign y2 = uio_in * uio_in;
-    assign sum = x2 + y2;
+    // CORDIC atan table (precomputed values, scaled)
+    reg signed [7:0] atan_table [0:7];
+    initial begin
+        atan_table[0] = 8'd45;
+        atan_table[1] = 8'd27;
+        atan_table[2] = 8'd14;
+        atan_table[3] = 8'd7;
+        atan_table[4] = 8'd4;
+        atan_table[5] = 8'd2;
+        atan_table[6] = 8'd1;
+        atan_table[7] = 8'd0;
+    end
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            r_reg <= 8'd0;
-            theta_reg <= 8'd0;
-        end else if (ena) begin
-            // Approximate square root using bit shift method
-            r_reg <= (sum[15:8] + sum[14:7]) >> 1;  
-
-            // Approximate atan(y/x) using scaled division
-            if (uio_in == 0)
-                theta_reg <= 8'd90;  // Vertical line, angle = 90°
-            else
-                theta_reg <= (ui_in << 4) / uio_in; // Scale by 16 for better precision
+            r <= 8'b0;
+            theta <= 8'b0;
+            x <= 8'b0;
+            y <= 8'b0;
+            z <= 8'b0;
+            done <= 0;
+            iter <= 0;
+        end else begin
+            if (!done) begin
+                X <= x;
+                Y <= y;
+                Z <= 0;
+                iter <= 0;
+                flip <= (x < 0);
+                done <= 1;
+            end else if (iter < 8) begin
+                reg signed [15:0] X_new, Y_new, Z_new;
+                if (Y >= 0) begin
+                    X_new = X + (Y >>> iter);
+                    Y_new = Y - (X >>> iter);
+                    Z_new = Z + atan_table[iter];
+                end else begin
+                    X_new = X - (Y >>> iter);
+                    Y_new = Y + (X >>> iter);
+                    Z_new = Z - atan_table[iter];
+                end
+                X <= X_new;
+                Y <= Y_new;
+                Z <= Z_new;
+                iter <= iter + 1;
+                if (iter == 7) begin
+                    r <= X_new[7:0];
+                    theta <= flip ? -Z_new[7:0] : Z_new[7:0];
+                end
+            end
         end
     end
 
-    assign uo_out = r_reg;      // r output (magnitude)
-    assign uio_out = theta_reg; // theta output (angle)
-    assign uio_oe = 8'b11111111; // Set all IOs to output mode
+    assign uo_out = {r[7:4], theta[3:0]};  // Pack r and theta into output
+    assign uio_out = 0;
+    assign uio_oe  = 0;
+    wire _unused = &{ena, uio_in};
 
 endmodule
