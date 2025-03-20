@@ -1,12 +1,12 @@
 `default_nettype none
 
 module tt_um_addon (
-    input  wire [7:0] ui_in,    // Dedicated inputs (x and y)
-    output wire [7:0] uo_out,   // Dedicated outputs (sqrt_out)
-    input  wire [7:0] uio_in,   // IOs: Input path (unused)
+    input  wire [7:0] ui_in,    // x input
+    input  wire [7:0] uio_in,   // y input
+    output wire [7:0] uo_out,   // sqrt_out output
     output wire [7:0] uio_out,  // IOs: Output path (unused)
     output wire [7:0] uio_oe,   // IOs: Enable path (unused)
-    input  wire       ena,      // always 1 when the design is powered, so you can ignore it
+    input  wire       ena,      // always 1 when the design is powered
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
 );
@@ -33,7 +33,7 @@ module tt_um_addon (
             result <= 8'b0;
         end else begin
             // Compute sum of squares without *
-            sum_squares = square(ui_in[3:0]) + square(ui_in[7:4]);
+            sum_squares = square(ui_in) + square(uio_in);
 
             // Compute square root using bitwise approach
             result = 0;
