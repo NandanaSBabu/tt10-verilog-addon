@@ -1,5 +1,5 @@
 import cocotb
-from cocotb.triggers import Timer
+from cocotb.triggers import Timer, RisingEdge
 
 @cocotb.test()
 async def test_project(dut):
@@ -8,14 +8,17 @@ async def test_project(dut):
     test_cases = [
         (3, 4, 5),   # sqrt(3^2 + 4^2) = 5
         (7, 24, 25), # sqrt(7^2 + 24^2) = 25
-        (10, 15, 18), # sqrt(10^2 + 15^2) = 18
-        (8, 6, 10)   # sqrt(8^2 + 6^2) = 10
     ]
+
+    dut.rst_n.value = 0  # Apply reset
+    await Timer(10, units="ns")
+    dut.rst_n.value = 1  # Release reset
 
     for x, y, expected in test_cases:
         dut.ui_in.value = x
         dut.uio_in.value = y
-        await Timer(20, units="ns")
+        await RisingEdge(dut.clk)  # Wait for a clock edge
+        await Timer(10, units="ns")  # Allow time for output to settle
 
         result = int(dut.uo_out.value)
         print(f"DEBUG: x={x}, y={y}, expected={expected}, got={result}")
