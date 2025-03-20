@@ -12,55 +12,67 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
+    reg [15:0] square_x, square_y;
     reg [15:0] sqrt_result;
-    reg [7:0] mid, low, high;
-    reg [15:0] mid_squared;
-    reg [15:0] x_sq, y_sq;
-    reg [3:0] iter;
+    reg [15:0] temp;
+    reg [15:0] add_x, add_y;
+    reg [7:0] step;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
             sqrt_result <= 16'b0;
             uo_out <= 8'b0;
-            iter <= 4'd0;
-        end 
-        else if (ena) begin
-            if (iter == 0) begin
-                // Compute x^2 and y^2 without using *
-                x_sq = 0;
-                repeat (ui_in) x_sq = x_sq + ui_in;
-                y_sq = 0;
-                repeat (uio_in) y_sq = y_sq + uio_in;
-                sum_squares = x_sq + y_sq;
+        end else if (ena) begin
+            // Compute x^2 using repeated addition (unrolled)
+            add_x = 0;
+            if (ui_in[0]) add_x = add_x + ui_in;
+            if (ui_in[1]) add_x = add_x + (ui_in << 1);
+            if (ui_in[2]) add_x = add_x + (ui_in << 2);
+            if (ui_in[3]) add_x = add_x + (ui_in << 3);
+            if (ui_in[4]) add_x = add_x + (ui_in << 4);
+            if (ui_in[5]) add_x = add_x + (ui_in << 5);
+            if (ui_in[6]) add_x = add_x + (ui_in << 6);
+            if (ui_in[7]) add_x = add_x + (ui_in << 7);
+            square_x = add_x;
 
-                // Initialize binary search
-                low = 0;
-                high = 255;
-                sqrt_result = 0;
-                iter = 4'd8; // 8 iterations of binary search
-            end 
-            else if (iter > 0) begin
-                // Binary search for sqrt(sum_squares)
-                mid = (low + high) >> 1; // (low + high) / 2
-                
-                // Compute mid^2 without *
-                mid_squared = 0;
-                repeat (mid) mid_squared = mid_squared + mid;
+            // Compute y^2 using repeated addition (unrolled)
+            add_y = 0;
+            if (uio_in[0]) add_y = add_y + uio_in;
+            if (uio_in[1]) add_y = add_y + (uio_in << 1);
+            if (uio_in[2]) add_y = add_y + (uio_in << 2);
+            if (uio_in[3]) add_y = add_y + (uio_in << 3);
+            if (uio_in[4]) add_y = add_y + (uio_in << 4);
+            if (uio_in[5]) add_y = add_y + (uio_in << 5);
+            if (uio_in[6]) add_y = add_y + (uio_in << 6);
+            if (uio_in[7]) add_y = add_y + (uio_in << 7);
+            square_y = add_y;
 
-                if (mid_squared <= sum_squares) begin
-                    sqrt_result = mid;
-                    low = mid + 1;
-                end 
-                else begin
-                    high = mid - 1;
-                end
+            // Compute sum of squares
+            sum_squares = square_x + square_y;
 
-                iter = iter - 1;
-            end 
-            else begin
-                uo_out <= sqrt_result[7:0]; // Assign sqrt result
-            end
+            // Compute square root using subtractive method (unrolled)
+            sqrt_result = 0;
+            temp = sum_squares;
+            step = 128; // Start with largest bit
+
+            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
+            step = step >> 1;
+            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
+            step = step >> 1;
+            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
+            step = step >> 1;
+            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
+            step = step >> 1;
+            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
+            step = step >> 1;
+            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
+            step = step >> 1;
+            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
+            step = step >> 1;
+            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
+
+            uo_out <= sqrt_result;
         end
     end
 
