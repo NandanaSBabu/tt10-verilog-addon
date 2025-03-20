@@ -14,7 +14,7 @@ module tb ();
   reg rst_n;
   reg [7:0] ui_in;
   reg [7:0] uio_in;
-  reg ena;  // ✅ Added enable signal
+  reg ena;  // ✅ Enable signal
   wire [7:0] uo_out;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
@@ -37,7 +37,7 @@ module tb ();
       .uio_oe (uio_oe),
       .clk    (clk),
       .rst_n  (rst_n),
-      .ena    (ena)  // ✅ Connected ena
+      .ena    (ena)  // ✅ Enable connected
   );
 
   // Clock generation: 10ns period (100MHz)
@@ -59,16 +59,16 @@ module tb ();
 
     // Apply test cases
     #20 ui_in = 3; uio_in = 4;  
-    #50 $display("Time = %t, x = %d, y = %d, sqrt_out = %d", $time, ui_in, uio_in, uo_out); // ✅ Increased delay
+    #50 $display("DEBUG: Time = %t, x = %d, y = %d, sqrt_out = %d", $time, ui_in, uio_in, uo_out);
 
     #20 ui_in = 7; uio_in = 24;
-    #50 $display("Time = %t, x = %d, y = %d, sqrt_out = %d", $time, ui_in, uio_in, uo_out); // ✅ Increased delay
+    #50 $display("DEBUG: Time = %t, x = %d, y = %d, sqrt_out = %d", $time, ui_in, uio_in, uo_out);
 
     #20 ui_in = 10; uio_in = 15;
-    #50 $display("Time = %t, x = %d, y = %d, sqrt_out = %d", $time, ui_in, uio_in, uo_out); // ✅ Increased delay
+    #50 $display("DEBUG: Time = %t, x = %d, y = %d, sqrt_out = %d", $time, ui_in, uio_in, uo_out);
 
     #20 ui_in = 8; uio_in = 6;
-    #50 $display("Time = %t, x = %d, y = %d, sqrt_out = %d", $time, ui_in, uio_in, uo_out); // ✅ Increased delay
+    #50 $display("DEBUG: Time = %t, x = %d, y = %d, sqrt_out = %d", $time, ui_in, uio_in, uo_out);
 
     // End simulation
     #100 $finish;
