@@ -3,48 +3,41 @@ from cocotb.triggers import RisingEdge
 
 @cocotb.test()
 async def test_project(dut):
-    """Test the tt_um_addon module"""
+    """Test the square root computation."""
     
-    # Reset
+    # Reset logic
     dut.rst_n.value = 0
     dut.ena.value = 0
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
     await RisingEdge(dut.clk)
-    
-    # Release reset
     dut.rst_n.value = 1
-    await RisingEdge(dut.clk)
-
-    # Enable module
     dut.ena.value = 1
-    await RisingEdge(dut.clk)
 
-    # Test case 1: 3,4 -> sqrt(3^2 + 4^2) = 5
+    # Test case 1: x = 3, y = 4 (Expected sqrt(3^2 + 4^2) = 5)
     dut.ui_in.value = 3
     dut.uio_in.value = 4
     await RisingEdge(dut.clk)
     await RisingEdge(dut.clk)
-    expected = 5
-    result = int(dut.uo_out.value)
-    assert result == expected, f"Test failed! Expected {expected}, got {result}"
-
-    # Test case 2: 7,24 -> sqrt(7^2 + 24^2) = 25
+    assert dut.uo_out.value == 5, f"Test failed! Expected 5, got {dut.uo_out.value}"
+    
+    # Test case 2: x = 7, y = 24 (Expected sqrt(7^2 + 24^2) = 25)
     dut.ui_in.value = 7
     dut.uio_in.value = 24
     await RisingEdge(dut.clk)
     await RisingEdge(dut.clk)
-    expected = 25
-    result = int(dut.uo_out.value)
-    assert result == expected, f"Test failed! Expected {expected}, got {result}"
+    assert dut.uo_out.value == 25, f"Test failed! Expected 25, got {dut.uo_out.value}"
 
-    # Test case 3: 8,6 -> sqrt(8^2 + 6^2) = 10
+    # Test case 3: x = 10, y = 15 (Expected sqrt(10^2 + 15^2) = 18)
+    dut.ui_in.value = 10
+    dut.uio_in.value = 15
+    await RisingEdge(dut.clk)
+    await RisingEdge(dut.clk)
+    assert dut.uo_out.value == 18, f"Test failed! Expected 18, got {dut.uo_out.value}"
+
+    # Test case 4: x = 8, y = 6 (Expected sqrt(8^2 + 6^2) = 10)
     dut.ui_in.value = 8
     dut.uio_in.value = 6
     await RisingEdge(dut.clk)
     await RisingEdge(dut.clk)
-    expected = 10
-    result = int(dut.uo_out.value)
-    assert result == expected, f"Test failed! Expected {expected}, got {result}"
+    assert dut.uo_out.value == 10, f"Test failed! Expected 10, got {dut.uo_out.value}"
 
     cocotb.log.info("All test cases passed!")
