@@ -22,6 +22,7 @@ module tb ();
   wire [7:0] uo_out;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
+  reg ena;  // enable signal
 
 `ifdef GL_TEST
   wire VPWR = 1'b1;
@@ -45,7 +46,8 @@ module tb ();
       .uio_out(uio_out),  // IOs: Output path
       .uio_oe (uio_oe),   // IOs: Enable path (active high: 0=input, 1=output)
       .clk    (clk),      // clock
-      .rst_n  (rst_n)     // active-low reset
+      .rst_n  (rst_n),    // active-low reset
+      .ena    (ena)       // enable signal
   );
 
   // Reset and test sequence
@@ -55,13 +57,37 @@ module tb ();
     rst_n = 0;
     ui_in = 0;
     uio_in = 0;
+    ena = 0; // Initially disable
 
     // Reset and then apply test cases
     #10 rst_n = 1;  // Release reset
-    #10 ui_in = 8'd3; uio_in = 8'd4; // Test with 3,4 (expect 5)
-    #20 ui_in = 8'd6; uio_in = 8'd8; // Test with 6,8 (expect 10)
-    #20 ui_in = 8'd5; uio_in = 8'd12; // Test with 5,12 (expect 13)
-    #30 $finish;  // End the simulation after the test cases
+    #10 ena = 1;    // Enable the calculation
+
+    // Test case 1: Check sqrt(0^2 + 0^2) = 0
+    ui_in = 0;
+    uio_in = 0;
+    await ClockCycles(clk, 1);
+    assert uo_out == 0 : "Expected 0, got " + uo_out;
+
+    // Test case 2: Check sqrt(3^2 + 4^2) = 5
+    ui_in = 3;
+    uio_in = 4;
+    await ClockCycles(clk, 1);
+    assert uo_out == 5 : "Expected 5, got " + uo_out;
+
+    // Test case 3: Check sqrt(6^2 + 8^2) = 10
+    ui_in = 6;
+    uio_in = 8;
+    await ClockCycles(clk, 1);
+    assert uo_out == 10 : "Expected 10, got " + uo_out;
+
+    // Test case 4: Check sqrt(5^2 + 12^2) = 13
+    ui_in = 5;
+    uio_in = 12;
+    await ClockCycles(clk, 1);
+    assert uo_out == 13 : "Expected 13, got " + uo_out;
+
+    $finish; // End the simulation after the test cases
   end
 
 endmodule
