@@ -1,6 +1,6 @@
 `default_nettype none
 
-module sqrt_pythagoras (
+module tt_um_addon (
     input wire [7:0] x, 
     input wire [7:0] y, 
     input wire clk, 
