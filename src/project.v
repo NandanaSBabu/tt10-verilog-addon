@@ -12,13 +12,11 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [7:0] result;
-    integer i;
-    reg [7:0] temp;
-    reg [15:0] square_check;
-    reg [7:0] temp_count;
+    reg [7:0] sqrt_result;
+    reg [15:0] remainder;
+    reg [7:0] bit, root;
 
-    // Function to compute square using repeated addition (avoiding multiplication)
+    // Function to compute square using repeated addition
     function [15:0] square;
         input [7:0] a;
         reg [15:0] s;
@@ -27,7 +25,7 @@ module tt_um_addon (
             s = 0;
             count = a;
             while (count > 0) begin
-                s = s + a;
+                s = s + a;  // Repeated addition (avoiding multiplication)
                 count = count - 1;
             end
             square = s;
@@ -37,31 +35,31 @@ module tt_um_addon (
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            result <= 8'b0;
+            sqrt_result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
             // Compute sum of squares
             sum_squares = square(ui_in) + square(uio_in);
 
-            // Compute square root using bitwise method (avoiding multiplication)
-            result = 0;
-            for (i = 7; i >= 0; i = i - 1) begin
-                temp = result | (1 << i);
-                
-                // Compute temp * temp using repeated addition
-                square_check = 0;
-                temp_count = temp;
-                while (temp_count > 0) begin
-                    square_check = square_check + temp;
-                    temp_count = temp_count - 1;
+            // Compute square root using bitwise method
+            remainder = sum_squares;
+            root = 0;
+            bit = 1 << 14; // Start with the highest power of 4 below 16 bits
+
+            while (bit > 0) begin
+                if (root + bit <= remainder) begin
+                    remainder = remainder - (root + bit);
+                    root = (root >> 1) + bit;
+                end else begin
+                    root = root >> 1;
                 end
-                
-                if (square_check <= sum_squares)
-                    result = temp;
+                bit = bit >> 2;
             end
 
+            sqrt_result = root;
+
             // Assign output in the same cycle
-            uo_out <= result;
+            uo_out <= sqrt_result;
         end
     end
 
