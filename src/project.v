@@ -1,61 +1,54 @@
-/*
- * Copyright (c) 2024
- * SPDX-License-Identifier: Apache-2.0
- */
-
 `default_nettype none
 
-module tt_um_rect_to_cyl (
-    input  wire [7:0] ui_in,    // Input: Encoded x, y, z values
-    output wire [7:0] uo_out,   // Output: Encoded r, theta, z_out
-    input  wire [7:0] uio_in,   // IOs (Not used in this design)
-    output wire [7:0] uio_out,  // IOs Output (Not used in this design)
-    output wire [7:0] uio_oe,   // IOs Enable (Not used in this design)
-    input  wire       ena,      // Enable
-    input  wire       clk,      // Clock
-    input  wire       rst_n     // Active low reset
+module tt_um_sqrt_pythagoras (
+    input  wire [7:0] ui_in,    // Dedicated inputs (x and y)
+    output wire [7:0] uo_out,   // Dedicated outputs (sqrt_out)
+    input  wire [7:0] uio_in,   // IOs: Input path (unused)
+    output wire [7:0] uio_out,  // IOs: Output path (unused)
+    output wire [7:0] uio_oe,   // IOs: Enable path (unused)
+    input  wire       ena,      // always 1 when the design is powered, so you can ignore it
+    input  wire       clk,      // clock
+    input  wire       rst_n     // reset_n - low to reset
 );
 
-    reg signed [7:0] x, y, z;
-    wire [7:0] r;
-    wire signed [7:0] theta;
-    wire [7:0] z_out;
-    reg start;
-    wire done;
+    reg [15:0] sum_squares;
+    reg [7:0] result;
+    integer b;
 
-    rect_to_cyl core (
-        .clk(clk),
-        .rst(~rst_n),
-        .start(start),
-        .x(x),
-        .y(y),
-        .z(z),
-        .r(r),
-        .theta(theta),
-        .z_out(z_out),
-        .done(done)
-    );
+    function [15:0] square;
+        input [7:0] a;
+        reg [15:0] s;
+        integer i;
+        begin
+            s = 0;
+            for (i = 0; i < 8; i = i + 1)
+                if (a[i]) s = s + (a << i);  // Shift-add squaring
+            square = s;
+        end
+    endfunction
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            x <= 8'b0;
-            y <= 8'b0;
-            z <= 8'b0;
-            start <= 1'b0;
-        end else if (ena) begin
-            x <= ui_in[7:0]; // Extract x from input
-            y <= uio_in[7:0]; // Extract y from input
-            z <= uio_in[7:0]; // Extract z from input
-            start <= 1'b1;
+            sum_squares <= 16'b0;
+            result <= 8'b0;
         end else begin
-            start <= 1'b0;
+            // Compute sum of squares without *
+            sum_squares = square(ui_in[3:0]) + square(ui_in[7:4]);
+
+            // Compute square root using bitwise approach
+            result = 0;
+            for (b = 7; b >= 0; b = b - 1) begin
+                if (square(result + (1 << b)) <= sum_squares)
+                    result = result + (1 << b);
+            end
         end
     end
 
-    assign uo_out = {r[7:4], theta[3:0]};  // Pack r and theta into output
-    assign uio_out = z_out;
-    assign uio_oe  = 8'b11111111;
-    wire _unused = &{ena, uio_in};
+    assign uo_out = result;  // Output sqrt result
+    assign uio_out = 8'b0;
+    assign uio_oe  = 8'b0;
+
+    // List all unused inputs to prevent warnings
+    wire _unused = &{ena};
 
 endmodule
-
