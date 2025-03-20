@@ -1,62 +1,56 @@
 # Tiny Tapeout project information
 project:
-  title:        "Square Root of x^2 + y^2"  # Project title
-  author:       "Joanna"                    # Your name
-  discord:      ""                           # Optional Discord username
-  description:  "Computes sqrt(x^2 + y^2) using Verilog"  # One-line description
-  language:     "Verilog"                    # Language used
-  clock_hz:     100000000                    # Clock frequency in Hz (100 MHz)
+  title:        "Square Root of Sum of Squares"  # Project title
+  author:       "Your Name"  # Your name
+  discord:      "Nandana"  # Your Discord username (optional)
+  description:  "Computes sqrt(x^2 + y^2) using an 8-bit x and 8-bit y input"  # One-line description
+  language:     "Verilog"  # HDL used
+  clock_hz:     0  # Clock frequency in Hz (or 0 if not applicable)
 
-  # Tile size: Keep as 1x1 unless you need more space.
-  tiles: "1x1"
+  # How many tiles your design occupies? A single tile is about 167x108 μm.
+  tiles: "1x1"  # Tile size
 
-  # Top module name (should match your Verilog file)
-  top_module:  "tt_um_sqrt_pythagoras"
+  # Your top module name must start with "tt_um_". Make it unique by including your GitHub username:
+  top_module:  "tt_um_addon"
 
-  # List your project's source files here
+  # List your project's source files here.
+  # Source files must be in ./src and you must list each source file separately.
+  # Don't forget to also update PROJECT_SOURCES in test/Makefile.
   source_files:
-    - "sqrt_pythagoras.v"
+    - "project.v"
 
-# Pinout configuration
+# The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
+# This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
-  ui[0]: "x[0]"   # LSB of x
+  ui[0]: "x[0]"
   ui[1]: "x[1]"
   ui[2]: "x[2]"
   ui[3]: "x[3]"
   ui[4]: "x[4]"
   ui[5]: "x[5]"
   ui[6]: "x[6]"
-  ui[7]: "x[7]"   # MSB of x
-  ui[8]: "y[0]"   # LSB of y
-  ui[9]: "y[1]"
-  ui[10]: "y[2]"
-  ui[11]: "y[3]"
-  ui[12]: "y[4]"
-  ui[13]: "y[5]"
-  ui[14]: "y[6]"
-  ui[15]: "y[7]"  # MSB of y
+  ui[7]: "x[7]"
 
   # Outputs
-  uo[0]: "sqrt_out[0]"  # LSB of sqrt(x² + y²)
+  uo[0]: "sqrt_out[0]"
   uo[1]: "sqrt_out[1]"
   uo[2]: "sqrt_out[2]"
   uo[3]: "sqrt_out[3]"
   uo[4]: "sqrt_out[4]"
   uo[5]: "sqrt_out[5]"
   uo[6]: "sqrt_out[6]"
-  uo[7]: "sqrt_out[7]"  # MSB of sqrt(x² + y²)
+  uo[7]: "sqrt_out[7]"
 
-  # Bidirectional pins (not used)
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  # Bidirectional pins (used for y input)
+  uio[0]: "y[0]"
+  uio[1]: "y[1]"
+  uio[2]: "y[2]"
+  uio[3]: "y[3]"
+  uio[4]: "y[4]"
+  uio[5]: "y[5]"
+  uio[6]: "y[6]"
+  uio[7]: "y[7]"
 
 # Do not change!
 yaml_version: 6
-
