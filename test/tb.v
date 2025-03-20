@@ -1,9 +1,6 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
-/* This testbench just instantiates the module and makes some convenient wires
-   that can be driven / tested by the cocotb test.py.
-*/
 module tb ();
 
   // Dump the signals to a VCD file. You can view it with gtkwave or surfer.
@@ -58,10 +55,19 @@ module tb ();
     ui_in = 0;
     uio_in = 0;
 
+    // Reset sequence
     #10 rst_n = 1;  // Release reset
+    #10 $display("Reset released, starting test sequence.");
+    
+    // Test with different input values
     #10 ui_in = 8'd3; uio_in = 8'd4; // Test with 3,4 (expect 5)
+    #20 $display("Testing with ui_in = %d, uio_in = %d", ui_in, uio_in);
     #20 ui_in = 8'd6; uio_in = 8'd8; // Test with 6,8 (expect 10)
+    #20 $display("Testing with ui_in = %d, uio_in = %d", ui_in, uio_in);
     #20 ui_in = 8'd5; uio_in = 8'd12; // Test with 5,12 (expect 13)
+    #20 $display("Testing with ui_in = %d, uio_in = %d", ui_in, uio_in);
+    
+    // End simulation
     #30 $finish;
   end
 
