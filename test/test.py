@@ -26,6 +26,7 @@ async def test_project(dut):
     # Test case 1: Check sqrt(0^2 + 0^2) = 0
     dut.ui_in.value = 0
     dut.uio_in.value = 0
+    dut.ena.value = 1  # Enable the calculation
     await ClockCycles(dut.clk, 1)
     assert dut.uo_out.value == 0, f"Expected 0, got {dut.uo_out.value}"
 
