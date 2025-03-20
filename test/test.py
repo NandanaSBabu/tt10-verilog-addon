@@ -10,7 +10,6 @@ async def test_project(dut):
     dut.ui_in.value = 0
     dut.uio_in.value = 0
     await RisingEdge(dut.clk)
-
     dut.rst_n.value = 1  # Release reset
     dut.ena.value = 1
 
