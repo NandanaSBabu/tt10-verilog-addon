@@ -22,8 +22,8 @@ tb.user_project.rst_n
 @200
 -Inputs
 @22
-tb.user_project.x[7:0]
-tb.user_project.y[7:0]
+tb.user_project.ui_in[7:0]
+tb.user_project.uio_in[7:0]
 @200
 -Output Pins
 @22
