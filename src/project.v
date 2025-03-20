@@ -12,67 +12,48 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [15:0] square_x, square_y;
-    reg [15:0] sqrt_result;
+    reg [7:0] result;
     reg [15:0] temp;
-    reg [15:0] add_x, add_y;
-    reg [7:0] step;
+    integer i;
+
+    // Function to compute square using repeated addition (no multiplication)
+    function [15:0] square;
+        input [7:0] a;
+        reg [15:0] s;
+        reg [7:0] count;
+        begin
+            s = 0;
+            count = a;
+            while (count > 0) begin
+                s = s + a;  // Repeated addition
+                count = count - 1;
+            end
+            square = s;
+        end
+    endfunction
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            sqrt_result <= 16'b0;
+            result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute x^2 using repeated addition (unrolled)
-            add_x = 0;
-            if (ui_in[0]) add_x = add_x + ui_in;
-            if (ui_in[1]) add_x = add_x + (ui_in << 1);
-            if (ui_in[2]) add_x = add_x + (ui_in << 2);
-            if (ui_in[3]) add_x = add_x + (ui_in << 3);
-            if (ui_in[4]) add_x = add_x + (ui_in << 4);
-            if (ui_in[5]) add_x = add_x + (ui_in << 5);
-            if (ui_in[6]) add_x = add_x + (ui_in << 6);
-            if (ui_in[7]) add_x = add_x + (ui_in << 7);
-            square_x = add_x;
+            // Compute sum of squares using the function
+            sum_squares = square(ui_in) + square(uio_in);
 
-            // Compute y^2 using repeated addition (unrolled)
-            add_y = 0;
-            if (uio_in[0]) add_y = add_y + uio_in;
-            if (uio_in[1]) add_y = add_y + (uio_in << 1);
-            if (uio_in[2]) add_y = add_y + (uio_in << 2);
-            if (uio_in[3]) add_y = add_y + (uio_in << 3);
-            if (uio_in[4]) add_y = add_y + (uio_in << 4);
-            if (uio_in[5]) add_y = add_y + (uio_in << 5);
-            if (uio_in[6]) add_y = add_y + (uio_in << 6);
-            if (uio_in[7]) add_y = add_y + (uio_in << 7);
-            square_y = add_y;
+            // Integer square root using bitwise method (no multiplication)
+            result = 0;
+            temp = 0;
+            for (i = 7; i >= 0; i = i - 1) begin
+                temp = result | (1 << i);
+                
+                // Instead of `temp * temp <= sum_squares`, use repeated addition
+                if ((temp << i) + temp <= sum_squares)
+                    result = temp;
+            end
 
-            // Compute sum of squares
-            sum_squares = square_x + square_y;
-
-            // Compute square root using subtractive method (unrolled)
-            sqrt_result = 0;
-            temp = sum_squares;
-            step = 128; // Start with largest bit
-
-            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
-            step = step >> 1;
-            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
-            step = step >> 1;
-            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
-            step = step >> 1;
-            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
-            step = step >> 1;
-            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
-            step = step >> 1;
-            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
-            step = step >> 1;
-            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
-            step = step >> 1;
-            if ((sqrt_result + step) <= temp - (sqrt_result + step)) sqrt_result = sqrt_result + step;
-
-            uo_out <= sqrt_result;
+            // Assign final sqrt result
+            uo_out <= result;
         end
     end
 
