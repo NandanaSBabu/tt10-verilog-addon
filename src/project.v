@@ -1,4 +1,4 @@
-`default_nettype none
+default_nettype none
 
 module tt_um_addon (
     input wire [7:0] ui_in,    // x input
@@ -6,7 +6,6 @@ module tt_um_addon (
     output wire [7:0] uo_out,  // sqrt_out output
     output wire [7:0] uio_out, // IOs: Output path (unused)
     output wire [7:0] uio_oe,  // IOs: Enable path (unused)
-    input wire ena,            // always 1 when the design is powered
     input wire clk,            // clock
     input wire rst_n           // active-low reset
 );
@@ -53,8 +52,5 @@ module tt_um_addon (
     assign uo_out = result;  // Ensure this is correctly assigned to uo_out
     assign uio_out = 8'b0;
     assign uio_oe  = 8'b0;
-
-    // List all unused inputs to prevent warnings
-    wire _unused = &{ena};
 
 endmodule
