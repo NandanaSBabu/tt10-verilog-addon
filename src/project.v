@@ -36,17 +36,16 @@ module tt_um_addon (
             result <= 8'b0;
         end else begin
             // Compute sum of squares
-            sum_squares <= square(ui_in) + square(uio_in);  // Non-blocking assignment
+            sum_squares = square(ui_in) + square(uio_in);
             
             // Debug: Display intermediate values
             $display("x = %d, y = %d, sum_squares = %d, result = %d", ui_in, uio_in, sum_squares, result);
             
             // Compute square root using bitwise approach
-            result <= 0;  // Reset result at the start of each computation
+            result = 0;
             for (b = 7; b >= 0; b = b - 1) begin
-                if (square(result + (1 << b)) <= sum_squares) begin
-                    result <= result + (1 << b);  // Non-blocking assignment for updating result
-                end
+                if (square(result + (1 << b)) <= sum_squares)
+                    result = result + (1 << b);
             end
         end
     end
