@@ -1,4 +1,4 @@
-`default_nettype none
+default_nettype none
 
 module tt_um_addon (
     input wire [7:0] ui_in,    // x input
@@ -35,9 +35,12 @@ module tt_um_addon (
             sum_squares <= 16'b0;
             result <= 8'b0;
         end else begin
-            // Compute sum of squares without *
+            // Compute sum of squares
             sum_squares = square(ui_in) + square(uio_in);
-
+            
+            // Debug: Display intermediate values
+            $display("x = %d, y = %d, sum_squares = %d, result = %d", ui_in, uio_in, sum_squares, result);
+            
             // Compute square root using bitwise approach
             result = 0;
             for (b = 7; b >= 0; b = b - 1) begin
@@ -47,7 +50,8 @@ module tt_um_addon (
         end
     end
 
-    assign uo_out = result;  // Output sqrt result
+    // Correctly assign the output
+    assign uo_out = result;  // Ensure this is correctly assigned to uo_out
     assign uio_out = 8'b0;
     assign uio_oe  = 8'b0;
 
