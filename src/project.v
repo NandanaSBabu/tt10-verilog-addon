@@ -7,7 +7,7 @@ module tt_um_addon (
     output wire [7:0] uio_out,  // IOs: Output path (unused)
     output wire [7:0] uio_oe,   // IOs: Enable path (unused)
     input  wire       clk,      // clock
-    input  wire       rst_n     // active-low reset
+    input  wire       rst_n,     // active-low reset
     input wire ena  // Add this line inside the module port list
 
 );
