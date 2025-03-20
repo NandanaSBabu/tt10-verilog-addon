@@ -33,7 +33,7 @@ module tt_um_addon (
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            result <= 8'b0;
+            result <= 8'b0;  // Initial value, but won't reset on each input
         end else begin
             // Compute sum of squares
             sum_squares = square(ui_in) + square(uio_in);
@@ -42,8 +42,8 @@ module tt_um_addon (
             $display("x = %d, y = %d, sum_squares = %d, result = %d", ui_in, uio_in, sum_squares, result);
             
             // Compute square root using bitwise approach
-            result = 0;
             for (b = 7; b >= 0; b = b - 1) begin
+                // Try adding 2^b to the result and check if it's a valid square
                 if (square(result + (1 << b)) <= sum_squares)
                     result = result + (1 << b);
             end
