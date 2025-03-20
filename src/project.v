@@ -7,7 +7,8 @@ module tt_um_addon (
     output wire [7:0] uio_out, // IOs: Output path (unused)
     output wire [7:0] uio_oe,  // IOs: Enable path (unused)
     input wire clk,            // clock
-    input wire rst_n           // active-low reset
+    input wire rst_n,          // active-low reset
+    input wire ena             // enable signal
 );
 
     reg [15:0] sum_squares;
@@ -33,8 +34,8 @@ module tt_um_addon (
         if (!rst_n) begin
             sum_squares <= 16'b0;
             result <= 8'b0;  // Keep result as 0 at reset
-        end else begin
-            // Compute sum of squares
+        end else if (ena) begin
+            // Compute sum of squares only when ena is high
             sum_squares = square(ui_in) + square(uio_in);
             
             // Debug: Display intermediate values
