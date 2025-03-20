@@ -12,7 +12,7 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [7:0] sqrt_result;
+    reg [15:0] sqrt_result;
     reg [7:0] mid, low, high;
     reg [15:0] mid_squared;
     reg [15:0] x_sq, y_sq;
@@ -21,7 +21,7 @@ module tt_um_addon (
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            sqrt_result <= 8'b0;
+            sqrt_result <= 16'b0;
             uo_out <= 8'b0;
             iter <= 4'd0;
         end 
@@ -29,8 +29,8 @@ module tt_um_addon (
             if (iter == 0) begin
                 // Compute x^2 and y^2 without using *
                 x_sq = 0;
-                y_sq = 0;
                 repeat (ui_in) x_sq = x_sq + ui_in;
+                y_sq = 0;
                 repeat (uio_in) y_sq = y_sq + uio_in;
                 sum_squares = x_sq + y_sq;
 
@@ -59,7 +59,7 @@ module tt_um_addon (
                 iter = iter - 1;
             end 
             else begin
-                uo_out <= sqrt_result;
+                uo_out <= sqrt_result[7:0]; // Assign sqrt result
             end
         end
     end
