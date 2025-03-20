@@ -22,7 +22,7 @@ module tt_um_addon (
         reg [7:0] count;
         begin
             s = 0;
-            count = a;  // ✅ Initialize count properly
+            count = a;
             while (count > 0) begin
                 s = s + a;  // Repeated addition (avoiding multiplication)
                 count = count - 1;
@@ -38,21 +38,17 @@ module tt_um_addon (
             uo_out <= 8'b0;
         end else if (ena) begin
             // Compute sum of squares
-            sum_squares <= square(ui_in) + square(uio_in);
+            sum_squares = square(ui_in) + square(uio_in);
 
-            // Compute square root using bitwise method
+            // Compute square root using bitwise method (avoiding multiplication)
             result = 0;
             for (b = 7; b >= 0; b = b - 1) begin
-                if (square(result + (1 << b)) <= sum_squares)
+                if ((result + (1 << b)) <= sum_squares / (result + (1 << b)))
                     result = result + (1 << b);
             end
 
-            // Output the computed square root
+            // Assign output in the same cycle
             uo_out <= result;
-
-            // Debugging print statements
-            $display("Time = %t | x = %d | y = %d | sum_squares = %d | sqrt_out = %d",
-                     $time, ui_in, uio_in, sum_squares, result);
         end
     end
 
