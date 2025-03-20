@@ -3,19 +3,19 @@
 
 module tb ();
 
-  // Dump the signals to a VCD file. You can view it with gtkwave or surfer.
+  // Dump the signals to a VCD file for waveform debugging
   initial begin
     $dumpfile("tb.vcd");
     $dumpvars(0, tb);
-    #1;
   end
 
-  // Wire up the inputs and outputs:
+  // Declare signals
   reg clk;
   reg rst_n;
-  reg [7:0] ui_in;   // x input
-  reg [7:0] uio_in;  // y input
-  wire [7:0] uo_out; // sqrt_out output
+  reg ena;  // 🔹 Added `ena`
+  reg [7:0] ui_in;
+  reg [7:0] uio_in;
+  wire [7:0] uo_out;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
 
@@ -30,13 +30,14 @@ module tb ();
       .VPWR(VPWR),
       .VGND(VGND),
 `endif
-      .ui_in  (ui_in),   
-      .uo_out (uo_out),   
-      .uio_in (uio_in),   
-      .uio_out(uio_out),  
-      .uio_oe (uio_oe),   
-      .clk    (clk),      
-      .rst_n  (rst_n)     
+      .ui_in  (ui_in),
+      .uo_out (uo_out),
+      .uio_in (uio_in),
+      .uio_out(uio_out),
+      .uio_oe (uio_oe),
+      .ena    (ena),  // 🔹 Connected `ena`
+      .clk    (clk),
+      .rst_n  (rst_n)
   );
 
   // Clock generation: 10ns period (100MHz)
@@ -46,11 +47,13 @@ module tb ();
     // Initialize signals
     clk = 0;
     rst_n = 0;
+    ena = 0;  // 🔹 Initialize `ena`
     ui_in = 0;
     uio_in = 0;
 
     // Apply reset
     #20 rst_n = 1;
+    ena = 1;  // 🔹 Set `ena` high
 
     // Apply test cases
     #20 ui_in = 3; uio_in = 4;  // sqrt(3^2 + 4^2) = 5
