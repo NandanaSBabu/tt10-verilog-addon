@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Your Name
+ * Copyright (c) 2024 Tiny Tapeout
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -20,7 +20,7 @@ module tt_um_addon (
     reg [7:0] result;
     integer b;
 
-    // Square function using repeated addition
+    // Function to compute square using repeated addition (No '*')
     function [15:0] square;
         input [7:0] a;
         reg [15:0] s;
@@ -42,27 +42,23 @@ module tt_um_addon (
             result <= 8'b0;
             uo_out <= 8'b0;
         end else begin
-            // Compute sum of squares
-            sum_squares = square(ui_in) + square(uio_in);
-            $display("sum_squares: %d", sum_squares);  // Debug print
+            sum_squares <= square(ui_in) + square(uio_in);
+            result <= 0;
 
-            // Compute square root using bitwise approach
-            result = 0;
             for (b = 7; b >= 0; b = b - 1) begin
                 if (square(result + (1 << b)) <= sum_squares)
-                    result = result + (1 << b);
+                    result <= result + (1 << b);
             end
 
-            $display("result: %d", result);  // Debug print
             uo_out <= result;
         end
     end
 
-    // Assign unused outputs to zero
+    // Unused output assignments to prevent warnings
     assign uio_out = 0;
     assign uio_oe  = 0;
 
-    // Unused inputs to prevent warnings
-    wire _unused = &{ena, clk, rst_n, 1'b0};
+    // Prevents synthesis warnings for unused inputs
+    wire _unused = &{ena};
 
 endmodule
