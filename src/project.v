@@ -12,45 +12,47 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [15:0] temp;  // Temporary register for checking squares
-    reg [7:0] result;
-    integer b, i;
+    reg [15:0] sqrt_result;
+    reg [7:0] low, high, mid;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            result <= 8'b0;
+            sqrt_result <= 16'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute sum of squares using repeated addition
+            // Compute sum of squares without multiplication
             sum_squares = 0;
 
-            for (i = 0; i < ui_in; i = i + 1)
+            for (integer i = 0; i < ui_in; i = i + 1)
                 sum_squares = sum_squares + ui_in;
 
-            for (i = 0; i < uio_in; i = i + 1)
+            for (integer i = 0; i < uio_in; i = i + 1)
                 sum_squares = sum_squares + uio_in;
 
-            // Compute square root without multiplication
-            result = 0;
-            temp = 0;
+            // Compute integer square root using binary search
+            low = 0;
+            high = 255;
+            sqrt_result = 0;
 
-            for (b = 7; b >= 0; b = b - 1) begin
-                reg [15:0] new_temp;
-                new_temp = temp;  // Copy current temp value
-                
-                // Add (result + (1 << b)) many times
-                for (i = 0; i < (result + (1 << b)); i = i + 1)
-                    new_temp = new_temp + (result + (1 << b));
+            while (low <= high) begin
+                mid = (low + high) >> 1;  // mid = (low + high) / 2 (safe shift division)
 
-                if (new_temp <= sum_squares) begin
-                    temp = new_temp;
-                    result = result + (1 << b);
+                // Check mid * mid without using *
+                reg [15:0] mid_squared = 0;
+                for (integer i = 0; i < mid; i = i + 1)
+                    mid_squared = mid_squared + mid;
+
+                if (mid_squared <= sum_squares) begin
+                    sqrt_result = mid;
+                    low = mid + 1;
+                end else begin
+                    high = mid - 1;
                 end
             end
 
-            // Assign output in the same cycle
-            uo_out <= result;
+            // Assign final square root result
+            uo_out <= sqrt_result;
         end
     end
 
