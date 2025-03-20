@@ -11,8 +11,8 @@ module tt_um_addon (
     input  wire       ena       // Enable signal
 );
 
-    reg [15:0] sum_squares, sum_squares_reg;
-    reg [7:0] result_reg;
+    reg [15:0] sum_squares;
+    reg [7:0] result;
     integer b;
 
     // Function to compute square using repeated addition
@@ -22,7 +22,7 @@ module tt_um_addon (
         reg [7:0] count;
         begin
             s = 0;
-            count = a;
+            count = a;  // ✅ Initialize count properly
             while (count > 0) begin
                 s = s + a;  // Repeated addition (avoiding multiplication)
                 count = count - 1;
@@ -34,21 +34,25 @@ module tt_um_addon (
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            sum_squares_reg <= 16'b0;
-            result_reg <= 8'b0;
+            result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
+            // Compute sum of squares
             sum_squares <= square(ui_in) + square(uio_in);
-            sum_squares_reg <= sum_squares;  // Pipeline to ensure correct update
 
             // Compute square root using bitwise method
-            result_reg = 0;
+            result = 0;
             for (b = 7; b >= 0; b = b - 1) begin
-                if (square(result_reg + (1 << b)) <= sum_squares_reg) 
-                    result_reg = result_reg + (1 << b);
+                if (square(result + (1 << b)) <= sum_squares)
+                    result = result + (1 << b);
             end
 
-            uo_out <= result_reg;  // Output result
+            // Output the computed square root
+            uo_out <= result;
+
+            // Debugging print statements
+            $display("Time = %t | x = %d | y = %d | sum_squares = %d | sqrt_out = %d",
+                     $time, ui_in, uio_in, sum_squares, result);
         end
     end
 
