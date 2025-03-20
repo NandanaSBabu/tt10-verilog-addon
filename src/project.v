@@ -12,24 +12,9 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
+    reg [15:0] temp;  // Temporary register for checking squares
     reg [7:0] result;
-    integer b;
-
-    // Function to compute square using repeated addition
-    function [15:0] square;
-        input [7:0] a;
-        reg [15:0] s;
-        reg [7:0] count;
-        begin
-            s = 0;
-            count = a;
-            while (count > 0) begin
-                s = s + a;  // Repeated addition (avoiding multiplication)
-                count = count - 1;
-            end
-            square = s;
-        end
-    endfunction
+    integer b, i;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -37,14 +22,31 @@ module tt_um_addon (
             result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute sum of squares
-            sum_squares = square(ui_in) + square(uio_in);
+            // Compute sum of squares using repeated addition
+            sum_squares = 0;
 
-            // Compute square root using bitwise method (avoiding multiplication)
+            for (i = 0; i < ui_in; i = i + 1)
+                sum_squares = sum_squares + ui_in;
+
+            for (i = 0; i < uio_in; i = i + 1)
+                sum_squares = sum_squares + uio_in;
+
+            // Compute square root without multiplication
             result = 0;
+            temp = 0;
+
             for (b = 7; b >= 0; b = b - 1) begin
-                if ((result + (1 << b)) <= sum_squares / (result + (1 << b)))
+                reg [15:0] new_temp;
+                new_temp = temp;  // Copy current temp value
+                
+                // Add (result + (1 << b)) many times
+                for (i = 0; i < (result + (1 << b)); i = i + 1)
+                    new_temp = new_temp + (result + (1 << b));
+
+                if (new_temp <= sum_squares) begin
+                    temp = new_temp;
                     result = result + (1 << b);
+                end
             end
 
             // Assign output in the same cycle
