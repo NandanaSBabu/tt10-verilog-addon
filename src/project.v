@@ -8,6 +8,8 @@ module tt_um_addon (
     output wire [7:0] uio_oe,   // IOs: Enable path (unused)
     input  wire       clk,      // clock
     input  wire       rst_n     // active-low reset
+    input wire ena  // Add this line inside the module port list
+
 );
 
     reg [15:0] sum_squares;
