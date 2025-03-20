@@ -46,7 +46,7 @@ module tb;
         uio_in = 8'd8;
         #20;
 
-        // Test case: x=0, y=0 (expect sqrt(0) = 0)
+        //Test case: x=0, y=0 (expect sqrt(0) = 0)
         ui_in = 8'd0;
         uio_in = 8'd0;
         #20;
