@@ -1,11 +1,11 @@
 `default_nettype none
 
-module sqrt_pythagoras (
-    input wire [7:0] x, 
-    input wire [7:0] y, 
+module tt_um_project (
+	input wire [7:0] ui_in, 
+	input wire [7:0] uio_in, 
     input wire clk, 
     input wire rst_n, 
-    output reg [7:0] sqrt_out
+	output reg [7:0] uo_out
 );
 
     reg [15:0] sum_squares;
@@ -32,7 +32,7 @@ module sqrt_pythagoras (
         if (!rst_n) begin
             sum_squares <= 16'b0;
             result <= 8'b0;
-            sqrt_out <= 8'b0;
+            uo_out <= 8'b0;
         end else begin
             // Compute sum of squares without *
             sum_squares = square(x) + square(y);
@@ -44,7 +44,7 @@ module sqrt_pythagoras (
                     result = result + (1 << b);
             end
 
-            sqrt_out <= result;
+            uo_out <= result;
         end
     end
 
