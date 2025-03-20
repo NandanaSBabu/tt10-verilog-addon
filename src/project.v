@@ -1,6 +1,6 @@
 `default_nettype none
 
-module tt_um_sqrt_pythagoras (
+module tt_um_addon (
     input  wire [7:0] ui_in,    // Dedicated inputs (x and y)
     output wire [7:0] uo_out,   // Dedicated outputs (sqrt_out)
     input  wire [7:0] uio_in,   // IOs: Input path (unused)
