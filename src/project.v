@@ -1,14 +1,14 @@
 `default_nettype none
 
 module tt_um_addon (
-    input  wire [7:0] ui_in,    // x input
-    input  wire [7:0] uio_in,   // y input
-    output wire [7:0] uo_out,   // sqrt_out output
-    output wire [7:0] uio_out,  // IOs: Output path (unused)
-    output wire [7:0] uio_oe,   // IOs: Enable path (unused)
-    input  wire       ena,      // always 1 when the design is powered
-    input  wire       clk,      // clock
-    input  wire       rst_n     // reset_n - low to reset
+    input wire [7:0] ui_in,    // x input
+    input wire [7:0] uio_in,   // y input
+    output wire [7:0] uo_out,  // sqrt_out output
+    output wire [7:0] uio_out, // IOs: Output path (unused)
+    output wire [7:0] uio_oe,  // IOs: Enable path (unused)
+    input wire ena,            // always 1 when the design is powered
+    input wire clk,            // clock
+    input wire rst_n           // active-low reset
 );
 
     reg [15:0] sum_squares;
@@ -18,11 +18,14 @@ module tt_um_addon (
     function [15:0] square;
         input [7:0] a;
         reg [15:0] s;
-        integer i;
+        reg [7:0] count;
         begin
             s = 0;
-            for (i = 0; i < 8; i = i + 1)
-                if (a[i]) s = s + (a << i);  // Shift-add squaring
+            count = a;
+            while (count > 0) begin
+                s = s + a;  // Repeated addition
+                count = count - 1;
+            end
             square = s;
         end
     endfunction
