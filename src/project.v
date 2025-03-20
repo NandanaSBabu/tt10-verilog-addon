@@ -2,8 +2,8 @@
 
 module tt_um_addon (
     input  wire [7:0] ui_in,    // x input
-    output reg  [7:0] uo_out,   // sqrt_out output
     input  wire [7:0] uio_in,   // y input
+    output reg  [7:0] uo_out,   // sqrt_out output
     output wire [7:0] uio_out,  // IOs: Output path (unused)
     output wire [7:0] uio_oe,   // IOs: Enable path (unused)
     input  wire       clk,      // clock
@@ -21,10 +21,12 @@ module tt_um_addon (
         reg [7:0] count;
         begin
             s = 0;
-            count = a;
-            while (count > 0) begin
-                s = s + a;  // Repeated addition (avoiding multiplication)
-                count = count - 1;
+            if (a > 0) begin
+                count = a;
+                while (count > 0) begin
+                    s = s + a;  // Repeated addition (avoiding multiplication)
+                    count = count - 1;
+                end
             end
             square = s;
         end
@@ -37,7 +39,7 @@ module tt_um_addon (
             uo_out <= 8'b0;
         end else begin
             // Compute sum of squares
-            sum_squares = square(ui_in) + square(uio_in);
+            sum_squares <= square(ui_in) + square(uio_in);
 
             // Compute square root using bitwise method
             result = 0;
