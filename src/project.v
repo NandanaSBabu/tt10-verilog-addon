@@ -1,55 +1,55 @@
 `default_nettype none
 
-module tt_um_addon (
-    input wire [7:0] ui_in,    // x input
-    input wire [7:0] uio_in,   // y input
-    output wire [7:0] uo_out,  // sqrt_out output
-    output wire [7:0] uio_out, // IOs: Output path (unused)
-    output wire [7:0] uio_oe,  // IOs: Enable path (unused)
-    input wire clk,            // clock
-    input wire rst_n,          // active-low reset
-    input wire ena             // enable signal
+module sqrt_pythagoras (
+    input wire [7:0] x, 
+    input wire [7:0] y, 
+    input wire clk, 
+    input wire rst_n, 
+    output reg [7:0] sqrt_out
 );
 
-    reg [15:0] sum_squares;  // To store sum of squares
-    reg [7:0] result;        // To store the result (sqrt approximation)
-    integer b;               // Loop variable
+    reg [15:0] sum_squares;
+    reg [7:0] result;
+    integer b;
 
-    // Square function using repeated addition
     function [15:0] square;
-        input [7:0] a;
-        integer i;
-        begin
-            square = 0;
-            for (i = 0; i < a; i = i + 1) begin
-                square = square + a;  // Repeated addition to compute square
-            end
-        end
-    endfunction
+    	input [7:0] a;
+    	reg [15:0] s;
+    	reg [7:0] count;
+    	begin
+        	s = 0;
+        	count = a;
+        	while (count > 0) begin
+            	s = s + a;  // Repeated addition
+            	count = count - 1;
+        	end
+        	square = s;
+    	end
+	endfunction
 
-    // Always block triggered on clock or reset
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            result <= 8'b0;  // Keep result as 0 on reset
-        end else if (ena) begin
-            // Compute sum of squares only when ena is high
-            sum_squares = square(ui_in) + square(uio_in);
-            
-            // Debug: Display intermediate values (optional)
-            $display("x = %d, y = %d, sum_squares = %d, result = %d", ui_in, uio_in, sum_squares, result);
-            
-            // Compute square root using bitwise approach
+            result <= 8'b0;
+            sqrt_out <= 8'b0;
+        end else begin
+            // Compute sum of squares without using multiplication
+            sum_squares = square(x) + square(y);
+
+            // Initialize result to 0 before starting square root calculation
+            result = 0;
+
+            // Bitwise approach to calculate square root
             for (b = 7; b >= 0; b = b - 1) begin
+                // Check if adding the bitwise shift to result yields a value whose square is <= sum_squares
                 if (square(result + (1 << b)) <= sum_squares)
                     result = result + (1 << b);
             end
+
+            // Assign the result to sqrt_out (output)
+            sqrt_out <= result;
         end
     end
-
-    // Assign the output (result will hold the square root approximation)
-    assign uo_out = result;  // Output the result
-    assign uio_out = 8'b0;    // Unused IO
-    assign uio_oe  = 8'b0;    // Unused IO enable
 
 endmodule
