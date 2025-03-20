@@ -13,10 +13,12 @@ module tt_um_addon (
 
     reg [15:0] sum_squares;
     reg [7:0] result;
-    reg [15:0] temp;
     integer i;
+    reg [7:0] temp;
+    reg [15:0] square_check;
+    reg [7:0] temp_count;
 
-    // Function to compute square using repeated addition (no multiplication)
+    // Function to compute square using repeated addition (avoiding multiplication)
     function [15:0] square;
         input [7:0] a;
         reg [15:0] s;
@@ -25,7 +27,7 @@ module tt_um_addon (
             s = 0;
             count = a;
             while (count > 0) begin
-                s = s + a;  // Repeated addition
+                s = s + a;
                 count = count - 1;
             end
             square = s;
@@ -38,21 +40,27 @@ module tt_um_addon (
             result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute sum of squares using the function
+            // Compute sum of squares
             sum_squares = square(ui_in) + square(uio_in);
 
-            // Integer square root using bitwise method (no multiplication)
+            // Compute square root using bitwise method (avoiding multiplication)
             result = 0;
-            temp = 0;
             for (i = 7; i >= 0; i = i - 1) begin
                 temp = result | (1 << i);
                 
-                // Instead of `temp * temp <= sum_squares`, use repeated addition
-                if ((temp << i) + temp <= sum_squares)
+                // Compute temp * temp using repeated addition
+                square_check = 0;
+                temp_count = temp;
+                while (temp_count > 0) begin
+                    square_check = square_check + temp;
+                    temp_count = temp_count - 1;
+                end
+                
+                if (square_check <= sum_squares)
                     result = temp;
             end
 
-            // Assign final sqrt result
+            // Assign output in the same cycle
             uo_out <= result;
         end
     end
