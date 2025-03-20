@@ -1,68 +1,59 @@
-`default_nettype none
 `timescale 1ns / 1ps
+`default_nettype none
 
-module tb ();
+module tb;
 
-  // Dump signals to a VCD file for waveform debugging
-  initial begin
-    $dumpfile("tb.vcd");
-    $dumpvars(0, tb);
-  end
+    reg [7:0] ui_in;   // x input
+    reg [7:0] uio_in;  // y input
+    wire [7:0] uo_out; // sqrt_out output
+    reg clk;           // clock
+    reg rst_n;         // active-low reset
+    reg ena;           // enable signal
 
-  // Declare signals
-  reg clk;
-  reg rst_n;
-  reg [7:0] ui_in;
-  reg [7:0] uio_in;
-  reg ena;
-  wire [7:0] uo_out;
-  wire [7:0] uio_out;
-  wire [7:0] uio_oe;
+    // Instantiate the module under test (MUT)
+    tt_um_addon uut (
+        .ui_in(ui_in),
+        .uio_in(uio_in),
+        .uo_out(uo_out),
+        .uio_out(),
+        .uio_oe(),
+        .clk(clk),
+        .rst_n(rst_n),
+        .ena(ena)
+    );
 
-  // Instantiate the DUT (Device Under Test)
-  tt_um_addon uut (
-      .ui_in  (ui_in),
-      .uo_out (uo_out),
-      .uio_in (uio_in),
-      .uio_out(uio_out),
-      .uio_oe (uio_oe),
-      .clk    (clk),
-      .rst_n  (rst_n),
-      .ena    (ena)
-  );
+    // Generate clock (10ns period, 50MHz)
+    always #5 clk = ~clk;
 
-  // Clock generation: 10ns period (100MHz)
-  always #10 clk = ~clk;
+    initial begin
+        // Initialize signals
+        clk = 0;
+        rst_n = 0;
+        ena = 0;
+        ui_in = 0;
+        uio_in = 0;
 
-  initial begin
-    // Initialize signals
-    clk = 0;
-    rst_n = 0;
-    ui_in = 0;
-    uio_in = 0;
-    ena = 0;
+        #10 rst_n = 1;  // Release reset
+        #10 ena = 1;     // Enable computation
 
-    // Apply reset
-    #20 rst_n = 1;
-    
-    // Enable calculations
-    #10 ena = 1;
+        // Test case 1: sqrt(3^2 + 4^2) = 5
+        ui_in = 8'd3;
+        uio_in = 8'd4;
+        #20;
 
-    // Apply test cases
-    #20 ui_in = 3; uio_in = 4;  
-    #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
+        // Test case 2: sqrt(6^2 + 8^2) = 10
+        ui_in = 8'd6;
+        uio_in = 8'd8;
+        #20;
 
-    #20 ui_in = 7; uio_in = 24;
-    #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
+        // Test case 3: sqrt(5^2 + 12^2) = 13
+        ui_in = 8'd5;
+        uio_in = 8'd12;
+        #20;
 
-    #20 ui_in = 10; uio_in = 15;
-    #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
-
-    #20 ui_in = 8; uio_in = 6;
-    #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
-
-    // End simulation
-    #100 $finish;
-  end
+        // End simulation
+        #50;
+        $finish;
+    end
 
 endmodule
