@@ -14,6 +14,7 @@ module tb ();
   reg rst_n;
   reg [7:0] ui_in;
   reg [7:0] uio_in;
+  reg ena;  // ✅ Fixed: Added ena signal
   wire [7:0] uo_out;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
@@ -35,7 +36,8 @@ module tb ();
       .uio_out(uio_out),
       .uio_oe (uio_oe),
       .clk    (clk),
-      .rst_n  (rst_n)
+      .rst_n  (rst_n),
+      .ena    (ena)  // ✅ Fixed: Connected ena signal
   );
 
   // Clock generation: 10ns period (100MHz)
@@ -47,9 +49,13 @@ module tb ();
     rst_n = 0;
     ui_in = 0;
     uio_in = 0;
+    ena = 0;  // ✅ Initialize ena to 0
 
     // Apply reset
     #20 rst_n = 1;
+    
+    // Enable computation
+    #10 ena = 1;  // ✅ Turn on ena signal
 
     // Apply test cases
     #20 ui_in = 3; uio_in = 4;  // sqrt(3^2 + 4^2) = 5
