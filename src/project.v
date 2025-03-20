@@ -16,7 +16,6 @@ module tt_um_addon (
     input  wire       rst_n     // reset_n - low to reset
 );
 
-    // Internal registers for computation
     reg [15:0] sum_squares;
     reg [7:0] result;
     integer b;
@@ -37,35 +36,33 @@ module tt_um_addon (
         end
     endfunction
 
-    // Process on clock edge or reset
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
             result <= 8'b0;
             uo_out <= 8'b0;
         end else begin
-            // Compute sum of squares without using multiplication
+            // Compute sum of squares
             sum_squares = square(ui_in) + square(uio_in);
+            $display("sum_squares: %d", sum_squares);  // Debug print
 
-            // Initialize result to 0 before starting square root calculation
+            // Compute square root using bitwise approach
             result = 0;
-
-            // Bitwise approach to calculate square root
             for (b = 7; b >= 0; b = b - 1) begin
                 if (square(result + (1 << b)) <= sum_squares)
                     result = result + (1 << b);
             end
 
-            // Assign the result to uo_out
+            $display("result: %d", result);  // Debug print
             uo_out <= result;
         end
     end
 
-    // Unused ports assignments
-    assign uio_out = 8'b0;
-    assign uio_oe  = 8'b0;
+    // Assign unused outputs to zero
+    assign uio_out = 0;
+    assign uio_oe  = 0;
 
-    // List all unused inputs to prevent warnings
+    // Unused inputs to prevent warnings
     wire _unused = &{ena, clk, rst_n, 1'b0};
 
 endmodule
