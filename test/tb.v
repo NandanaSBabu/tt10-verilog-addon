@@ -13,9 +13,9 @@ module tb ();
   // Testbench signals
   reg clk;
   reg rst_n;
-  reg [7:0] x;
-  reg [7:0] y;
-  wire [7:0] sqrt_out;
+  reg [7:0] ui_in;
+  reg [7:0] uio_in;
+  wire [7:0] uo_out;
 
 `ifdef GL_TEST
   wire VPWR = 1'b1;
@@ -23,16 +23,16 @@ module tb ();
 `endif
 
   // Instantiate the sqrt_pythagoras module
-  sqrt_pythagoras uut (
+  tt_um_addon user_project (
 `ifdef GL_TEST
       .VPWR(VPWR),
       .VGND(VGND),
 `endif
-      .x      (x),       // Input x
-      .y      (y),       // Input y
+    .ui_in      (ui_in),       // Input x
+    .uio_in      (uio_in),       // Input y
       .clk    (clk),     // Clock
       .rst_n  (rst_n),   // Reset (active low)
-      .sqrt_out (sqrt_out) // Output sqrt(x^2 + y^2)
+    .uo_out (ou_out) // Output sqrt(x^2 + y^2)
   );
 
 endmodule
