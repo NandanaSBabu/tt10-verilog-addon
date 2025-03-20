@@ -14,11 +14,9 @@ module tt_um_addon (
     reg [15:0] sum_squares;
     reg [7:0] result;
     integer i;
-    reg [7:0] temp;
     reg [15:0] square_check;
-    reg [7:0] temp_count;
 
-    // Function to compute square using repeated addition (avoiding multiplication)
+    // Function to compute square using repeated addition
     function [15:0] square;
         input [7:0] a;
         reg [15:0] s;
@@ -43,24 +41,18 @@ module tt_um_addon (
             // Compute sum of squares
             sum_squares = square(ui_in) + square(uio_in);
 
-            // Compute square root using bitwise method (avoiding multiplication)
+            // Compute square root using subtraction method
             result = 0;
+            square_check = 0;
+
             for (i = 7; i >= 0; i = i - 1) begin
-                temp = result | (1 << i);
-                
-                // Compute temp * temp using repeated addition
-                square_check = 0;
-                temp_count = temp;
-                while (temp_count > 0) begin
-                    square_check = square_check + temp;
-                    temp_count = temp_count - 1;
+                if ((square_check + ((result | (1 << i)) * (result | (1 << i)))) <= sum_squares) begin
+                    result = result | (1 << i);
+                    square_check = square_check + (result * result);
                 end
-                
-                if (square_check <= sum_squares)
-                    result = temp;
             end
 
-            // Assign output in the same cycle
+            // Assign output
             uo_out <= result;
         end
     end
