@@ -67,5 +67,4 @@ module tb ();
     // End simulation
     #50 $finish;
   end
-
 endmodule
