@@ -5,7 +5,7 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = sqrt_pythagoras.v
+PROJECT_SOURCES = project.v
 
 ifneq ($(GATES),yes)
 
@@ -34,11 +34,11 @@ endif
 COMPILE_ARGS += -I$(SRC_DIR)
 
 # Include the testbench sources:
-VERILOG_SOURCES += $(PWD)/tb_sqrt_pythagoras.v
-TOPLEVEL = tb_sqrt_pythagoras
+VERILOG_SOURCES += $(PWD)/tb.v
+TOPLEVEL = tb
 
 # MODULE is the basename of the Python test file
-MODULE = test_sqrt_pythagoras
+MODULE = test
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
