@@ -7,7 +7,7 @@
 
 module tt_um_addon (
     input  wire [7:0] ui_in,    // Dedicated inputs
-    output wire [7:0] uo_out,   // Dedicated outputs
+    output reg [7:0] uo_out,    // Dedicated outputs (changed to reg)
     input  wire [7:0] uio_in,   // IOs: Input path
     output wire [7:0] uio_out,  // IOs: Output path
     output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
@@ -57,7 +57,7 @@ module tt_um_addon (
           result = result + (1 << b);
       end
 
-      // Assign the result to uo_out (output)
+      // Assign the result to uo_out (output) - now assigned to a reg type
       uo_out <= result;
     end
   end
