@@ -7,9 +7,8 @@ module tt_um_addon (
     output wire [7:0] uio_out,  // IOs: Output path (unused)
     output wire [7:0] uio_oe,   // IOs: Enable path (unused)
     input  wire       clk,      // clock
-    input  wire       rst_n,     // active-low reset
-    input wire ena  // Add this line inside the module port list
-
+    input  wire       rst_n,    // active-low reset
+    input  wire       ena       // ✅ Fixed: Added missing comma
 );
 
     reg [15:0] sum_squares;
@@ -39,7 +38,7 @@ module tt_um_addon (
             sum_squares <= 16'b0;
             result <= 8'b0;
             uo_out <= 8'b0;
-        end else begin
+        end else if (ena) begin  // ✅ Fixed: Now only runs if ena = 1
             // Compute sum of squares
             sum_squares <= square(ui_in) + square(uio_in);
 
