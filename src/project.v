@@ -1,11 +1,11 @@
 `default_nettype none
 
 module tt_um_addon (
-    input wire [7:0] x, 
-    input wire [7:0] y, 
+	input wire [7:0] ui_in, 
+	input wire [7:0] uio_in, 
     input wire clk, 
     input wire rst_n, 
-    output reg [7:0] sqrt_out
+	output reg [7:0] uo_out
 );
 
     reg [15:0] sum_squares;
@@ -32,7 +32,7 @@ module tt_um_addon (
         if (!rst_n) begin
             sum_squares <= 16'b0;
             result <= 8'b0;
-            sqrt_out <= 8'b0;
+            uo_out <= 8'b0;
         end else begin
             // Compute sum of squares without using multiplication
             sum_squares = square(x) + square(y);
@@ -48,7 +48,7 @@ module tt_um_addon (
             end
 
             // Assign the result to sqrt_out (output)
-            sqrt_out <= result;
+            uo_out <= result;
         end
     end
 
