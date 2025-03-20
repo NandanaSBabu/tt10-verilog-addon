@@ -1,42 +1,51 @@
-`default_nettype none
 `timescale 1ns / 1ps
+`default_nettype none
 
-/* Testbench to instantiate the user project for cocotb testing */
+module tb ()
+    reg [7:0] ui_in;     // x input
+    reg [7:0] uio_in;    // y input
+    wire [7:0] uo_out;   // sqrt_out output
+    reg clk;
+    reg rst_n;
 
-module tb ();
+    // Instantiate the DUT (Device Under Test)
+    tt_um_addon uut (
+        .ui_in(ui_in),
+        .uio_in(uio_in),
+        .uo_out(uo_out),
+        .uio_out(),
+        .uio_oe(),
+        .clk(clk),
+        .rst_n(rst_n)
+    );
 
-  // Clock and reset signals
-  reg clk;
-  reg rst_n;
-  reg ena;
+    // Clock generation: 10ns period (100MHz)
+    always #10 clk = ~clk;
 
-  // Input and output signals
-  reg [7:0] ui_in;
-  reg [7:0] uio_in;
-  wire [7:0] uo_out;
-  wire [7:0] uio_out;
-  wire [7:0] uio_oe;
+    initial begin
+        // Initialize signals
+        clk = 0;
+        rst_n = 0;
+        ui_in = 0;
+        uio_in = 0;
 
-  // VCD Dump for waveform generation (gtkwave or similar)
-  initial begin
-    $dumpfile("tb.vcd");
-    $dumpvars(0, tb);
-    #1;
-  end
+        // Apply reset
+        #20 rst_n = 1;
 
-  // Clock generation: 100MHz (10ns period)
-  always #5 clk = ~clk;
+        // Apply test cases
+        #20 ui_in = 3; uio_in = 4;  // sqrt(3^2 + 4^2) = 5
+        #30 $display("Time = %t, x = %d, y = %d, sqrt_out = %d", $time, ui_in, uio_in, uo_out);
 
-  // Instantiate the device under test (DUT)
-  tt_um_addon user_project (
-      .ui_in   (ui_in),    // Dedicated inputs
-      .uo_out  (uo_out),   // Dedicated outputs
-      .uio_in  (uio_in),   // IOs: Input path
-      .uio_out (uio_out),  // IOs: Output path
-      .uio_oe  (uio_oe),   // IOs: Enable path
-      .ena     (ena),      // Enable signal
-      .clk     (clk),      // Clock signal
-      .rst_n   (rst_n)     // Active-low reset
-  );
+        #20 ui_in = 7; uio_in = 24; // sqrt(7^2 + 24^2) = 25
+        #30 $display("Time = %t, x = %d, y = %d, sqrt_out = %d", $time, ui_in, uio_in, uo_out);
 
+        #20 ui_in = 10; uio_in = 15; // sqrt(10^2 + 15^2) = 18
+        #30 $display("Time = %t, x = %d, y = %d, sqrt_out = %d", $time, ui_in, uio_in, uo_out);
+
+        #20 ui_in = 8; uio_in = 6;  // sqrt(8^2 + 6^2) = 10
+        #30 $display("Time = %t, x = %d, y = %d, sqrt_out = %d", $time, ui_in, uio_in, uo_out);
+
+        // End simulation
+        #50 $finish;
+    end
 endmodule
