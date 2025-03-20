@@ -1,6 +1,10 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
+/* This testbench just instantiates the module and makes some convenient wires
+   that can be driven / tested by the cocotb test.py.
+*/
+
 module tb ();
 
   // Dump the signals to a VCD file. You can view it with gtkwave or surfer.
@@ -28,9 +32,8 @@ module tb ();
   // Clock generation
   always #5 clk = ~clk; // 100MHz clock (10ns period)
 
-  // Replace tt_um_example with your module name:
+  // Instantiate the module under test (MUT)
   tt_um_addon user_project (
-
       // Include power ports for the Gate Level test:
 `ifdef GL_TEST
       .VPWR(VPWR),
@@ -49,26 +52,19 @@ module tb ();
 
   // Reset and test sequence
   initial begin
+    // Initialize signals
     clk = 0;
     rst_n = 0;
     ena = 1;
     ui_in = 0;
     uio_in = 0;
 
+    // Reset and then apply test cases
     #10 rst_n = 1;  // Release reset
-    #20;  // Extra delay for full reset propagation
-    
-    // Add debug here
-    $display("Test 1: ui_in = %d, uio_in = %d", ui_in, uio_in);
-    
-    // Test with different values
-    #10 ui_in = 8'd3; uio_in = 8'd4; // Test with 3, 4 (expect 5)
-    #20 $display("Test 2: ui_in = %d, uio_in = %d", ui_in, uio_in);
-    #20 ui_in = 8'd6; uio_in = 8'd8; // Test with 6, 8 (expect 10)
-    #20 $display("Test 3: ui_in = %d, uio_in = %d", ui_in, uio_in);
-    #20 ui_in = 8'd5; uio_in = 8'd12; // Test with 5, 12 (expect 13)
-    #20 $display("Test 4: ui_in = %d, uio_in = %d", ui_in, uio_in);
-    
-    // End simulation
-    #30 $finish;
-end
+    #10 ui_in = 8'd3; uio_in = 8'd4; // Test with 3,4 (expect 5)
+    #20 ui_in = 8'd6; uio_in = 8'd8; // Test with 6,8 (expect 10)
+    #20 ui_in = 8'd5; uio_in = 8'd12; // Test with 5,12 (expect 13)
+    #30 $finish;  // End the simulation after the test cases
+  end
+
+endmodule
