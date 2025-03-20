@@ -55,20 +55,20 @@ module tb ();
     ui_in = 0;
     uio_in = 0;
 
-    // Reset sequence
     #10 rst_n = 1;  // Release reset
-    #10 $display("Reset released, starting test sequence.");
+    #20;  // Extra delay for full reset propagation
     
-    // Test with different input values
-    #10 ui_in = 8'd3; uio_in = 8'd4; // Test with 3,4 (expect 5)
-    #20 $display("Testing with ui_in = %d, uio_in = %d", ui_in, uio_in);
-    #20 ui_in = 8'd6; uio_in = 8'd8; // Test with 6,8 (expect 10)
-    #20 $display("Testing with ui_in = %d, uio_in = %d", ui_in, uio_in);
-    #20 ui_in = 8'd5; uio_in = 8'd12; // Test with 5,12 (expect 13)
-    #20 $display("Testing with ui_in = %d, uio_in = %d", ui_in, uio_in);
+    // Add debug here
+    $display("Test 1: ui_in = %d, uio_in = %d", ui_in, uio_in);
+    
+    // Test with different values
+    #10 ui_in = 8'd3; uio_in = 8'd4; // Test with 3, 4 (expect 5)
+    #20 $display("Test 2: ui_in = %d, uio_in = %d", ui_in, uio_in);
+    #20 ui_in = 8'd6; uio_in = 8'd8; // Test with 6, 8 (expect 10)
+    #20 $display("Test 3: ui_in = %d, uio_in = %d", ui_in, uio_in);
+    #20 ui_in = 8'd5; uio_in = 8'd12; // Test with 5, 12 (expect 13)
+    #20 $display("Test 4: ui_in = %d, uio_in = %d", ui_in, uio_in);
     
     // End simulation
     #30 $finish;
-  end
-
-endmodule
+end
