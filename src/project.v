@@ -15,7 +15,7 @@ module tt_um_addon (
     reg [15:0] square_x, square_y;
     reg [7:0] result;
     reg [2:0] state; // State machine for sequential operations
-    reg [7:0] bit;
+    reg [7:0] b;
     reg calc_done;
 
     always @(posedge clk or negedge rst_n) begin
@@ -25,7 +25,7 @@ module tt_um_addon (
             square_y    <= 16'b0;
             result      <= 8'b0;
             uo_out      <= 8'b0;
-            bit         <= 8'b10000000; // Highest bit for approximation
+            b         <= 8'b10000000; // Highest bit for approximation
             state       <= 3'b000;
             calc_done   <= 1'b0;
         end else if (ena) begin
@@ -38,15 +38,15 @@ module tt_um_addon (
                 3'b001: begin
                     sum_squares <= square_x + square_y;
                     result <= 8'b0;
-                    bit <= 8'b10000000; // Start at highest bit
+                    b <= 8'b10000000; // Start at highest bit
                     state <= 3'b010;
                 end
                 3'b010: begin
-                    if (bit > 0) begin
-                        if ((result | bit) * (result | bit) <= sum_squares) begin
-                            result <= result | bit;
+                    if (b > 0) begin
+                        if ((result | b) * (result | b) <= sum_squares) begin
+                            result <= result | b;
                         end
-                        bit <= bit >> 1; // Shift bit right
+                        b <= b >> 1; // Shift bit right
                     end else begin
                         calc_done <= 1'b1;
                         state <= 3'b011;
