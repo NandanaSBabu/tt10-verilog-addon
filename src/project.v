@@ -12,51 +12,36 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [7:0] approx_sqrt;
-    reg [7:0] bitmask;
-    reg [15:0] temp;
+    reg [7:0] sqrt_result;
+    reg [15:0] temp, bit;
+    integer n;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            approx_sqrt <= 8'b0;
+            sqrt_result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute sum of squares
-            sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
-            
-            // Approximate square root using shift-subtract method (no loops)
-            approx_sqrt = 0;
-            bitmask = 8'b10000000;  // Start with the highest bit
-            
-            temp = 0;
-            
-            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
-            bitmask = bitmask >> 1;
-            
-            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
-            bitmask = bitmask >> 1;
-            
-            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
-            bitmask = bitmask >> 1;
-            
-            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
-            bitmask = bitmask >> 1;
-            
-            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
-            bitmask = bitmask >> 1;
-            
-            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
-            bitmask = bitmask >> 1;
-            
-            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
-            bitmask = bitmask >> 1;
-            
-            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
+            // Compute x^2 + y^2 using shift-add method (avoiding multiplication)
+            sum_squares = (ui_in << 2) + ui_in + (uio_in << 2) + uio_in;
 
-            // Assign final output
-            approx_sqrt = temp[7:0];
-            uo_out <= approx_sqrt;
+            // Bitwise square root calculation
+            temp = sum_squares;
+            bit = 1 << 14; // Start at highest bit position
+            sqrt_result = 0;
+
+            for (n = 0; n < 8; n = n + 1) begin
+                if (temp >= (sqrt_result | bit)) begin
+                    temp = temp - (sqrt_result | bit);
+                    sqrt_result = (sqrt_result >> 1) | bit;
+                end else begin
+                    sqrt_result = sqrt_result >> 1;
+                end
+                bit = bit >> 2;
+            end
+
+            // Assign computed square root to output
+            uo_out <= sqrt_result;
         end
     end
 
