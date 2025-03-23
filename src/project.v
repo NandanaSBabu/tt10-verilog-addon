@@ -51,6 +51,10 @@ module tt_um_addon (
                 end
                 3'b011: begin
                     uo_out <= result; // Store the final result
+                    state <= 3'b100;
+                end
+                3'b100: begin
+                    // Hold output and wait for next enable
                     state <= 3'b000;
                 end
             endcase
