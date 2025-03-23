@@ -11,44 +11,38 @@ module tt_um_addon (
     input  wire       ena       // Enable signal
 );
 
-    // Internal registers
-    reg [15:0] sum_squares;
-    reg [15:0] x_square, y_square;
-    reg [7:0] sqrt_result;
-    reg [3:0] step;
-
-    // Multiplication using repeated addition (sequential)
-    reg [7:0] x_reg, y_reg, x_counter, y_counter;
+    // Registers for multiplication
+    reg [15:0] sum_squares, temp, bit;
+    reg [7:0] x_reg, y_reg, sqrt_result;
+    reg [7:0] x_mult, y_mult, x_count, y_count;
     reg [15:0] x_acc, y_acc;
+    reg [3:0] step;
     reg mul_done;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             x_acc <= 16'b0;
             y_acc <= 16'b0;
-            x_counter <= 8'b0;
-            y_counter <= 8'b0;
-            x_reg <= 8'b0;
-            y_reg <= 8'b0;
-            mul_done <= 0;
+            x_mult <= 8'b0;
+            y_mult <= 8'b0;
+            x_count <= 8'b0;
+            y_count <= 8'b0;
+            mul_done <= 1'b0;
         end else if (ena && !mul_done) begin
-            if (x_counter < x_reg) begin
-                x_acc <= x_acc + x_reg;
-                x_counter <= x_counter + 1;
-            end else if (y_counter < y_reg) begin
-                y_acc <= y_acc + y_reg;
-                y_counter <= y_counter + 1;
+            if (x_count < x_mult) begin
+                x_acc <= x_acc + x_mult;
+                x_count <= x_count + 1;
+            end else if (y_count < y_mult) begin
+                y_acc <= y_acc + y_mult;
+                y_count <= y_count + 1;
             end else begin
-                x_square <= x_acc;
-                y_square <= y_acc;
                 sum_squares <= x_acc + y_acc;
-                mul_done <= 1;
+                mul_done <= 1'b1;
             end
         end
     end
 
-    // Square root approximation using bit-wise method
-    reg [15:0] temp, bit;
+    // Square root approximation
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sqrt_result <= 8'b0;
@@ -60,7 +54,7 @@ module tt_um_addon (
             case (step)
                 0: begin
                     temp <= sum_squares;
-                    bit <= 1 << 14; // Start at highest power of 4
+                    bit <= 1 << 14; // Highest power of 4
                     sqrt_result <= 0;
                     step <= 1;
                 end
