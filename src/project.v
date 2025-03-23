@@ -72,7 +72,7 @@ module tt_um_addon (
                             num     <= num - (result + b);
                             result  <= result + b;
                         end
-                        result <= result >> 1; // shift result.
+                        result <= result >> 1;
                         b <= b >> 2;
                     end else begin
                         state <= 3'd5;
