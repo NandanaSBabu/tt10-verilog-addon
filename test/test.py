@@ -1,6 +1,6 @@
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge
+from cocotb.triggers import RisingEdge, Timer
 
 @cocotb.test()
 async def test_project(dut):
@@ -15,10 +15,12 @@ async def test_project(dut):
     dut.uio_in.value = 4
     dut.ena.value = 1
 
-    for _ in range(50):
+    for _ in range(100): #increase clock cycle count
         await RisingEdge(dut.clk)
 
     dut.ena.value = 0
+
+    await Timer(100, units = "ns") #add timer to allow final output to be calculated.
 
     print(f"uo_out: {dut.uo_out.value}")
     print(f"num: {dut.debug_num.value}")
