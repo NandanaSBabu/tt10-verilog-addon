@@ -11,39 +11,31 @@ module tt_um_addon (
     input  wire       ena       // Enable signal
 );
 
-    reg [15:0] x, y;
     reg [15:0] sum_squares;
-    reg [7:0] result;
-    reg [15:0] r, d;
-    integer n;
-
+    reg [7:0] sqrt_result;
+    reg [7:0] r, odd;
+    
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            x <= 16'b0;
-            y <= 16'b0;
             sum_squares <= 16'b0;
-            result <= 8'b0;
+            sqrt_result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Approximate squaring (avoiding multiplication)
-            x = {ui_in, 8'b0}; // Shift left for fixed point
-            y = {uio_in, 8'b0};
+            // Squaring using shifts & adds
+            sum_squares = (ui_in << 3) + (ui_in << 1) + (uio_in << 3) + (uio_in << 1); 
 
-            // Sum of squares approximation
-            sum_squares = (x >> 1) + (y >> 1); 
-
-            // CORDIC-style square root approximation
+            // Square root using sum of odd numbers
             r = 0;
-            d = sum_squares;
-            for (n = 7; n >= 0; n = n - 1) begin
-                if ((r + (1 << n)) * (r + (1 << n)) <= d) begin
-                    r = r + (1 << n);
-                end
-            end
-            result = r[7:0];
+            odd = 1;
+            sqrt_result = 0;
 
-            // Assign output
-            uo_out <= result;
+            while (r + odd <= sum_squares) begin
+                r = r + odd;
+                odd = odd + 2;
+                sqrt_result = sqrt_result + 1;
+            end
+            
+            uo_out <= sqrt_result;
         end
     end
 
