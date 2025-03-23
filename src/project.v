@@ -13,10 +13,10 @@ module tt_um_addon (
 
     reg [15:0] sum_squares;
     reg [15:0] square_x, square_y;
-    reg [7:0] result;
     reg [15:0] temp;
+    reg [7:0] result;
     integer shift;
-    
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
@@ -38,18 +38,20 @@ module tt_um_addon (
             // Compute sum of squares
             sum_squares = square_x + square_y;
 
-            // Compute square root using bitwise subtraction method
+            // Square Root using Shift-and-Subtract
             result = 0;
-            temp = sum_squares;
-            
-            for (shift = 7; shift >= 0; shift = shift - 1) begin
-                if (temp >= ((result << 1) | (1 << shift))) begin
-                    temp = temp - ((result << 1) | (1 << shift));
-                    result = result | (1 << shift);
+            temp = 0;
+            for (shift = 15; shift >= 0; shift = shift - 2) begin
+                temp = (temp << 2) | (sum_squares >> shift) & 2'b11;
+                if ((result << 1 | 1) <= temp) begin
+                    temp = temp - (result << 1 | 1);
+                    result = (result << 1) | 1;
+                end else begin
+                    result = result << 1;
                 end
             end
 
-            // Assign output in the same cycle
+            // Assign output
             uo_out <= result;
         end
     end
