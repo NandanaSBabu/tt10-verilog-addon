@@ -41,8 +41,8 @@ module tb ();
       .rst_n  (rst_n)     // not reset
   );
 
-  // Clock generation
-  always #5 clk = ~clk;
+  // Clock generation (50MHz)
+  always #10 clk = ~clk;  // 20ns period, 10ns per phase
 
   initial begin
     clk = 0;
@@ -51,15 +51,34 @@ module tb ();
     ui_in = 0;
     uio_in = 0;
     
-    #10 rst_n = 1;  // Release reset
+    #50 rst_n = 1;  // Release reset after 50ns
+
+    // Wait a few clock cycles
+    #50;
 
     // Test case 1: ui_in = 20, uio_in = 99
-    #10 ui_in = 20; uio_in = 99;
-    #10 $display("Input: %d, %d | Output: %d", ui_in, uio_in, uo_out);
+    ui_in = 20; 
+    uio_in = 99;
+    #50;
+    $display("Test 1 - Input: %d, %d | Output: %d", ui_in, uio_in, uo_out);
 
     // Test case 2: ui_in = 50, uio_in = 50
-    #10 ui_in = 50; uio_in = 50;
-    #10 $display("Input: %d, %d | Output: %d", ui_in, uio_in, uo_out);
+    ui_in = 50; 
+    uio_in = 50;
+    #50;
+    $display("Test 2 - Input: %d, %d | Output: %d", ui_in, uio_in, uo_out);
+
+    // Test case 3: ui_in = 6, uio_in = 8
+    ui_in = 6;
+    uio_in = 8;
+    #50;
+    $display("Test 3 - Input: %d, %d | Output: %d", ui_in, uio_in, uo_out);
+
+    // Test case 4: ui_in = 15, uio_in = 112
+    ui_in = 15;
+    uio_in = 112;
+    #50;
+    $display("Test 4 - Input: %d, %d | Output: %d", ui_in, uio_in, uo_out);
 
     // End simulation
     #100 $finish;
