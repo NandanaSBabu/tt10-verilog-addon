@@ -12,24 +12,24 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
+    reg [15:0] x_square;
+    reg [15:0] y_square;
     reg [7:0] result;
-    integer shift;
+    integer b;
 
-    // Function to compute square using repeated addition (avoiding multiplication)
-    function [15:0] square;
-        input [7:0] a;
-        reg [15:0] s;
-        reg [7:0] count;
-        begin
-            s = 0;
-            count = a;
-            while (count > 0) begin
-                s = s + a;  // Repeated addition
-                count = count - 1;
-            end
-            square = s;
+    always @(*) begin
+        // Compute squares using repeated addition (avoiding multiplication)
+        x_square = 0;
+        y_square = 0;
+
+        for (b = 0; b < ui_in; b = b + 1) begin
+            x_square = x_square + ui_in;
         end
-    endfunction
+
+        for (b = 0; b < uio_in; b = b + 1) begin
+            y_square = y_square + uio_in;
+        end
+    end
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -38,14 +38,13 @@ module tt_um_addon (
             uo_out <= 8'b0;
         end else if (ena) begin
             // Compute sum of squares
-            sum_squares = square(ui_in) + square(uio_in);
+            sum_squares <= x_square + y_square;
 
-            // Compute square root using bitwise approximation
+            // Compute square root using bitwise method (avoiding multiplication)
             result = 0;
-            for (shift = 7; shift >= 0; shift = shift - 1) begin
-                if ((result + (1 << shift)) * (result + (1 << shift)) <= sum_squares) begin
-                    result = result + (1 << shift);
-                end
+            for (b = 7; b >= 0; b = b - 1) begin
+                if ((result + (1 << b)) <= sum_squares / (result + (1 << b)))
+                    result = result + (1 << b);
             end
 
             // Assign output in the same cycle
