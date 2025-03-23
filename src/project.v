@@ -21,8 +21,8 @@ module tt_um_addon (
     // State encoding:
     // 0: Compute squares
     // 1: Compute sum (x^2+y^2)
-    // 2: Initialize sqrt: set num, result=0, and bit = highest candidate (start at 1<<14)
-    // 3: Reduce bit until bit <= num (if bit > num, shift right by 2)
+    // 2: Initialize sqrt: set num, result=0, and b = highest candidate (start at 1<<14)
+    // 3: Reduce b until b <= num (if b > num, shift right by 2)
     // 4: Iterative sqrt calculation: subtract and update
     // 5: Output result and return to state 0
 
@@ -35,7 +35,7 @@ module tt_um_addon (
             result      <= 16'd0;
             uo_out      <= 8'd0;
             state       <= 3'd0;
-            b         <= 16'd0;
+            b           <= 16'd0;
         end else if (ena) begin
             case (state)
                 3'd0: begin
@@ -50,7 +50,7 @@ module tt_um_addon (
                 3'd2: begin
                     num     <= sum_squares;
                     result  <= 16'd0;
-                    b     <= 16'd16384; // 1 << 14
+                    b       <= 16'd16384; // 1 << 14
                     state   <= 3'd3;
                 end
                 3'd3: begin
