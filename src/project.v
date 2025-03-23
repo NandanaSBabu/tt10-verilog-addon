@@ -15,36 +15,35 @@ module tt_um_addon (
     reg [15:0] square_x, square_y, sum_squares;
     reg [7:0] result;
     reg valid_input;
-    reg [3:0] state;  
-
-    // Function to compute the square using a loop workaround
-    function automatic [15:0] square;
-        input [7:0] num;
+    reg [3:0] state;
+    
+    // Function to compute square using repeated addition
+    function [15:0] square(input [7:0] num);
         reg [15:0] sum;
         reg [7:0] i;
         begin
             sum = 0;
-            for (i = 0; i < 255; i = i + 1) begin
-                if (i < num) sum = sum + num;
+            for (i = 0; i < num; i = i + 1) begin
+                sum = sum + num;
             end
             square = sum;
         end
     endfunction
 
-    // Integer square root function
-    function automatic [7:0] sqrt;
-        input [15:0] num;
+    // Integer square root using bitwise method
+    function [7:0] sqrt(input [15:0] num);
         reg [15:0] rem;
         reg [7:0] res;
         reg [7:0] bit;
         begin
             rem = num;
             res = 0;
-            bit = 1 << 7;
+            bit = 1 << 14;  // Start from the highest power of 4 in a 16-bit number
+
             while (bit > 0) begin
                 if (rem >= (res | bit)) begin
                     rem = rem - (res | bit);
-                    res = res >> 1 | bit;
+                    res = (res >> 1) | bit;
                 end else begin
                     res = res >> 1;
                 end
@@ -97,13 +96,5 @@ module tt_um_addon (
     assign uo_out = valid_input ? result : 8'b0;  
     assign uio_out = 8'b00000000;  
     assign uio_oe  = 8'b00000000;  
-
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            $display("RESET: square_x=%d, square_y=%d, sum_squares=%d, result=%d", square_x, square_y, sum_squares, result);
-        end else if (valid_input) begin
-            $display("COMPUTE: square_x=%d, square_y=%d, sum_squares=%d, result=%d", square_x, square_y, sum_squares, result);
-        end
-    end
 
 endmodule
