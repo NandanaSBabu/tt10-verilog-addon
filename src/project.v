@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2024 Your Name
- * SPDX-License-Identifier: Apache-2.0
- */
-
 `default_nettype none
 
 module tt_um_addon (
@@ -11,17 +6,17 @@ module tt_um_addon (
     output reg  [7:0] uo_out,   // sqrt_out output
     output wire [7:0] uio_out,  // Unused IO output path
     output wire [7:0] uio_oe,   // Unused IO enable path (0 = input)
-    input  wire       ena,      // Enable signal (when high, compute)
-    input  wire       clk,      // Clock
-    input  wire       rst_n     // Active-low reset
+    input  wire        ena,      // Enable signal (when high, compute)
+    input  wire        clk,      // Clock
+    input  wire        rst_n     // Active-low reset
 );
 
     // Internal registers
     reg [15:0] square_x, square_y, sum_squares;
-    reg [15:0] num;     // Working copy of sum_squares for sqrt calculation
-    reg [15:0] result;  // Intermediate sqrt result (16 bits)
-    reg [15:0] b;     // Current bit value for testing
-    reg [2:0]  state;   // State machine (0 to 5)
+    reg [15:0] num;      // Working copy of sum_squares for sqrt calculation
+    reg [15:0] result;   // Intermediate sqrt result (16 bits)
+    reg [15:0] b;        // Current bit value for testing
+    reg [2:0]  state;    // State machine (0 to 5)
 
     // State encoding:
     // 0: Compute squares
@@ -38,15 +33,15 @@ module tt_um_addon (
             sum_squares <= 16'd0;
             num         <= 16'd0;
             result      <= 16'd0;
-            b         <= 16'd0;
+            b           <= 16'd0;
             uo_out      <= 8'd0;
             state       <= 3'd0;
         end else if (ena) begin
             case (state)
                 3'd0: begin
                     // Compute squares using multiplication
-                    square_x    <= ui_in * ui_in;   // e.g., 3*3 = 9
-                    square_y    <= uio_in * uio_in;  // e.g., 4*4 = 16
+                    square_x    <= ui_in * ui_in;  // e.g., 3*3 = 9
+                    square_y    <= uio_in * uio_in; // e.g., 4*4 = 16
                     state       <= 3'd1;
                 end
                 3'd1: begin
@@ -57,16 +52,15 @@ module tt_um_addon (
                 3'd2: begin
                     // Initialize the sqrt algorithm:
                     // Make a copy of the operand and set result = 0.
-                    num    <= sum_squares;
-                    result <= 16'd0;
+                    num     <= sum_squares;
+                    result  <= 16'd0;
                     // Initialize bit to highest power of 4 by starting at 1<<14
-                    b    <= 16'd16384; // 1<<14
-                    state  <= 3'd3;
+                    b       <= 16'd16384; // 1<<14
+                    state   <= 3'd3;
                 end
                 3'd3: begin
                     // Ensure 'bit' is not greater than the number
                     if (b > num)
-                        
                         b <= b >> 2;
                     else
                         state <= 3'd4;
@@ -75,12 +69,12 @@ module tt_um_addon (
                     // Iterative square root calculation:
                     if (b != 0) begin
                         if (num >= result + b) begin
-                            num    <= num - (result + b);
-                            result <= (result >> 1) + b;
+                            num     <= num - (result + b);
+                            result  <= (result >> 1) + b;
                         end else begin
                             result <= result >> 1;
                         end
-                        b<= b >> 2;
+                        b <= b >> 2;
                     end else begin
                         state <= 3'd5;
                     end
