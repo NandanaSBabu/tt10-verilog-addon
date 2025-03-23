@@ -15,15 +15,16 @@ module tt_um_addon (
     reg [15:0] square_x, square_y;
     reg [7:0] result;
     reg [15:0] temp, temp_square;
-    integer i;
+    integer i, j;
 
     // Function to compute square without multiplication
     function [15:0] square(input [7:0] num);
-        integer j;
+        reg [15:0] acc;
         begin
-            square = 0;
-            for (j = 0; j < 8; j = j + 1)
-                if (num[j]) square = square + (num << j);
+            acc = 0;
+            for (j = 0; j < num; j = j + 1)
+                acc = acc + num;  // Square using repeated addition
+            square = acc;
         end
     endfunction
 
@@ -34,20 +35,24 @@ module tt_um_addon (
             sum_squares <= 0;
             result <= 0;
         end else begin
-            square_x = square(ui_in);   // Compute square without *
-            square_y = square(uio_in);  // Compute square without *
+            square_x = square(ui_in);   // Compute square
+            square_y = square(uio_in);  // Compute square
 
             sum_squares = square_x + square_y;
 
-            // Compute square root using an improved bitwise method
+            // Compute square root using repeated addition
             result = 0;
             temp = 0;
             for (i = 7; i >= 0; i = i - 1) begin
                 temp = result | (1 << i);  // Try setting the next bit
-                temp_square = square(temp); // Compute square without *
+
+                // Compute square of temp without *
+                temp_square = 0;
+                for (j = 0; j < temp; j = j + 1)
+                    temp_square = temp_square + temp;
 
                 if (temp_square <= sum_squares)
-                    result = temp;  // Confirm the bit is correct
+                    result = temp;
             end
         end
     end
