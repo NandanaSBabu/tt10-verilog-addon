@@ -1,59 +1,70 @@
+/*
+ * Copyright (c) 2024 Your Name
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 `default_nettype none
 
 module tt_um_addon (
-    input  wire [7:0] ui_in,    // x input
-    input  wire [7:0] uio_in,   // y input
-    output reg  [7:0] uo_out,   // sqrt_out output
-    output wire [7:0] uio_out,  // IOs: Output path (unused)
-    output wire [7:0] uio_oe,   // IOs: Enable path (unused)
+    input  wire [7:0] ui_in,    // Dedicated inputs
+    output wire [7:0] uo_out,   // Dedicated outputs
+    input  wire [7:0] uio_in,   // IOs: Input path
+    output wire [7:0] uio_out,  // IOs: Output path
+    output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
+    input  wire       ena,      // always 1 when the design is powered, so you can ignore it
     input  wire       clk,      // clock
-    input  wire       rst_n,    // active-low reset
-    input  wire       ena       // Enable signal
+    input  wire       rst_n     // reset_n - low to reset
 );
 
     reg [15:0] sum_squares;
+    reg [15:0] square_x, square_y;
     reg [7:0] result;
-    integer b;
-
-    // Function to compute square using repeated addition
-    function [15:0] square;
-        input [7:0] a;
-        reg [15:0] s;
-        reg [7:0] count;
-        begin
-            s = 0;
-            count = a;
-            while (count > 0) begin
-                s = s + a;  // Repeated addition (avoiding multiplication)
-                count = count - 1;
-            end
-            square = s;
-        end
-    endfunction
+    reg [15:0] temp, temp_square;
+    integer i, j;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            sum_squares <= 16'b0;
-            result <= 8'b0;
-            uo_out <= 8'b0;
-        end else if (ena) begin
-            // Compute sum of squares
-            sum_squares = square(ui_in) + square(uio_in);
-
-            // Compute square root using bitwise method (avoiding multiplication)
-            result = 0;
-            for (b = 7; b >= 0; b = b - 1) begin
-                if ((result + (1 << b)) <= sum_squares / (result + (1 << b)))
-                    result = result + (1 << b);
+            square_x <= 0;
+            square_y <= 0;
+            sum_squares <= 0;
+            result <= 0;
+        end else begin
+            // Compute ui_in^2 using repeated addition
+            square_x = 0;
+            for (j = 0; j < 8; j = j + 1) begin
+                if (ui_in[j]) square_x = square_x + (ui_in << j);
             end
 
-            // Assign output in the same cycle
-            uo_out <= result;
+            // Compute uio_in^2 using repeated addition
+            square_y = 0;
+            for (j = 0; j < 8; j = j + 1) begin
+                if (uio_in[j]) square_y = square_y + (uio_in << j);
+            end
+
+            sum_squares = square_x + square_y;
+
+            // Compute square root using bitwise method (no multiplication)
+            result = 0;
+            for (i = 7; i >= 0; i = i - 1) begin
+                temp = result + (1 << i);
+
+                // Compute temp^2 using repeated addition
+                temp_square = 0;
+                for (j = 0; j < 8; j = j + 1) begin
+                    if (temp[j]) temp_square = temp_square + (temp << j);
+                end
+
+                if (temp_square <= sum_squares)
+                    result = temp;
+            end
         end
     end
 
-    // Assign unused outputs to 0 to avoid warnings
-    assign uio_out = 8'b0;
-    assign uio_oe  = 8'b0;
+    assign uo_out = result;
+    assign uio_out = 0;
+    assign uio_oe  = 0;
+
+    // List all unused inputs to prevent warnings
+    wire _unused = &{ena, 1'b0};
 
 endmodule
