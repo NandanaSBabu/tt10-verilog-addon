@@ -15,11 +15,6 @@ module tt_um_addon (
     reg [15:0] square_x, square_y;
     reg [15:0] result; // Changed to 16 bits to avoid width issues
 
-    // Debug signals
-    wire [15:0] debug_square_x;
-    wire [15:0] debug_square_y;
-    wire [15:0] debug_sum_squares;
-
     // Squaring function using multiplication
     function [15:0] square;
         input [7:0] value;
@@ -28,6 +23,7 @@ module tt_um_addon (
         end
     endfunction
 
+    // Always block with non-blocking assignments
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
@@ -43,26 +39,37 @@ module tt_um_addon (
             // Compute sum of squares
             sum_squares <= square_x + square_y;
 
-            // Debug output
-            $display("square_x: %h, square_y: %h, sum_squares: %h", square_x, square_y, sum_squares);
+            // Simple square root approximation (no unrolling)
+            result <= 0; // Reset the result before approximation
+            if ((result + (1 << 7)) * (result + (1 << 7)) <= sum_squares) begin
+                result <= result + (1 << 7);
+            end
+            if ((result + (1 << 6)) * (result + (1 << 6)) <= sum_squares) begin
+                result <= result + (1 << 6);
+            end
+            if ((result + (1 << 5)) * (result + (1 << 5)) <= sum_squares) begin
+                result <= result + (1 << 5);
+            end
+            if ((result + (1 << 4)) * (result + (1 << 4)) <= sum_squares) begin
+                result <= result + (1 << 4);
+            end
+            if ((result + (1 << 3)) * (result + (1 << 3)) <= sum_squares) begin
+                result <= result + (1 << 3);
+            end
+            if ((result + (1 << 2)) * (result + (1 << 2)) <= sum_squares) begin
+                result <= result + (1 << 2);
+            end
+            if ((result + (1 << 1)) * (result + (1 << 1)) <= sum_squares) begin
+                result <= result + (1 << 1);
+            end
+            if ((result + (1 << 0)) * (result + (1 << 0)) <= sum_squares) begin
+                result <= result + (1 << 0);
+            end
 
-            // Compute square root using bitwise approximation (manual unrolling)
-            result <= 16'b0; // Reset the result before approximation
-            if ((result + (1 << 15)) * (result + (1 << 15)) <= sum_squares) begin
-                result <= result + (1 << 15);
-            end
-            if ((result + (1 << 14)) * (result + (1 << 14)) <= sum_squares) begin
-                result <= result + (1 << 14);
-            end
-            // Continue for the other bits...
+            // Assign the output (only 8 bits of the result)
             uo_out <= result[7:0];
         end
     end
-
-    // Assign debug outputs
-    assign debug_square_x = square_x;
-    assign debug_square_y = square_y;
-    assign debug_sum_squares = sum_squares;
 
     // Assign unused outputs to avoid warnings
     assign uio_out = 8'b0;
