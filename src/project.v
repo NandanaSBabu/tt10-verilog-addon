@@ -13,47 +13,68 @@ module tt_um_addon (
 
     reg [15:0] sum_squares;
     reg [15:0] square_x, square_y;
-    reg [7:0] result; // Should be 8-bit since sqrt(255^2) < 256
+    reg [15:0] result;
+
+    // Squaring function using multiplication
+    function [15:0] square;
+        input [7:0] value;
+        begin
+            square = value * value;  // Direct multiplication
+        end
+    endfunction
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            square_x <= 16'b0;
-            square_y <= 16'b0;
-            result <= 8'b0;
-            uo_out <= 8'b0;
+            square_x    <= 16'b0;
+            square_y    <= 16'b0;
+            result      <= 16'b0;
+            uo_out      <= 8'b0;
         end else if (ena) begin
-            // Compute squares
-            square_x <= ui_in * ui_in;
-            square_y <= uio_in * uio_in;
+            // Compute square of x (ui_in) and y (uio_in)
+            square_x    <= square(ui_in);
+            square_y    <= square(uio_in);
 
             // Compute sum of squares
             sum_squares <= square_x + square_y;
 
-            // Reset result for each calculation
-            result <= 8'b0;
+            // Compute square root using bitwise approximation
+            result <= 16'b0; // Reset the result
+            if ((result + (1 << 15)) * (result + (1 << 15)) <= sum_squares) 
+                result <= result + (1 << 15);
+            if ((result + (1 << 14)) * (result + (1 << 14)) <= sum_squares) 
+                result <= result + (1 << 14);
+            if ((result + (1 << 13)) * (result + (1 << 13)) <= sum_squares) 
+                result <= result + (1 << 13);
+            if ((result + (1 << 12)) * (result + (1 << 12)) <= sum_squares) 
+                result <= result + (1 << 12);
+            if ((result + (1 << 11)) * (result + (1 << 11)) <= sum_squares) 
+                result <= result + (1 << 11);
+            if ((result + (1 << 10)) * (result + (1 << 10)) <= sum_squares) 
+                result <= result + (1 << 10);
+            if ((result + (1 << 9)) * (result + (1 << 9)) <= sum_squares) 
+                result <= result + (1 << 9);
+            if ((result + (1 << 8)) * (result + (1 << 8)) <= sum_squares) 
+                result <= result + (1 << 8);
+            if ((result + (1 << 7)) * (result + (1 << 7)) <= sum_squares) 
+                result <= result + (1 << 7);
+            if ((result + (1 << 6)) * (result + (1 << 6)) <= sum_squares) 
+                result <= result + (1 << 6);
+            if ((result + (1 << 5)) * (result + (1 << 5)) <= sum_squares) 
+                result <= result + (1 << 5);
+            if ((result + (1 << 4)) * (result + (1 << 4)) <= sum_squares) 
+                result <= result + (1 << 4);
+            if ((result + (1 << 3)) * (result + (1 << 3)) <= sum_squares) 
+                result <= result + (1 << 3);
+            if ((result + (1 << 2)) * (result + (1 << 2)) <= sum_squares) 
+                result <= result + (1 << 2);
+            if ((result + (1 << 1)) * (result + (1 << 1)) <= sum_squares) 
+                result <= result + (1 << 1);
+            if ((result + (1 << 0)) * (result + (1 << 0)) <= sum_squares) 
+                result <= result + (1 << 0);
 
-            // Approximate square root using shift method
-            if (sum_squares >= 255*255) result <= 255;
-            else if (sum_squares >= 225*225) result <= 225;
-            else if (sum_squares >= 196*196) result <= 196;
-            else if (sum_squares >= 169*169) result <= 169;
-            else if (sum_squares >= 144*144) result <= 144;
-            else if (sum_squares >= 121*121) result <= 121;
-            else if (sum_squares >= 100*100) result <= 100;
-            else if (sum_squares >= 81*81) result <= 81;
-            else if (sum_squares >= 64*64) result <= 64;
-            else if (sum_squares >= 49*49) result <= 49;
-            else if (sum_squares >= 36*36) result <= 36;
-            else if (sum_squares >= 25*25) result <= 25;
-            else if (sum_squares >= 16*16) result <= 16;
-            else if (sum_squares >= 9*9) result <= 9;
-            else if (sum_squares >= 4*4) result <= 4;
-            else if (sum_squares >= 1*1) result <= 1;
-            else result <= 0;
-
-            // Assign output
-            uo_out <= result;
+            // Assign the output (only 8 bits of the result)
+            uo_out <= result[7:0];
         end
     end
 
