@@ -13,24 +13,24 @@ module tt_um_addon (
 
     reg [15:0] sum_squares;
     reg [7:0] sqrt_result;
-    reg [15:0] temp, bit;
-    integer n;
+    reg [15:0] temp;
+    reg [7:0] bit;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            sum_squares <= 16'b0;
-            sqrt_result <= 8'b0;
-            uo_out <= 8'b0;
+            sum_squares <= 0;
+            sqrt_result <= 0;
+            uo_out <= 0;
         end else if (ena) begin
-            // Compute x^2 + y^2 using shift-add method (avoiding multiplication)
-            sum_squares = (ui_in << 2) + ui_in + (uio_in << 2) + uio_in;
+            // Compute x² + y² directly using multiplication
+            sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
 
-            // Bitwise square root calculation
+            // Approximate Square Root using a hardware-friendly method
             temp = sum_squares;
-            bit = 1 << 14; // Start at highest bit position
             sqrt_result = 0;
+            bit = 1 << 6; // Start at highest power of 4
 
-            for (n = 0; n < 8; n = n + 1) begin
+            repeat (7) begin
                 if (temp >= (sqrt_result | bit)) begin
                     temp = temp - (sqrt_result | bit);
                     sqrt_result = (sqrt_result >> 1) | bit;
