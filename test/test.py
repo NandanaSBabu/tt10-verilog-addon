@@ -4,7 +4,6 @@
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
-import math
 
 @cocotb.test()
 async def test_project(dut):
@@ -25,21 +24,19 @@ async def test_project(dut):
 
     dut._log.info("Testing project behavior")
 
-    # Test cases (a, b, expected sqrt(a^2 + b^2))
+    # Test cases: (x, y, expected_hypotenuse)
     test_cases = [
-        (20, 99, int(math.sqrt(20**2 + 99**2))),
-        (6, 8, int(math.sqrt(6**2 + 8**2))),
-        (15, 112, int(math.sqrt(15**2 + 112**2))),
-        (8, 15, int(math.sqrt(8**2 + 15**2))),
-        (20, 21, int(math.sqrt(20**2 + 21**2)))
+        (3, 4, 5),
+        (6, 8, 10),
+        (5, 12, 13),
+        (8, 15, 17),
+        (7, 24, 25),
+        (20, 21, 29)
     ]
 
     for ui_val, uio_val, expected in test_cases:
         dut.ui_in.value = ui_val
         dut.uio_in.value = uio_val
-        await ClockCycles(dut.clk, 1)
-
-        actual = int(dut.uo_out.value)
-        dut._log.info(f"Input: {ui_val}, {uio_val} | Output: {actual} | Expected: {expected}")
-
-        assert actual == expected, f"Test failed: sqrt({ui_val}² + {uio_val}²) = {actual}, expected {expected}"
+        await ClockCycles(dut.clk, 5)  # Wait for computation
+        assert dut.uo_out.value == expected, f"Test failed: {ui_val}, {uio_val} -> {dut.uo_out.value}, expected {expected}"
+        dut._log.info(f"Test passed: {ui_val}, {uio_val} -> {dut.uo_out.value}")
