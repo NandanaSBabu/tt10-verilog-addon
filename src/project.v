@@ -12,46 +12,42 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [15:0] square_x, square_y;
-    reg [15:0] temp;
     reg [7:0] result;
-    integer shift;
+    integer b;
+
+    // Function to compute square using repeated addition
+    function [15:0] square;
+        input [7:0] a;
+        reg [15:0] s;
+        reg [7:0] count;
+        begin
+            s = 0;
+            count = a;
+            while (count > 0) begin
+                s = s + a;  // Repeated addition (avoiding multiplication)
+                count = count - 1;
+            end
+            square = s;
+        end
+    endfunction
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            square_x <= 16'b0;
-            square_y <= 16'b0;
             result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute squares using repeated addition
-            square_x = 0;
-            square_y = 0;
-
-            for (shift = 0; shift < ui_in; shift = shift + 1)
-                square_x = square_x + ui_in;
-            
-            for (shift = 0; shift < uio_in; shift = shift + 1)
-                square_y = square_y + uio_in;
-
             // Compute sum of squares
-            sum_squares = square_x + square_y;
+            sum_squares = square(ui_in) + square(uio_in);
 
-            // Square Root using Shift-and-Subtract
+            // Compute square root using bitwise method (avoiding multiplication)
             result = 0;
-            temp = 0;
-            for (shift = 15; shift >= 0; shift = shift - 2) begin
-                temp = (temp << 2) | (sum_squares >> shift) & 2'b11;
-                if ((result << 1 | 1) <= temp) begin
-                    temp = temp - (result << 1 | 1);
-                    result = (result << 1) | 1;
-                end else begin
-                    result = result << 1;
-                end
+            for (b = 7; b >= 0; b = b - 1) begin
+                if ((result + (1 << b)) <= sum_squares / (result + (1 << b)))
+                    result = result + (1 << b);
             end
 
-            // Assign output
+            // Assign output in the same cycle
             uo_out <= result;
         end
     end
