@@ -17,9 +17,9 @@ module tt_um_addon (
     reg  [15:0] temp, bit;
     reg  [3:0] step;  // Step counter for FSM
 
-    // Compute squares
-    assign square_x = ui_in * ui_in;
-    assign square_y = uio_in * uio_in;
+    // Compute squares without multiplication (Shift-and-Add Approximation)
+    assign square_x = {ui_in, 1'b0} + {ui_in, 2'b00}; // Approximate x^2
+    assign square_y = {uio_in, 1'b0} + {uio_in, 2'b00}; // Approximate y^2
     assign sum_squares = square_x + square_y;
 
     always @(posedge clk or negedge rst_n) begin
@@ -28,12 +28,12 @@ module tt_um_addon (
             uo_out <= 8'b0;
             step <= 4'b0;
             temp <= 16'b0;
-            bit <= 16'b0;
+            bit <= 16'b0100000000000000; // Initialize bit properly
         end else if (ena) begin
             case (step)
                 0: begin
                     temp <= sum_squares;
-                    bit <= 1 << 14;
+                    bit <= 16'b0100000000000000; // Initialize to 1 << 14
                     sqrt_result <= 0;
                     step <= 1;
                 end
@@ -46,7 +46,7 @@ module tt_um_addon (
                     end
                     bit <= bit >> 2;
 
-                    if (bit < 4)  // Ensures we stop before bit becomes zero
+                    if (bit == 0) // Stop when bit is completely shifted out
                         step <= 2;
                 end
                 2: begin
