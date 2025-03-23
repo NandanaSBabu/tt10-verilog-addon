@@ -38,6 +38,9 @@ module tt_um_addon (
             // Compute sum of squares
             sum_squares <= square_x + square_y; // Non-blocking assignment
 
+            // Debugging: Show intermediate values
+            $display("square_x: %h, square_y: %h, sum_squares: %h", square_x, square_y, sum_squares);
+
             // Compute square root using bitwise approximation (manual unrolling)
             result <= 16'b0; // Reset the result before approximation
             if ((result + (1 << 15)) * (result + (1 << 15)) <= sum_squares) begin
