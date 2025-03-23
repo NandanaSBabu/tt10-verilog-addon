@@ -16,6 +16,7 @@ module tt_um_addon (
     reg [7:0] result;
     reg [2:0] state; // State machine for sequential operations
     reg [7:0] bit;
+    reg calc_done;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -26,6 +27,7 @@ module tt_um_addon (
             uo_out      <= 8'b0;
             bit         <= 8'b10000000; // Highest bit for approximation
             state       <= 3'b000;
+            calc_done   <= 1'b0;
         end else if (ena) begin
             case (state)
                 3'b000: begin
@@ -46,12 +48,15 @@ module tt_um_addon (
                         end
                         bit <= bit >> 1; // Shift bit right
                     end else begin
+                        calc_done <= 1'b1;
                         state <= 3'b011;
                     end
                 end
                 3'b011: begin
-                    uo_out <= result; // Store the final result
-                    state <= 3'b100;
+                    if (calc_done) begin
+                        uo_out <= result; // Store the final result
+                        state <= 3'b100;
+                    end
                 end
                 3'b100: begin
                     // Hold output and wait for next enable
