@@ -39,15 +39,15 @@ module tt_um_addon (
 
             sum_squares = square_x + square_y;
 
-            // Compute square root using bitwise method
+            // Compute square root using an improved bitwise method
             result = 0;
             temp = 0;
             for (i = 7; i >= 0; i = i - 1) begin
-                temp = result + (1 << i);
+                temp = result | (1 << i);  // Try setting the next bit
                 temp_square = square(temp); // Compute square without *
 
                 if (temp_square <= sum_squares)
-                    result = temp;
+                    result = temp;  // Confirm the bit is correct
             end
         end
     end
