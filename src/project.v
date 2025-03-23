@@ -1,32 +1,56 @@
 `default_nettype none
 
 module tt_um_addon (
-    input  wire [7:0] ui_in,    // x input
-    output wire [7:0] uo_out,   // output result
-    input  wire [7:0] uio_in,   // y input
-    output wire [7:0] uio_out,  // unused output
-    output wire [7:0] uio_oe,   // unused enable
-    input  wire       ena,      // always 1
-    input  wire       clk,      // clock
-    input  wire       rst_n     // active low reset
+    input  wire [7:0] ui_in,    
+    output wire [7:0] uo_out,   
+    input  wire [7:0] uio_in,   
+    output wire [7:0] uio_out,  
+    output wire [7:0] uio_oe,   
+    input  wire       ena,      
+    input  wire       clk,      
+    input  wire       rst_n     
 );
 
     reg [7:0] x_reg, y_reg;
     reg [15:0] square_x, square_y, sum_squares;
     reg [7:0] result;
     reg valid_input;
+    reg [3:0] state;  
 
-    integer i, j;
-    reg [15:0] temp, temp_square;
-
-    // Function to compute square without multiplication
-    function [15:0] square(input [7:0] num);
-        reg [15:0] acc;
+    // Function to compute the square using a loop workaround
+    function automatic [15:0] square;
+        input [7:0] num;
+        reg [15:0] sum;
+        reg [7:0] i;
         begin
-            acc = 0;
-            for (j = 0; j < num; j = j + 1)
-                acc = acc + num;  
-            square = acc;
+            sum = 0;
+            for (i = 0; i < 255; i = i + 1) begin
+                if (i < num) sum = sum + num;
+            end
+            square = sum;
+        end
+    endfunction
+
+    // Integer square root function
+    function automatic [7:0] sqrt;
+        input [15:0] num;
+        reg [15:0] rem;
+        reg [7:0] res;
+        reg [7:0] bit;
+        begin
+            rem = num;
+            res = 0;
+            bit = 1 << 7;
+            while (bit > 0) begin
+                if (rem >= (res | bit)) begin
+                    rem = rem - (res | bit);
+                    res = res >> 1 | bit;
+                end else begin
+                    res = res >> 1;
+                end
+                bit = bit >> 2;
+            end
+            sqrt = res;
         end
     endfunction
 
@@ -39,37 +63,34 @@ module tt_um_addon (
             sum_squares <= 0;
             result <= 0;
             valid_input <= 0;
+            state <= 0;
         end else begin
-            if (ui_in != 0 || uio_in != 0) begin  
-                valid_input <= 1;  
-            end
-            
-            if (valid_input) begin  
-                x_reg <= ui_in;
-                y_reg <= uio_in;
-                
-                // Compute squares
-                square_x <= square(x_reg);
-                square_y <= square(y_reg);
-                
-                // Compute sum of squares
-                sum_squares <= square_x + square_y;
-
-                // Compute square root using repeated addition
-                result = 0;
-                temp = 0;
-                for (i = 7; i >= 0; i = i - 1) begin
-                    temp = result | (1 << i);
-                    
-                    // Compute square of temp without *
-                    temp_square = 0;
-                    for (j = 0; j < temp; j = j + 1)
-                        temp_square = temp_square + temp;
-
-                    if (temp_square <= sum_squares)
-                        result = temp;
+            case (state)
+                0: begin
+                    if (ui_in != 0 || uio_in != 0) begin
+                        x_reg <= ui_in;
+                        y_reg <= uio_in;
+                        valid_input <= 1;
+                        state <= 1;
+                    end
                 end
-            end
+                1: begin
+                    square_x <= square(x_reg);
+                    square_y <= square(y_reg);
+                    state <= 2;
+                end
+                2: begin
+                    sum_squares <= square_x + square_y;
+                    state <= 3;
+                end
+                3: begin
+                    result <= sqrt(sum_squares);
+                    state <= 4;
+                end
+                4: begin
+                    state <= 0;  
+                end
+            endcase
         end
     end
 
@@ -84,7 +105,5 @@ module tt_um_addon (
             $display("COMPUTE: square_x=%d, square_y=%d, sum_squares=%d, result=%d", square_x, square_y, sum_squares, result);
         end
     end
-
-    wire _unused = &{ena, 1'b0};
 
 endmodule
