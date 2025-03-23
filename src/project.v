@@ -65,7 +65,7 @@ module tt_um_addon (
                             num     <= num - (result + b);
                             result  <= result + b;
                         end
-                        bit <= bit >> 2;
+                        b <= b >> 2;
                     end else begin
                         state <= 3'd5;
                     end
