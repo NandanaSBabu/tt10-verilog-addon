@@ -15,6 +15,21 @@ module tt_um_addon (
     reg [15:0] square_x, square_y;
     reg [7:0] result; // 8-bit output result
 
+    // Function to compute square using shift-and-add method
+    function [15:0] square;
+        input [7:0] value;
+        reg [15:0] sum;
+        integer i;
+        begin
+            sum = 0;
+            for (i = 0; i < 8; i = i + 1) begin
+                if (value[i])
+                    sum = sum + (value << i);
+            end
+            square = sum;
+        end
+    endfunction
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
@@ -23,9 +38,9 @@ module tt_um_addon (
             result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute squares using shift-and-add multiplication
-            square_x <= ui_in * ui_in;
-            square_y <= uio_in * uio_in;
+            // Compute squares using shift-and-add
+            square_x <= square(ui_in);
+            square_y <= square(uio_in);
             sum_squares <= square_x + square_y;
 
             // Bitwise square root approximation
