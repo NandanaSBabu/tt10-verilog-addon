@@ -1,100 +1,59 @@
 `default_nettype none
 
 module tt_um_addon (
-    input  wire [7:0] ui_in,    
-    output wire [7:0] uo_out,   
-    input  wire [7:0] uio_in,   
-    output wire [7:0] uio_out,  
-    output wire [7:0] uio_oe,   
-    input  wire       ena,      
-    input  wire       clk,      
-    input  wire       rst_n     
+    input  wire [7:0] ui_in,    // x input
+    input  wire [7:0] uio_in,   // y input
+    output reg  [7:0] uo_out,   // sqrt_out output
+    output wire [7:0] uio_out,  // IOs: Output path (unused)
+    output wire [7:0] uio_oe,   // IOs: Enable path (unused)
+    input  wire       clk,      // clock
+    input  wire       rst_n,    // active-low reset
+    input  wire       ena       // Enable signal
 );
 
-    reg [7:0] x_reg, y_reg;
-    reg [15:0] square_x, square_y, sum_squares;
+    reg [15:0] sum_squares;
     reg [7:0] result;
-    reg valid_input;
-    reg [3:0] state;
-    
+    integer b;
+
     // Function to compute square using repeated addition
-    function [15:0] square(input [7:0] num);
-        reg [15:0] sum;
-        reg [7:0] i;
+    function [15:0] square;
+        input [7:0] a;
+        reg [15:0] s;
+        reg [7:0] count;
         begin
-            sum = 0;
-            for (i = 0; i < num; i = i + 1) begin
-                sum = sum + num;
+            s = 0;
+            count = a;
+            while (count > 0) begin
+                s = s + a;  // Repeated addition (avoiding multiplication)
+                count = count - 1;
             end
-            square = sum;
-        end
-    endfunction
-
-    // Integer square root using bitwise method
-    function [7:0] sqrt(input [15:0] num);
-        reg [15:0] rem;
-        reg [7:0] res;
-        reg [7:0] bit;
-        begin
-            rem = num;
-            res = 0;
-            bit = 1 << 14;  // Start from the highest power of 4 in a 16-bit number
-
-            while (bit > 0) begin
-                if (rem >= (res | bit)) begin
-                    rem = rem - (res | bit);
-                    res = (res >> 1) | bit;
-                end else begin
-                    res = res >> 1;
-                end
-                bit = bit >> 2;
-            end
-            sqrt = res;
+            square = s;
         end
     endfunction
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            x_reg <= 0;
-            y_reg <= 0;
-            square_x <= 0;
-            square_y <= 0;
-            sum_squares <= 0;
-            result <= 0;
-            valid_input <= 0;
-            state <= 0;
-        end else begin
-            case (state)
-                0: begin
-                    if (ui_in != 0 || uio_in != 0) begin
-                        x_reg <= ui_in;
-                        y_reg <= uio_in;
-                        valid_input <= 1;
-                        state <= 1;
-                    end
-                end
-                1: begin
-                    square_x <= square(x_reg);
-                    square_y <= square(y_reg);
-                    state <= 2;
-                end
-                2: begin
-                    sum_squares <= square_x + square_y;
-                    state <= 3;
-                end
-                3: begin
-                    result <= sqrt(sum_squares);
-                    state <= 4;
-                end
-                4: begin
-                    state <= 0;  
-                end
-            endcase
+            sum_squares <= 16'b0;
+            result <= 8'b0;
+            uo_out <= 8'b0;
+        end else if (ena) begin
+            // Compute sum of squares
+            sum_squares = square(ui_in) + square(uio_in);
+
+            // Compute square root using bitwise method (avoiding multiplication)
+            result = 0;
+            for (b = 7; b >= 0; b = b - 1) begin
+                if ((result + (1 << b)) <= sum_squares / (result + (1 << b)))
+                    result = result + (1 << b);
+            end
+
+            // Assign output in the same cycle
+            uo_out <= result;
         end
     end
 
-    assign uo_out = valid_input ? result : 8'b0;  
-    assign uio_out = 8'b00000000;  
-    assign uio_oe  = 8'b00000000;  
+    // Assign unused outputs to 0 to avoid warnings
+    assign uio_out = 8'b0;
+    assign uio_oe  = 8'b0;
 
 endmodule
