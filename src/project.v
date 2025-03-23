@@ -32,11 +32,11 @@ module tt_um_addon (
             uo_out <= 8'b0;
         end else if (ena) begin
             // Compute square of x (ui_in) and y (uio_in) using the square function
-            square_x <= square(ui_in);
-            square_y <= square(uio_in);
+            square_x <= square(ui_in);  // Non-blocking assignment
+            square_y <= square(uio_in); // Non-blocking assignment
 
             // Compute sum of squares
-            sum_squares <= square_x + square_y;
+            sum_squares <= square_x + square_y; // Non-blocking assignment
 
             // Compute square root using bitwise approximation (manual unrolling)
             result <= 16'b0; // Reset the result before approximation
@@ -90,7 +90,7 @@ module tt_um_addon (
             end
 
             // Assign the output (only 8 bits of the result)
-            uo_out <= result[7:0];
+            uo_out <= result[7:0]; // Non-blocking assignment
         end
     end
 
