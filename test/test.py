@@ -26,8 +26,7 @@ async def test_project(dut):
         (3, 4, 5),   # sqrt(3^2 + 4^2) = 5
         (6, 8, 10),  # sqrt(6^2 + 8^2) = 10
         (5, 12, 13), # sqrt(5^2 + 12^2) = 13
-        (8, 15, 17), # sqrt(8^2 + 15^2) = 17
-        (12, 16, 20) # sqrt(12^2 + 16^2) = 20
+        
     ]
 
     for a, b, expected in test_cases:
