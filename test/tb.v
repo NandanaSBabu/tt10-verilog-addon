@@ -7,7 +7,7 @@ module tb ();
   // Generate VCD file for waveform analysis
   initial begin
     $dumpfile("tb.vcd");
-    $dumpvars(0, tbs);
+    $dumpvars(0, tb);
   end
 
   // Define input and output registers/wires
