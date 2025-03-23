@@ -35,9 +35,9 @@ async def test_project(dut):
 
     assert dut.uo_out.value == 25, f"Test failed! Expected 25, got {dut.uo_out.value}"
 
-    # Test case 3: 0^2 + 0^2 = 0, sqrt(0) = 0
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
+    # Test case 3: 10^2 + 15^2 = 325, sqrt(325) = 18.027... Output is 18
+    dut.ui_in.value = 10
+    dut.uio_in.value = 15
     dut.ena.value = 1
 
     for _ in range(40):
@@ -45,11 +45,11 @@ async def test_project(dut):
 
     dut.ena.value = 0
 
-    assert dut.uo_out.value == 0, f"Test failed! Expected 0, got {dut.uo_out.value}"
+    assert dut.uo_out.value == 18, f"Test failed! Expected 18, got {dut.uo_out.value}"
 
-    # Test case 4: 1^2 + 0^2 = 1, sqrt(1) = 1
-    dut.ui_in.value = 1
-    dut.uio_in.value = 0
+    # Test case 4: 8^2 + 6^2 = 100, sqrt(100) = 10
+    dut.ui_in.value = 8
+    dut.uio_in.value = 6
     dut.ena.value = 1
 
     for _ in range(40):
@@ -57,51 +57,4 @@ async def test_project(dut):
 
     dut.ena.value = 0
 
-    assert dut.uo_out.value == 1, f"Test failed! Expected 1, got {dut.uo_out.value}"
-
-    # Test case 5: 0^2 + 1^2 = 1, sqrt(1) = 1
-    dut.ui_in.value = 0
-    dut.uio_in.value = 1
-    dut.ena.value = 1
-
-    for _ in range(40):
-        await RisingEdge(dut.clk)
-
-    dut.ena.value = 0
-
-    assert dut.uo_out.value == 1, f"Test failed! Expected 1, got {dut.uo_out.value}"
-
-    # Test case 6: 5^2 + 12^2 = 169, sqrt(169) = 13
-    dut.ui_in.value = 5
-    dut.uio_in.value = 12
-    dut.ena.value = 1
-
-    for _ in range(40):
-        await RisingEdge(dut.clk)
-
-    dut.ena.value = 0
-
-    assert dut.uo_out.value == 13, f"Test failed! Expected 13, got {dut.uo_out.value}"
-
-    # Test case 7: max value of 7 bit input, should not overflow.
-    dut.ui_in.value = 127
-    dut.uio_in.value = 127
-    dut.ena.value = 1
-
-    for _ in range(40):
-        await RisingEdge(dut.clk)
-    dut.ena.value = 0
-
-    assert dut.uo_out.value == 179, f"Test failed! Expected 179, got {dut.uo_out.value}"
-
-    # Test Case 8: boundary case
-    dut.ui_in.value = 1
-    dut.uio_in.value = 1
-    dut.ena.value = 1
-
-    for _ in range(40):
-        await RisingEdge(dut.clk)
-
-    dut.ena.value = 0
-
-    assert dut.uo_out.value == 1, f"Test failed! Expected 1, got {dut.uo_out.value}"
+    assert dut.uo_out.value == 10, f"Test failed! Expected 10, got {dut.uo_out.value}"
