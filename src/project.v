@@ -30,19 +30,22 @@ module tt_um_addon (
                     square_x <= ui_in * ui_in;
                     square_y <= uio_in * uio_in;
                     state <= 1;
-                    $display("State 0: x^2=%d, y^2=%d", square_x, square_y);
+                    $display("State 0: x=%d, y=%d", ui_in, uio_in);
                 end
                 1: begin
-                    sum_squares <= square_x + square_y;
-                    state <= 2;
-                    $display("State 1: Sum=%d", sum_squares);
+                    state <= 2; // Wait for multiplication result
                 end
                 2: begin
-                    result <= 0;
+                    sum_squares <= square_x + square_y;
                     state <= 3;
-                    $display("State 2: Reset result");
+                    $display("State 2: x^2=%d, y^2=%d, Sum=%d", square_x, square_y, sum_squares);
                 end
                 3: begin
+                    result <= 0;
+                    state <= 4;
+                    $display("State 3: Reset result");
+                end
+                4: begin
                     if ((result + (1 << 7)) * (result + (1 << 7)) <= sum_squares)
                         result <= result + (1 << 7);
                     if ((result + (1 << 6)) * (result + (1 << 6)) <= sum_squares)
@@ -59,13 +62,13 @@ module tt_um_addon (
                         result <= result + (1 << 1);
                     if ((result + (1 << 0)) * (result + (1 << 0)) <= sum_squares)
                         result <= result + (1 << 0);
-                    state <= 4;
-                    $display("State 3: Computed sqrt=%d", result);
+                    state <= 5;
+                    $display("State 4: Computed sqrt=%d", result);
                 end
-                4: begin
+                5: begin
                     uo_out <= result; // Store the final result
                     state <= 0;
-                    $display("State 4: Output=%d", uo_out);
+                    $display("State 5: Output=%d", uo_out);
                 end
             endcase
         end
