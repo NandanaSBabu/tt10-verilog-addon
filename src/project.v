@@ -60,7 +60,7 @@ module tt_um_addon (
                     num    <= sum_squares;
                     result <= 16'd0;
                     // Initialize bit to highest power of 4 by starting at 1<<14
-                    bit    <= 16'd16384; // 1<<14
+                    b    <= 16'd16384; // 1<<14
                     state  <= 3'd3;
                 end
                 3'd3: begin
