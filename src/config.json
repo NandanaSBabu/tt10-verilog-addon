@@ -23,5 +23,5 @@
     "RT_MAX_LAYER": "met4",
     "MAGIC_DEF_LABELS": 0,
     "MAGIC_WRITE_LEF_PINONLY": 1,
-    "DIE_AREA": "0 0 1000 1000"  // Explicitly define the DIE_AREA. Adjust the dimensions as needed.
+    "DIE_AREA": "0 0 1000 1000"
 }
