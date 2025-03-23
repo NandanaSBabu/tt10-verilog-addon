@@ -70,9 +70,7 @@ module tt_um_addon (
                     if (b != 0) begin
                         if (num >= result + b) begin
                             num     <= num - (result + b);
-                            result  <= (result >> 1) + b;
-                        end else begin
-                            result <= result >> 2; // Corrected line: Shift by 2 bits
+                            result  <= result + b; // Corrected line: removed shift.
                         end
                         b <= b >> 2;
                     end else begin
