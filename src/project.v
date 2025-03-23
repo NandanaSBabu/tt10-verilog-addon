@@ -38,16 +38,16 @@ module tt_um_addon (
             result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute squares using shift-and-add
+            // Compute squares using shift-and-add (use non-blocking assignments)
             square_x <= square(ui_in);
             square_y <= square(uio_in);
             sum_squares <= square_x + square_y;
 
-            // Bitwise square root approximation
-            result = 0;
+            // Sequential square root approximation
+            result <= 0;
             for (integer i = 7; i >= 0; i = i - 1) begin
                 if ((result | (1 << i)) * (result | (1 << i)) <= sum_squares) begin
-                    result = result | (1 << i);
+                    result <= result | (1 << i);
                 end
             end
 
