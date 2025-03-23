@@ -1,11 +1,10 @@
-# Tiny Tapeout project information
 project:
   title:        "Pythagorean Theorem Calculator"  # Project title
   author:       "Nandana"  # Your name
   discord:      ""  # Your discord username (optional)
   description:  "Computes hypotenuse using Pythagorean theorem"  # One-line description
   language:     "Verilog"  # HDL used
-  clock_hz:     10000000  # Clock frequency in Hz (10 MHz)
+  clock_hz:     50000000  # Clock frequency in Hz (50 MHz)
 
   # Design tile size
   tiles: "1x1"  # Valid values: 1x1, 1x2, 2x2, etc.
@@ -30,7 +29,7 @@ pinout:
   ui[7]: ""
 
   # Outputs
-  uo[0]: "output
+  uo[0]: "output"
   uo[1]: ""
   uo[2]: ""
   uo[3]: ""
