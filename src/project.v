@@ -11,6 +11,7 @@ module tt_um_addon (
     input  wire       rst_n     // reset_n - low to reset
 );
 
+    reg [7:0] x_reg, y_reg;
     reg [15:0] sum_squares;
     reg [15:0] square_x, square_y;
     reg [7:0] result;
@@ -30,15 +31,23 @@ module tt_um_addon (
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
+            x_reg <= 0;
+            y_reg <= 0;
             square_x <= 0;
             square_y <= 0;
             sum_squares <= 0;
             result <= 0;
-            $display("RESET: square_x=%d, square_y=%d, sum_squares=%d, result=%d", square_x, square_y, sum_squares, result);
         end else begin
-            square_x = square(ui_in);   // Compute square
-            square_y = square(uio_in);  // Compute square
-            sum_squares = square_x + square_y;
+            // Latch inputs
+            x_reg <= ui_in;
+            y_reg <= uio_in;
+
+            // Compute squares
+            square_x <= square(x_reg);
+            square_y <= square(y_reg);
+
+            // Compute sum of squares
+            sum_squares <= square_x + square_y;
 
             // Compute square root using repeated addition
             result = 0;
@@ -54,14 +63,21 @@ module tt_um_addon (
                 if (temp_square <= sum_squares)
                     result = temp;
             end
-            
-            $display("COMPUTE: square_x=%d, square_y=%d, sum_squares=%d, result=%d", square_x, square_y, sum_squares, result);
         end
     end
 
     assign uo_out = result;
     assign uio_out = 8'b00000000;  // Default output
     assign uio_oe  = 8'b00000000;  // Default output enable
+
+    // Debugging print statements
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            $display("RESET: square_x=%d, square_y=%d, sum_squares=%d, result=%d", square_x, square_y, sum_squares, result);
+        end else begin
+            $display("COMPUTE: square_x=%d, square_y=%d, sum_squares=%d, result=%d", square_x, square_y, sum_squares, result);
+        end
+    end
 
     // Unused inputs
     wire _unused = &{ena, 1'b0};
