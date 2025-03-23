@@ -36,55 +36,30 @@ module tt_um_addon (
             odd <= 16'b1;
         end else if (ena) begin
             // Compute squares
-            square_x = square(ui_in);
-            square_y = square(uio_in);
-            sum_squares = square_x + square_y;
+            square_x <= square(ui_in);
+            square_y <= square(uio_in);
+            sum_squares <= square_x + square_y;
 
             // Integer square root using sum of odd numbers method
-            r = 0;
-            odd = 1;
-            sqrt_result = 0;
+            r <= 0;
+            odd <= 1;
+            sqrt_result <= 0;
 
-            if (r + odd <= sum_squares) begin
-                r = r + odd;
-                odd = odd + 2;
-                sqrt_result = sqrt_result + 1;
-            end
-            if (r + odd <= sum_squares) begin
-                r = r + odd;
-                odd = odd + 2;
-                sqrt_result = sqrt_result + 1;
-            end
-            if (r + odd <= sum_squares) begin
-                r = r + odd;
-                odd = odd + 2;
-                sqrt_result = sqrt_result + 1;
-            end
-            if (r + odd <= sum_squares) begin
-                r = r + odd;
-                odd = odd + 2;
-                sqrt_result = sqrt_result + 1;
-            end
-            if (r + odd <= sum_squares) begin
-                r = r + odd;
-                odd = odd + 2;
-                sqrt_result = sqrt_result + 1;
-            end
-            if (r + odd <= sum_squares) begin
-                r = r + odd;
-                odd = odd + 2;
-                sqrt_result = sqrt_result + 1;
-            end
-            if (r + odd <= sum_squares) begin
-                r = r + odd;
-                odd = odd + 2;
-                sqrt_result = sqrt_result + 1;
-            end
-            if (r + odd <= sum_squares) begin
-                r = r + odd;
-                odd = odd + 2;
-                sqrt_result = sqrt_result + 1;
-            end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
+            if (r + odd <= sum_squares) begin r <= r + odd; odd <= odd + 2; sqrt_result <= sqrt_result + 1; end
 
             // Assign output
             uo_out <= sqrt_result;
