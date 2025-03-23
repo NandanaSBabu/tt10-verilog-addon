@@ -12,59 +12,36 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [15:0] square_x, square_y;
-    reg [7:0] result; // 8-bit output result
-
-    // Function to compute square using shift-and-add
-    function [15:0] square;
-        input [7:0] value;
-        reg [15:0] sum;
-        integer i;
-        begin
-            sum = 0;
-            for (i = 0; i < 8; i = i + 1) begin
-                if (value[i])
-                    sum = sum + (value << i);
-            end
-            square = sum;
-        end
-    endfunction
-
-    // Compute integer square root using shift-subtract method
-    function [7:0] sqrt_approx;
-        input [15:0] value;
-        reg [15:0] remainder;
-        reg [7:0] root;
-        integer i;
-        begin
-            root = 0;
-            remainder = value;
-            for (i = 7; i >= 0; i = i - 1) begin
-                if ((root | (1 << i)) * (root | (1 << i)) <= remainder) begin
-                    root = root | (1 << i);
-                end
-            end
-            sqrt_approx = root;
-        end
-    endfunction
+    reg [7:0] result;
+    reg [7:0] approx_sqrt;
+    reg [15:0] temp;
+    reg [3:0] shift;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            square_x <= 16'b0;
-            square_y <= 16'b0;
             result <= 8'b0;
+            approx_sqrt <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute squares using shift-and-add (no multiplication)
-            square_x <= square(ui_in);
-            square_y <= square(uio_in);
-            sum_squares <= square_x + square_y;
+            // Calculate sum of squares
+            sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
 
-            // Compute square root using integer approximation
-            result <= sqrt_approx(sum_squares);
+            // Approximate square root using bitwise method
+            approx_sqrt = 0;
+            temp = 0;
+            shift = 15; // Highest bit position
+            
+            while (shift >= 0) begin
+                temp = (approx_sqrt | (1 << shift));
+                if (temp * temp <= sum_squares) begin
+                    approx_sqrt = temp;
+                end
+                shift = shift - 1;
+            end
 
-            // Assign the output (only 8 bits of the result)
+            // Assign final square root output
+            result <= approx_sqrt;
             uo_out <= result;
         end
     end
