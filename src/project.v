@@ -70,8 +70,9 @@ module tt_um_addon (
                     if (b != 0) begin
                         if (num >= result + b) begin
                             num     <= num - (result + b);
-                            result  <= result + b; // Corrected line: removed shift.
+                            result  <= result + b;
                         end
+                        result <= result >> 1; // shift result.
                         b <= b >> 2;
                     end else begin
                         state <= 3'd5;
