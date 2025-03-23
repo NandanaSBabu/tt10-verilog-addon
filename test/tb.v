@@ -1,91 +1,67 @@
+/*
+ * Copyright (c) 2024 Your Name
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 `default_nettype none
-`timescale 1ns / 1ps
 
-/* Testbench for Pythagorean Theorem Calculator (Tiny Tapeout) */
-module tb ();
+module tt_um_addon (
+    input  wire [7:0] ui_in,    // Dedicated inputs
+    output wire [7:0] uo_out,   // Dedicated outputs
+    input  wire [7:0] uio_in,   // IOs: Input path
+    output wire [7:0] uio_out,  // IOs: Output path
+    output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
+    input  wire       ena,      // always 1 when the design is powered, so you can ignore it
+    input  wire       clk,      // clock
+    input  wire       rst_n     // reset_n - low to reset
+);
 
-  // Generate VCD file for waveform analysis
-  initial begin
-    $dumpfile("tb.vcd");
-    $dumpvars(0, tb);
-  end
+    reg [15:0] square_x, square_y;
+    reg [15:0] sum_squares;
+    reg [7:0] result;
+    reg [15:0] temp_sqrt;
 
-  // Define input and output registers/wires
-  reg clk;
-  reg rst_n;
-  reg ena;
-  reg [7:0] ui_in;   // Input: side a
-  reg [7:0] uio_in;  // Input: side b
-  wire [7:0] uo_out; // Output: hypotenuse
-  wire [7:0] uio_out;
-  wire [7:0] uio_oe;
+    // Squaring function
+    function [15:0] square;
+        input [7:0] value;
+        begin
+            square = value * value;
+        end
+    endfunction
 
-  // Power connections for Gate-Level Simulation
-  `ifdef GL_TEST
-  wire VPWR = 1'b1;
-  wire VGND = 1'b0;
-  `endif
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            square_x <= 16'b0;
+            square_y <= 16'b0;
+            sum_squares <= 16'b0;
+            result <= 8'b0;
+        end else if (ena) begin
+            square_x <= square(ui_in);
+            square_y <= square(uio_in);
+            sum_squares <= square_x + square_y;
+        end
+    end
 
-  // Generate Clock (100ns period -> 10MHz frequency)
-  always #50 clk = ~clk;
+    // Integer square root calculation using bitwise method
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            temp_sqrt <= 16'b0;
+            result <= 8'b0;
+        end else if (ena) begin
+            temp_sqrt = 0;
+            for (integer n = 7; n >= 0; n = n - 1) begin
+                if ((temp_sqrt | (1 << n)) * (temp_sqrt | (1 << n)) <= sum_squares)
+                    temp_sqrt = temp_sqrt | (1 << n);
+            end
+            result <= temp_sqrt[7:0];
+        end
+    end
 
-  // Instantiate Design Under Test (DUT)
-  tt_um_addon user_project (
-      `ifdef GL_TEST
-      .VPWR(VPWR),
-      .VGND(VGND),
-      `endif
-      .ui_in  (ui_in),    // Side a
-      .uio_in (uio_in),   // Side b
-      .uo_out (uo_out),   // Hypotenuse output
-      .uio_out(uio_out),
-      .uio_oe (uio_oe),
-      .ena    (ena),
-      .clk    (clk),
-      .rst_n  (rst_n)
-  );
+    assign uo_out = result; // Output the computed sqrt value
+    assign uio_out = 8'b0; // No output on uio_out
+    assign uio_oe = 8'b0;  // All uio pins are set as inputs
 
-  // Initialize signals and test cases
-  initial begin
-    clk = 0;
-    rst_n = 0;
-    ena = 1;
-    ui_in = 0;
-    uio_in = 0;
-
-    // Apply Reset (Hold low for 5 clock cycles)
-    repeat (5) @(posedge clk);
-    rst_n = 1;  // Release reset
-
-    // Apply Test Cases
-    repeat (5) @(posedge clk);
-    ui_in = 8'd3; uio_in = 8'd4;  // sqrt(3² + 4²) = 5
-    repeat (10) @(posedge clk);
-    $display("Time=%0t | a=%d, b=%d, sqrt(a² + b²)=%d", $time, ui_in, uio_in, uo_out);
-
-    repeat (5) @(posedge clk);
-    ui_in = 8'd6; uio_in = 8'd8;  // sqrt(6² + 8²) = 10
-    repeat (10) @(posedge clk);
-    $display("Time=%0t | a=%d, b=%d, sqrt(a² + b²)=%d", $time, ui_in, uio_in, uo_out);
-
-    repeat (5) @(posedge clk);
-    ui_in = 8'd5; uio_in = 8'd12; // sqrt(5² + 12²) = 13
-    repeat (10) @(posedge clk);
-    $display("Time=%0t | a=%d, b=%d, sqrt(a² + b²)=%d", $time, ui_in, uio_in, uo_out);
-
-    repeat (5) @(posedge clk);
-    ui_in = 8'd8; uio_in = 8'd15; // sqrt(8² + 15²) = 17
-    repeat (10) @(posedge clk);
-    $display("Time=%0t | a=%d, b=%d, sqrt(a² + b²)=%d", $time, ui_in, uio_in, uo_out);
-
-    repeat (5) @(posedge clk);
-    ui_in = 8'd12; uio_in = 8'd16; // sqrt(12² + 16²) = 20
-    repeat (10) @(posedge clk);
-    $display("Time=%0t | a=%d, b=%d, sqrt(a² + b²)=%d", $time, ui_in, uio_in, uo_out);
-
-    // End simulation
-    #50;
-    $finish;
-  end
+    // List all unused inputs to prevent warnings
+    wire _unused = &{ena, 1'b0};
 
 endmodule
