@@ -1,8 +1,8 @@
 `default_nettype none
 module tt_um_addon (
-    input wire clk,          // Clock signal
-    input wire rst_n,        // Active-low reset
-    input wire ena,          // Enable signal
+    input wire clk,
+    input wire rst_n,
+    input wire ena,
     input wire [7:0] ui_in,  // Input x
     input wire [7:0] uio_in, // Input y
     output reg [7:0] uo_out, // Output sqrt(x^2 + y^2)
@@ -14,6 +14,7 @@ module tt_um_addon (
     reg [7:0] sqrt_result;
     reg [7:0] temp;
     reg [3:0] i;
+    reg computing; // State flag
 
     assign uio_out = 8'b0; // Default output to prevent errors
     assign uio_oe = 8'b0;  // Default output enable to prevent errors
@@ -24,19 +25,22 @@ module tt_um_addon (
             sqrt_result <= 0;
             temp <= 0;
             i <= 0;
+            computing <= 0;
             uo_out <= 0;
-        end else if (ena) begin
+        end else if (ena && !computing) begin
             sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
             temp <= 0;
             sqrt_result <= 0;
             i <= 7;
-        end else if (i > 0) begin
+            computing <= 1; // Start computation
+        end else if (computing && i > 0) begin
             temp <= (sqrt_result << 1) | (1 << (i - 1));
             if (temp * temp <= sum_squares)
                 sqrt_result <= temp;
             i <= i - 1;
-        end else begin
-            uo_out <= sqrt_result;
+        end else if (computing && i == 0) begin
+            uo_out <= sqrt_result; // Output the final value
+            computing <= 0; // Reset computing flag
         end
     end
 endmodule
