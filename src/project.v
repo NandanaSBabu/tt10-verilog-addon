@@ -24,17 +24,17 @@ module tt_um_addon (
             uo_out <= 8'b0;
         end else if (ena) begin
             // Compute square of x (ui_in) and y (uio_in) using repeated addition
-            square_x <= ui_in * ui_in; // Use non-blocking assignment for square_x
-            square_y <= uio_in * uio_in; // Use non-blocking assignment for square_y
+            square_x = ui_in * ui_in; // Direct multiplication for square of ui_in
+            square_y = uio_in * uio_in; // Direct multiplication for square of uio_in
 
             // Compute sum of squares
-            sum_squares <= square_x + square_y; // Use non-blocking assignment for sum_squares
+            sum_squares = square_x + square_y;
 
             // Compute square root using bitwise approximation
-            result <= 0;
+            result = 0;
             for (integer b = 7; b >= 0; b = b - 1) begin
                 if ((result + (1 << b)) * (result + (1 << b)) <= sum_squares) begin
-                    result <= result + (1 << b); // Use non-blocking assignment for result
+                    result = result + (1 << b);
                 end
             end
 
