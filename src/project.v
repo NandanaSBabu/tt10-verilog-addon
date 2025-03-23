@@ -1,13 +1,19 @@
+/*
+ * Copyright (c) 2024 Your Name
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 `default_nettype none
+
 module tt_um_addon (
-    input  wire clk,
-    input  wire rst_n,
-    input  wire ena,
-    input  wire [7:0] ui_in,
-    input  wire [7:0] uio_in,
-    output reg  [7:0] uo_out,
-    output wire [7:0] uio_out,  // Added output
-    output wire [7:0] uio_oe    // Added output enable
+    input  wire [7:0] ui_in,    // Dedicated inputs
+    output wire [7:0] uo_out,   // Dedicated outputs
+    input  wire [7:0] uio_in,   // IOs: Input path
+    output wire [7:0] uio_out,  // IOs: Output path
+    output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
+    input  wire       ena,      // always 1 when the design is powered, so you can ignore it
+    input  wire       clk,      // clock
+    input  wire       rst_n     // reset_n - low to reset
 );
 
     reg [15:0] square_x, square_y;
@@ -15,7 +21,7 @@ module tt_um_addon (
     reg [15:0] result;
     reg [15:0] temp_sqrt;
 
-    // Exact squaring function
+    // Squaring function
     function [15:0] square;
         input [7:0] value;
         begin
@@ -37,7 +43,7 @@ module tt_um_addon (
         end
     end
 
-    // More accurate square root calculation
+    // Square root approximation
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             temp_sqrt <= 16'b0;
@@ -52,14 +58,11 @@ module tt_um_addon (
         end
     end
 
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n)
-            uo_out <= 8'b0;
-        else if (ena)
-            uo_out <= result[7:0];
-    end
-
+    assign uo_out = result[7:0]; // Output the computed sqrt value
     assign uio_out = 8'b0; // No output on uio_out
     assign uio_oe = 8'b0;  // All uio pins are set as inputs
+
+    // List all unused inputs to prevent warnings
+    wire _unused = &{ena, 1'b0};
 
 endmodule
