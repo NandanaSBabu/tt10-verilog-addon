@@ -81,7 +81,7 @@ module tb ();
     $display("Test 4 - Input: %d, %d | Output: %d", ui_in, uio_in, uo_out);
 
     // End simulation
-    #100 $finish;
+    #200 $finish;
   end
 
 endmodule
