@@ -12,39 +12,41 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [15:0] x_square;
-    reg [15:0] y_square;
+    reg [15:0] square_x, square_y;
     reg [7:0] result;
-    integer b;
-
-    always @(*) begin
-        // Compute squares using repeated addition (avoiding multiplication)
-        x_square = 0;
-        y_square = 0;
-
-        for (b = 0; b < ui_in; b = b + 1) begin
-            x_square = x_square + ui_in;
-        end
-
-        for (b = 0; b < uio_in; b = b + 1) begin
-            y_square = y_square + uio_in;
-        end
-    end
-
+    reg [15:0] temp;
+    integer shift;
+    
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
+            square_x <= 16'b0;
+            square_y <= 16'b0;
             result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute sum of squares
-            sum_squares <= x_square + y_square;
+            // Compute squares using repeated addition
+            square_x = 0;
+            square_y = 0;
 
-            // Compute square root using bitwise method (avoiding multiplication)
+            for (shift = 0; shift < ui_in; shift = shift + 1)
+                square_x = square_x + ui_in;
+            
+            for (shift = 0; shift < uio_in; shift = shift + 1)
+                square_y = square_y + uio_in;
+
+            // Compute sum of squares
+            sum_squares = square_x + square_y;
+
+            // Compute square root using bitwise subtraction method
             result = 0;
-            for (b = 7; b >= 0; b = b - 1) begin
-                if ((result + (1 << b)) <= sum_squares / (result + (1 << b)))
-                    result = result + (1 << b);
+            temp = sum_squares;
+            
+            for (shift = 7; shift >= 0; shift = shift - 1) begin
+                if (temp >= ((result << 1) | (1 << shift))) begin
+                    temp = temp - ((result << 1) | (1 << shift));
+                    result = result | (1 << shift);
+                end
             end
 
             // Assign output in the same cycle
