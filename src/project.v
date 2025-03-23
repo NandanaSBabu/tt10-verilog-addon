@@ -15,7 +15,7 @@ module tt_um_addon (
     reg [15:0] square_x, square_y;
     reg [7:0] result; // 8-bit output result
 
-    // Function to compute square using shift-and-add method
+    // Function to compute square using shift-and-add
     function [15:0] square;
         input [7:0] value;
         reg [15:0] sum;
@@ -30,6 +30,24 @@ module tt_um_addon (
         end
     endfunction
 
+    // Compute integer square root using shift-subtract method
+    function [7:0] sqrt_approx;
+        input [15:0] value;
+        reg [15:0] remainder;
+        reg [7:0] root;
+        integer i;
+        begin
+            root = 0;
+            remainder = value;
+            for (i = 7; i >= 0; i = i - 1) begin
+                if ((root | (1 << i)) * (root | (1 << i)) <= remainder) begin
+                    root = root | (1 << i);
+                end
+            end
+            sqrt_approx = root;
+        end
+    endfunction
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
@@ -38,18 +56,13 @@ module tt_um_addon (
             result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute squares using shift-and-add (use non-blocking assignments)
+            // Compute squares using shift-and-add (no multiplication)
             square_x <= square(ui_in);
             square_y <= square(uio_in);
             sum_squares <= square_x + square_y;
 
-            // Sequential square root approximation
-            result <= 0;
-            for (integer i = 7; i >= 0; i = i - 1) begin
-                if ((result | (1 << i)) * (result | (1 << i)) <= sum_squares) begin
-                    result <= result | (1 << i);
-                end
-            end
+            // Compute square root using integer approximation
+            result <= sqrt_approx(sum_squares);
 
             // Assign the output (only 8 bits of the result)
             uo_out <= result;
