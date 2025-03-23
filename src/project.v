@@ -15,7 +15,7 @@ module tt_um_addon (
     reg [15:0] square_x, square_y;
     reg [15:0] result;
 
-    // Squaring function
+    // Squaring function using multiplication
     function [15:0] square;
         input [7:0] value;
         begin
@@ -26,20 +26,20 @@ module tt_um_addon (
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            square_x    <= 16'b0;
-            square_y    <= 16'b0;
-            result      <= 16'b0;
-            uo_out      <= 8'b0;
+            square_x <= 16'b0;
+            square_y <= 16'b0;
+            result <= 16'b0;
+            uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute squares using non-blocking assignments
-            square_x    <= square(ui_in);
-            square_y    <= square(uio_in);
+            // Compute square of x (ui_in) and y (uio_in)
+            square_x <= square(ui_in);
+            square_y <= square(uio_in);
+
+            // Compute sum of squares
             sum_squares <= square_x + square_y;
 
-            // Reset result before approximation
-            result <= 16'b0;
-
-            // Bitwise approximation for square root
+            // Compute square root using bitwise approximation (manual unrolling)
+            result <= 16'b0; // Reset the result before approximation
             if ((result + (1 << 15)) * (result + (1 << 15)) <= sum_squares) result <= result + (1 << 15);
             if ((result + (1 << 14)) * (result + (1 << 14)) <= sum_squares) result <= result + (1 << 14);
             if ((result + (1 << 13)) * (result + (1 << 13)) <= sum_squares) result <= result + (1 << 13);
@@ -57,7 +57,7 @@ module tt_um_addon (
             if ((result + (1 << 1)) * (result + (1 << 1)) <= sum_squares) result <= result + (1 << 1);
             if ((result + (1 << 0)) * (result + (1 << 0)) <= sum_squares) result <= result + (1 << 0);
 
-            // Assign output
+            // Assign the output (only 8 bits of the result)
             uo_out <= result[7:0];
         end
     end
