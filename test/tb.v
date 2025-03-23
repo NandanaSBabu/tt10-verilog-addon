@@ -10,6 +10,7 @@ module tb ();
   initial begin
     $dumpfile("tb.vcd");
     $dumpvars(0, tb);
+    $display("Testbench tb is running!");  // Debug print
     #1;
   end
 
