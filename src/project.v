@@ -18,6 +18,14 @@ module tt_um_addon (
     reg [15:0] b;           // Current bit value for testing
     reg [2:0]  state;       // State machine (0 to 5)
 
+    // Debug signals
+    reg [15:0] debug_num;
+    reg [15:0] debug_result;
+    reg [15:0] debug_b;
+    reg [2:0]  debug_state;
+    reg        debug_ena;
+    reg        debug_rst_n;
+
     // State encoding:
     // 0: Compute squares
     // 1: Compute sum (x^2+y^2)
@@ -36,6 +44,12 @@ module tt_um_addon (
             b           <= 16'd0;
             uo_out      <= 8'd0;
             state       <= 3'd0;
+            debug_num   <= 16'd0;
+            debug_result <= 16'd0;
+            debug_b     <= 16'd0;
+            debug_state <= 3'd0;
+            debug_ena   <= 1'b0;
+            debug_rst_n <= 1'b0;
         end else if (ena) begin
             case (state)
                 3'd0: begin
@@ -85,6 +99,12 @@ module tt_um_addon (
                 end
                 default: state <= 3'd0;
             endcase
+            debug_num   <= num;
+            debug_result <= result;
+            debug_b     <= b;
+            debug_state <= state;
+            debug_ena   <= ena;
+            debug_rst_n <= rst_n;
         end
     end
 
