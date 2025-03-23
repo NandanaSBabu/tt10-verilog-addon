@@ -1,53 +1,68 @@
-`timescale 1ns / 1ps
 `default_nettype none
+`timescale 1ns / 1ps
 
-module tb;
+module tb ();
 
-    reg [7:0] ui_in;
-    reg [7:0] uio_in;
-    wire [7:0] uo_out;
-    reg clk, rst_n;
+  // Dump signals to a VCD file for waveform debugging
+  initial begin
+    $dumpfile("tb.vcd");
+    $dumpvars(0, tb);
+  end
 
-    tt_um_addon user_project (
-        .ui_in(ui_in),
-        .uo_out(uo_out),
-        .uio_in(uio_in),
-        .uio_out(),
-        .uio_oe(),
-        .ena(1'b1),
-        .clk(clk),
-        .rst_n(rst_n)
-    );
+  // Declare signals
+  reg clk;
+  reg rst_n;
+  reg [7:0] ui_in;
+  reg [7:0] uio_in;
+  reg ena;
+  wire [7:0] uo_out;
+  wire [7:0] uio_out;
+  wire [7:0] uio_oe;
 
-    always #5 clk = ~clk; // Clock toggles every 5 ns (100 MHz)
+  // Instantiate the DUT (Device Under Test)
+  tt_um_addon uut (
+      .ui_in  (ui_in),
+      .uo_out (uo_out),
+      .uio_in (uio_in),
+      .uio_out(uio_out),
+      .uio_oe (uio_oe),
+      .clk    (clk),
+      .rst_n  (rst_n),
+      .ena    (ena)
+  );
 
-    initial begin
-        $dumpfile("tb.vcd");
-        $dumpvars(0, tb);
+  // Clock generation: 10ns period (100MHz)
+  always #10 clk = ~clk;
 
-        clk = 0;
-        rst_n = 0;
-        ui_in = 0;
-        uio_in = 0;
-        #10 rst_n = 1;
+  initial begin
+    // Initialize signals
+    clk = 0;
+    rst_n = 0;
+    ui_in = 0;
+    uio_in = 0;
+    ena = 0;
 
-        // Test 1: x=3, y=4 (Expected result = 5)
-        #10 ui_in = 3; uio_in = 4;
-        #50;
+    // Apply reset
+    #20 rst_n = 1;
+    
+    // Enable calculations
+    #10 ena = 1;
 
-        // Test 2: x=6, y=8 (Expected result = 10)
-        #10 ui_in = 6; uio_in = 8;
-        #50;
+    // Apply test cases
+    #20 ui_in = 3; uio_in = 4;  
+    #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
 
-        // Test 3: x=20, y=99 (Expected result = 101)
-        #10 ui_in = 20; uio_in = 99;
-        #50;
+    #20 ui_in = 7; uio_in = 24;
+    #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
 
-        // Test 4: x=5, y=12 (Expected result = 13)
-        #10 ui_in = 5; uio_in = 12;
-        #50;
+    #20 ui_in = 10; uio_in = 15;
+    #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
 
-        $finish;
-    end
+    #20 ui_in = 8; uio_in = 6;
+    #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
+
+    // End simulation
+    #100 $finish;
+  end
 
 endmodule
