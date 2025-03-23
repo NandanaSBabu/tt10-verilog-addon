@@ -1,87 +1,53 @@
-`default_nettype none
 `timescale 1ns / 1ps
+`default_nettype none
 
-module tb ();
+module tb;
 
-  // Dump the signals to a VCD file for debugging
-  initial begin
-    $dumpfile("tb.vcd");
-    $dumpvars(0, tb);
-    #1;
-  end
+    reg [7:0] ui_in;
+    reg [7:0] uio_in;
+    wire [7:0] uo_out;
+    reg clk, rst_n;
 
-  // Define test signals
-  reg clk;
-  reg rst_n;
-  reg ena;
-  reg [7:0] ui_in;
-  reg [7:0] uio_in;
-  wire [7:0] uo_out;
-  wire [7:0] uio_out;
-  wire [7:0] uio_oe;
+    tt_um_addon user_project (
+        .ui_in(ui_in),
+        .uo_out(uo_out),
+        .uio_in(uio_in),
+        .uio_out(),
+        .uio_oe(),
+        .ena(1'b1),
+        .clk(clk),
+        .rst_n(rst_n)
+    );
 
-`ifdef GL_TEST
-  wire VPWR = 1'b1;
-  wire VGND = 1'b0;
-`endif
+    always #5 clk = ~clk; // Clock toggles every 5 ns (100 MHz)
 
-  // Instantiate the DUT
-  tt_um_addon user_project (
-`ifdef GL_TEST
-      .VPWR(VPWR),
-      .VGND(VGND),
-`endif
-      .ui_in  (ui_in),    // Dedicated inputs
-      .uo_out (uo_out),   // Dedicated outputs
-      .uio_in (uio_in),   // IOs: Input path
-      .uio_out(uio_out),  // IOs: Output path
-      .uio_oe (uio_oe),   // IOs: Enable path (active high: 0=input, 1=output)
-      .ena    (ena),      // enable - goes high when design is selected
-      .clk    (clk),      // clock
-      .rst_n  (rst_n)     // not reset
-  );
+    initial begin
+        $dumpfile("tb.vcd");
+        $dumpvars(0, tb);
 
-  // Clock generation (50MHz)
-  always #10 clk = ~clk;  // 20ns period, 10ns per phase
+        clk = 0;
+        rst_n = 0;
+        ui_in = 0;
+        uio_in = 0;
+        #10 rst_n = 1;
 
-  initial begin
-    clk = 0;
-    rst_n = 0;
-    ena = 1;
-    ui_in = 0;
-    uio_in = 0;
-    
-    #50 rst_n = 1;  // Release reset after 50ns
+        // Test 1: x=3, y=4 (Expected result = 5)
+        #10 ui_in = 3; uio_in = 4;
+        #50;
 
-    // Wait a few clock cycles
-    #50;
+        // Test 2: x=6, y=8 (Expected result = 10)
+        #10 ui_in = 6; uio_in = 8;
+        #50;
 
-    // Test case 1: ui_in = 20, uio_in = 99
-    ui_in = 20; 
-    uio_in = 99;
-    #50;
-    $display("Test 1 - Input: %d, %d | Output: %d", ui_in, uio_in, uo_out);
+        // Test 3: x=20, y=99 (Expected result = 101)
+        #10 ui_in = 20; uio_in = 99;
+        #50;
 
-    // Test case 2: ui_in = 50, uio_in = 50
-    ui_in = 50; 
-    uio_in = 50;
-    #50;
-    $display("Test 2 - Input: %d, %d | Output: %d", ui_in, uio_in, uo_out);
+        // Test 4: x=5, y=12 (Expected result = 13)
+        #10 ui_in = 5; uio_in = 12;
+        #50;
 
-    // Test case 3: ui_in = 6, uio_in = 8
-    ui_in = 6;
-    uio_in = 8;
-    #50;
-    $display("Test 3 - Input: %d, %d | Output: %d", ui_in, uio_in, uo_out);
-
-    // Test case 4: ui_in = 15, uio_in = 112
-    ui_in = 15;
-    uio_in = 112;
-    #50;
-    $display("Test 4 - Input: %d, %d | Output: %d", ui_in, uio_in, uo_out);
-
-    // End simulation
-    #100 $finish;
-  end
+        $finish;
+    end
 
 endmodule
