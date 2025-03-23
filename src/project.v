@@ -26,20 +26,20 @@ module tt_um_addon (
             state       <= 0;
         end else if (ena) begin
             case (state)
-                begin
+                0: begin
                     square_x <= ui_in * ui_in;
                     square_y <= uio_in * uio_in;
                     state <= 1;
                 end
-                begin
+                1: begin
                     sum_squares <= square_x + square_y;
                     state <= 2;
                 end
-                begin
+                2: begin
                     result <= 0;
                     state <= 3;
                 end
-                begin
+                3: begin
                     if ((result + (1 << 7)) * (result + (1 << 7)) <= sum_squares)
                         result <= result + (1 << 7);
                     if ((result + (1 << 6)) * (result + (1 << 6)) <= sum_squares)
@@ -58,7 +58,7 @@ module tt_um_addon (
                         result <= result + (1 << 0);
                     state <= 4;
                 end
-                begin
+                4: begin
                     uo_out <= result; // Store the final result
                     state <= 0;
                 end
