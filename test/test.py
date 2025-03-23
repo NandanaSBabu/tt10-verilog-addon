@@ -1,7 +1,6 @@
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, Timer
-from cocotb.binary import BinaryValue
 
 @cocotb.test()
 async def test_project(dut):
@@ -12,16 +11,27 @@ async def test_project(dut):
     await RisingEdge(dut.clk)
     dut.rst_n.value = 1
 
-    dut.ui_in.value = 3
-    dut.uio_in.value = 4
-    dut.ena.value = 1
+    test_vectors = [
+        (3, 4, 5),
+        (7, 24, 25),
+        (10, 15, 25),
+        (8, 6, 10),
+        (1, 1, 1),
+        (20,21,29),
+        (2,2,2)
+    ]
 
-    for _ in range(100):
-        await RisingEdge(dut.clk)
+    for x, y, expected_sqrt in test_vectors:
+        dut.ui_in.value = x
+        dut.uio_in.value = y
+        dut.ena.value = 1
 
-    dut.ena.value = 0
+        for _ in range(200): #increased simulation time.
+            await RisingEdge(dut.clk)
 
-    await Timer(100, units="ns")
+        dut.ena.value = 0
+        await Timer(100, units="ns")
 
-    print(f"uo_out: {dut.uo_out.value}")
-    assert dut.uo_out.value == 5, f"Test failed! Expected 5, got {dut.uo_out.value}"
+        actual_sqrt = dut.uo_out.value
+        print(f"x={x}, y={y}, expected={expected_sqrt}, actual={actual_sqrt}")
+        assert actual_sqrt == expected_sqrt, f"Test failed for x={x}, y={y}. Expected {expected_sqrt}, got {actual_sqrt}"
