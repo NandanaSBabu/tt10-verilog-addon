@@ -18,7 +18,7 @@ module tt_um_addon (
 
     reg [15:0] square_x, square_y;
     reg [15:0] sum_squares;
-    reg [15:0] result;
+    reg [7:0] result;
     reg [15:0] temp_sqrt;
 
     // Squaring function
@@ -34,8 +34,7 @@ module tt_um_addon (
             square_x <= 16'b0;
             square_y <= 16'b0;
             sum_squares <= 16'b0;
-            temp_sqrt <= 16'b0;
-            result <= 16'b0;
+            result <= 8'b0;
         end else if (ena) begin
             square_x <= square(ui_in);
             square_y <= square(uio_in);
@@ -43,22 +42,22 @@ module tt_um_addon (
         end
     end
 
-    // Square root approximation
+    // Integer square root calculation using bitwise method
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             temp_sqrt <= 16'b0;
-            result <= 16'b0;
+            result <= 8'b0;
         end else if (ena) begin
             temp_sqrt = 0;
-            for (integer n = 15; n >= 0; n = n - 1) begin
+            for (integer n = 7; n >= 0; n = n - 1) begin
                 if ((temp_sqrt | (1 << n)) * (temp_sqrt | (1 << n)) <= sum_squares)
                     temp_sqrt = temp_sqrt | (1 << n);
             end
-            result <= temp_sqrt;
+            result <= temp_sqrt[7:0];
         end
     end
 
-    assign uo_out = result[7:0]; // Output the computed sqrt value
+    assign uo_out = result; // Output the computed sqrt value
     assign uio_out = 8'b0; // No output on uio_out
     assign uio_oe = 8'b0;  // All uio pins are set as inputs
 
