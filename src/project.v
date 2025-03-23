@@ -34,10 +34,10 @@ module tt_um_addon (
             square_y <= 0;
             sum_squares <= 0;
             result <= 0;
+            $display("RESET: square_x=%d, square_y=%d, sum_squares=%d, result=%d", square_x, square_y, sum_squares, result);
         end else begin
             square_x = square(ui_in);   // Compute square
             square_y = square(uio_in);  // Compute square
-
             sum_squares = square_x + square_y;
 
             // Compute square root using repeated addition
@@ -54,6 +54,8 @@ module tt_um_addon (
                 if (temp_square <= sum_squares)
                     result = temp;
             end
+            
+            $display("COMPUTE: square_x=%d, square_y=%d, sum_squares=%d, result=%d", square_x, square_y, sum_squares, result);
         end
     end
 
