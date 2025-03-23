@@ -12,38 +12,43 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [7:0] sqrt_result;
+    reg [15:0] square_x, square_y;
     reg [15:0] r;
+    reg [7:0] sqrt_result;
     reg [15:0] odd;
-    reg [3:0] count;
+    reg calc_done;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            uo_out       <= 8'b0;
-            sum_squares  <= 16'b0;
-            sqrt_result  <= 8'b0;
-            r            <= 16'b0;
-            odd          <= 16'b1;
-            count        <= 4'b0;
-        end else if (ena) begin
-            if (count == 0) begin
-                // Compute squares and initialize registers
-                sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
-                r           <= 16'b0;
-                odd         <= 16'b1;
-                sqrt_result <= 8'b0;
-                count       <= 4'd15;  // Iterate 16 times
+            uo_out <= 8'b0;
+            sum_squares <= 16'b0;
+            square_x <= 16'b0;
+            square_y <= 16'b0;
+            r <= 16'b0;
+            sqrt_result <= 8'b0;
+            odd <= 16'b1;
+            calc_done <= 1'b0;
+        end else if (ena && !calc_done) begin
+            // Compute squares
+            square_x <= ui_in * ui_in;
+            square_y <= uio_in * uio_in;
+            sum_squares <= square_x + square_y;
+            r <= 0;
+            odd <= 1;
+            sqrt_result <= 0;
+            calc_done <= 1'b0;
+        end else if (ena && !calc_done) begin
+            // Integer square root calculation
+            if (r + odd <= sum_squares) begin
+                r <= r + odd;
+                odd <= odd + 2;
+                sqrt_result <= sqrt_result + 1;
             end else begin
-                // Iterative sqrt calculation using sum of odd numbers
-                if (r + odd <= sum_squares) begin
-                    r           <= r + odd;
-                    odd         <= odd + 2;
-                    sqrt_result <= sqrt_result + 1;
-                end
-                count <= count - 1;
+                calc_done <= 1'b1;
             end
-            // Assign output only after completion
-            if (count == 1) uo_out <= sqrt_result;
+        end
+        if (calc_done) begin
+            uo_out <= sqrt_result;
         end
     end
 
