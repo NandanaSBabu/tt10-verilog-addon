@@ -11,29 +11,56 @@ module tt_um_addon (
     input  wire       ena       // Enable signal
 );
 
-    // Internal signals
-    wire [15:0] square_x, square_y, sum_squares;
-    reg  [7:0] sqrt_result;
-    reg  [15:0] temp, bit;
-    reg  [3:0] step;  // Step counter for FSM
+    // Internal registers
+    reg [15:0] sum_squares;
+    reg [15:0] x_square, y_square;
+    reg [7:0] sqrt_result;
+    reg [3:0] step;
 
-    // Compute squares without multiplication (Shift-and-Add Approximation)
-    assign square_x = {ui_in, 1'b0} + {ui_in, 2'b00}; // Approximate x^2
-    assign square_y = {uio_in, 1'b0} + {uio_in, 2'b00}; // Approximate y^2
-    assign sum_squares = square_x + square_y;
+    // Multiplication using repeated addition (sequential)
+    reg [7:0] x_reg, y_reg, x_counter, y_counter;
+    reg [15:0] x_acc, y_acc;
+    reg mul_done;
 
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            x_acc <= 16'b0;
+            y_acc <= 16'b0;
+            x_counter <= 8'b0;
+            y_counter <= 8'b0;
+            x_reg <= 8'b0;
+            y_reg <= 8'b0;
+            mul_done <= 0;
+        end else if (ena && !mul_done) begin
+            if (x_counter < x_reg) begin
+                x_acc <= x_acc + x_reg;
+                x_counter <= x_counter + 1;
+            end else if (y_counter < y_reg) begin
+                y_acc <= y_acc + y_reg;
+                y_counter <= y_counter + 1;
+            end else begin
+                x_square <= x_acc;
+                y_square <= y_acc;
+                sum_squares <= x_acc + y_acc;
+                mul_done <= 1;
+            end
+        end
+    end
+
+    // Square root approximation using bit-wise method
+    reg [15:0] temp, bit;
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sqrt_result <= 8'b0;
             uo_out <= 8'b0;
             step <= 4'b0;
             temp <= 16'b0;
-            bit <= 16'b0100000000000000; // Initialize bit properly
-        end else if (ena) begin
+            bit <= 16'b0;
+        end else if (ena && mul_done) begin
             case (step)
                 0: begin
                     temp <= sum_squares;
-                    bit <= 16'b0100000000000000; // Initialize to 1 << 14
+                    bit <= 1 << 14; // Start at highest power of 4
                     sqrt_result <= 0;
                     step <= 1;
                 end
@@ -45,13 +72,11 @@ module tt_um_addon (
                         sqrt_result <= sqrt_result >> 1;
                     end
                     bit <= bit >> 2;
-
-                    if (bit == 0) // Stop when bit is completely shifted out
-                        step <= 2;
+                    if (bit < 4) step <= 2;
                 end
                 2: begin
                     uo_out <= sqrt_result;
-                    step <= 0; // Ready for next cycle
+                    step <= 0;
                 end
             endcase
         end
