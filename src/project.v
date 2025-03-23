@@ -12,24 +12,9 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [7:0] result;
-    integer b;
-
-    // Function to compute square using repeated addition
-    function [15:0] square;
-        input [7:0] a;
-        reg [15:0] s;
-        reg [7:0] count;
-        begin
-            s = 0;
-            count = a;
-            while (count > 0) begin
-                s = s + a;  // Repeated addition (avoiding multiplication)
-                count = count - 1;
-            end
-            square = s;
-        end
-    endfunction
+    reg [15:0] square_x, square_y;
+    reg [7:0] result, temp_res;
+    integer b, i, j;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -37,17 +22,38 @@ module tt_um_addon (
             result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute sum of squares
-            sum_squares = square(ui_in) + square(uio_in);
-
-            // Compute square root using bitwise method (avoiding multiplication)
-            result = 0;
-            for (b = 7; b >= 0; b = b - 1) begin
-                if ((result + (1 << b)) <= sum_squares / (result + (1 << b)))
-                    result = result + (1 << b);
+            // Compute squares using loops (avoiding multiplication)
+            square_x = 0;
+            square_y = 0;
+            for (i = 0; i < ui_in; i = i + 1) begin
+                square_x = square_x + ui_in;
+            end
+            for (i = 0; i < uio_in; i = i + 1) begin
+                square_y = square_y + uio_in;
             end
 
-            // Assign output in the same cycle
+            // Compute sum of squares
+            sum_squares = square_x + square_y;
+
+            // Compute square root using repeated addition
+            result = 0;
+            temp_res = 0;
+            for (b = 7; b >= 0; b = b - 1) begin
+                temp_res = result + (1 << b);
+                
+                // Compute temp_res * temp_res without using `*`
+                reg [15:0] temp_sq;
+                temp_sq = 0;
+                for (j = 0; j < temp_res; j = j + 1) begin
+                    temp_sq = temp_sq + temp_res;
+                end
+                
+                if (temp_sq <= sum_squares) begin
+                    result = temp_res;
+                end
+            end
+
+            // Assign output
             uo_out <= result;
         end
     end
