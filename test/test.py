@@ -1,27 +1,41 @@
+# SPDX-FileCopyrightText: © 2024 Tiny Tapeout
+# SPDX-License-Identifier: Apache-2.0
+
 import cocotb
-from cocotb.triggers import RisingEdge
+from cocotb.clock import Clock
+from cocotb.triggers import ClockCycles
 
 @cocotb.test()
 async def test_project(dut):
-    """Test the square root computation"""
-    dut.rst_n.value = 0
-    dut.ena.value = 0
+    dut._log.info("Start")
+
+    # Set the clock period to 10 us (100 KHz)
+    clock = Clock(dut.clk, 10, units="us")
+    cocotb.start_soon(clock.start())
+
+    # Reset
+    dut._log.info("Reset")
+    dut.ena.value = 1
     dut.ui_in.value = 0
     dut.uio_in.value = 0
-    await RisingEdge(dut.clk)
-    
+    dut.rst_n.value = 0
+    await ClockCycles(dut.clk, 10)
     dut.rst_n.value = 1
-    await RisingEdge(dut.clk)
 
-    dut.ena.value = 1
-    dut.ui_in.value = 3
-    dut.uio_in.value = 4
-    await RisingEdge(dut.clk)
-    await RisingEdge(dut.clk)
-    assert dut.uo_out.value == 5, f"Test failed! Expected 5, got {dut.uo_out.value}"
+    dut._log.info("Testing project behavior")
 
-    dut.ui_in.value = 6
-    dut.uio_in.value = 8
-    await RisingEdge(dut.clk)
-    await RisingEdge(dut.clk)
-    assert dut.uo_out.value == 10, f"Test failed! Expected 10, got {dut.uo_out.value}"
+    # Test cases
+    test_cases = [
+        (20, 99, 101),
+        (6, 8, 10),
+        (15, 112, 113),
+        (8, 15, 17),
+        (20, 21, 29)
+    ]
+
+    for ui_val, uio_val, expected in test_cases:
+        dut.ui_in.value = ui_val
+        dut.uio_in.value = uio_val
+        await ClockCycles(dut.clk, 1)
+        assert dut.uo_out.value == expected, f"Test failed: {ui_val} + {uio_val} != {dut.uo_out.value}, expected {expected}"
+        dut._log.info(f"Test passed: {ui_val} + {uio_val} = {dut.uo_out.value}")
