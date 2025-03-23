@@ -12,29 +12,81 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
+    reg [15:0] square_x, square_y;
+    reg [15:0] r;
     reg [7:0] sqrt_result;
-    reg [7:0] r, odd;
-    
+    reg [15:0] odd;
+
+    // Squaring function using multiplication
+    function [15:0] square;
+        input [7:0] value;
+        begin
+            square = value * value;
+        end
+    endfunction
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            sum_squares <= 16'b0;
-            sqrt_result <= 8'b0;
             uo_out <= 8'b0;
+            sum_squares <= 16'b0;
+            square_x <= 16'b0;
+            square_y <= 16'b0;
+            r <= 16'b0;
+            sqrt_result <= 8'b0;
+            odd <= 16'b1;
         end else if (ena) begin
-            // Squaring using shifts & adds
-            sum_squares = (ui_in << 3) + (ui_in << 1) + (uio_in << 3) + (uio_in << 1); 
+            // Compute squares
+            square_x = square(ui_in);
+            square_y = square(uio_in);
+            sum_squares = square_x + square_y;
 
-            // Square root using sum of odd numbers
+            // Integer square root using sum of odd numbers method
             r = 0;
             odd = 1;
             sqrt_result = 0;
 
-            while (r + odd <= sum_squares) begin
+            if (r + odd <= sum_squares) begin
                 r = r + odd;
                 odd = odd + 2;
                 sqrt_result = sqrt_result + 1;
             end
-            
+            if (r + odd <= sum_squares) begin
+                r = r + odd;
+                odd = odd + 2;
+                sqrt_result = sqrt_result + 1;
+            end
+            if (r + odd <= sum_squares) begin
+                r = r + odd;
+                odd = odd + 2;
+                sqrt_result = sqrt_result + 1;
+            end
+            if (r + odd <= sum_squares) begin
+                r = r + odd;
+                odd = odd + 2;
+                sqrt_result = sqrt_result + 1;
+            end
+            if (r + odd <= sum_squares) begin
+                r = r + odd;
+                odd = odd + 2;
+                sqrt_result = sqrt_result + 1;
+            end
+            if (r + odd <= sum_squares) begin
+                r = r + odd;
+                odd = odd + 2;
+                sqrt_result = sqrt_result + 1;
+            end
+            if (r + odd <= sum_squares) begin
+                r = r + odd;
+                odd = odd + 2;
+                sqrt_result = sqrt_result + 1;
+            end
+            if (r + odd <= sum_squares) begin
+                r = r + odd;
+                odd = odd + 2;
+                sqrt_result = sqrt_result + 1;
+            end
+
+            // Assign output
             uo_out <= sqrt_result;
         end
     end
