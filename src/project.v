@@ -23,41 +23,41 @@ module tt_um_addon (
             square_y    <= 16'b0;
             result      <= 8'b0;
             uo_out      <= 8'b0;
-            bit         <= 8'b10000000; // Start with the highest bit
-            state       <= 0;
+            bit         <= 8'b10000000; // Start with highest bit
+            state       <= 3'b000;
         end else if (ena) begin
             case (state)
-                0: begin
+                3'b000: begin
                     square_x <= ui_in * ui_in;
                     square_y <= uio_in * uio_in;
-                    state <= 1;
+                    state <= 3'b001;
                 end
-                1: begin
+                3'b001: begin
                     sum_squares <= square_x + square_y;
-                    result <= 0;
-                    bit <= 8'b10000000; // Start checking from the highest bit
-                    state <= 2;
+                    result <= 8'b0;
+                    bit <= 8'b10000000; // Highest bit
+                    state <= 3'b010;
                 end
-                2: begin
+                3'b010: begin
                     if (bit > 0) begin
                         if ((result | bit) * (result | bit) <= sum_squares) begin
                             result <= result | bit;
                         end
-                        bit <= bit >> 1; // Move to the next lower bit
+                        bit <= bit >> 1; // Shift bit right
                     end else begin
-                        state <= 3;
+                        state <= 3'b011;
                     end
                 end
-                3: begin
-                    uo_out <= result; // Store the final result
-                    state <= 0;
+                3'b011: begin
+                    uo_out <= result; // Store final result
+                    state <= 3'b000;
                 end
             endcase
         end
     end
 
     // Assign unused outputs to avoid warnings
-    assign uio_out = 8'b0;
-    assign uio_oe  = 8'b0;
+    assign uio_out = 8'b00000000;
+    assign uio_oe  = 8'b00000000;
 
 endmodule
