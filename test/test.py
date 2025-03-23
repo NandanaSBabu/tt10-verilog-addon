@@ -12,32 +12,22 @@ async def test_project(dut):
     dut.rst_n.value = 1
     dut.ena.value = 1
 
-    # Test case 1: x = 3, y = 4 (Expected sqrt(3^2 + 4^2) = 5)
-    dut.ui_in.value = 3
-    dut.uio_in.value = 4
-    await RisingEdge(dut.clk)
-    await RisingEdge(dut.clk)
-    assert dut.uo_out.value == 5, f"Test failed! Expected 5, got {dut.uo_out.value}"
-    
-    # Test case 2: x = 7, y = 24 (Expected sqrt(7^2 + 24^2) = 25)
-    dut.ui_in.value = 7
-    dut.uio_in.value = 24
-    await RisingEdge(dut.clk)
-    await RisingEdge(dut.clk)
-    assert dut.uo_out.value == 25, f"Test failed! Expected 25, got {dut.uo_out.value}"
+    # Test cases
+    test_cases = [
+        (3, 4, 5),     # sqrt(3^2 + 4^2) = 5
+        (7, 24, 25),   # sqrt(7^2 + 24^2) = 25
+        (10, 15, 18),  # sqrt(10^2 + 15^2) = ~18
+        (8, 6, 10)     # sqrt(8^2 + 6^2) = 10
+    ]
 
-    # Test case 3: x = 10, y = 15 (Expected sqrt(10^2 + 15^2) = 18)
-    dut.ui_in.value = 10
-    dut.uio_in.value = 15
-    await RisingEdge(dut.clk)
-    await RisingEdge(dut.clk)
-    assert dut.uo_out.value == 18, f"Test failed! Expected 18, got {dut.uo_out.value}"
-
-    # Test case 4: x = 8, y = 6 (Expected sqrt(8^2 + 6^2) = 10)
-    dut.ui_in.value = 8
-    dut.uio_in.value = 6
-    await RisingEdge(dut.clk)
-    await RisingEdge(dut.clk)
-    assert dut.uo_out.value == 10, f"Test failed! Expected 10, got {dut.uo_out.value}"
+    for x, y, expected in test_cases:
+        dut.ui_in.value = x
+        dut.uio_in.value = y
+        await RisingEdge(dut.clk)
+        await RisingEdge(dut.clk)
+        
+        output = int(dut.uo_out.value)
+        print(f"x = {x}, y = {y} -> Expected sqrt = {expected}, Got = {output}")
+        assert output == expected, f"Test failed! Expected {expected}, got {output}"
 
     cocotb.log.info("All test cases passed!")
