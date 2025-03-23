@@ -16,8 +16,7 @@ module tt_um_addon (
     reg [15:0] num;         // Working copy of sum_squares for sqrt calculation
     reg [15:0] result;      // Intermediate sqrt result (16 bits)
     reg [2:0]  state;       // State machine (0 to 5)
-    reg [15:0] b;            // Current bit for sqrt calculation
-    reg [15:0] temp_result;
+    reg [15:0] bit;          // Bit to test for sqrt calculation
 
     // State encoding:
     // 0: Compute squares
@@ -36,7 +35,7 @@ module tt_um_addon (
             result      <= 16'd0;
             uo_out      <= 8'd0;
             state       <= 3'd0;
-            b           <= 16'd0;
+            bit         <= 16'd0;
         end else if (ena) begin
             case (state)
                 3'd0: begin
@@ -51,23 +50,22 @@ module tt_um_addon (
                 3'd2: begin
                     num     <= sum_squares;
                     result  <= 16'd0;
-                    b       <= 16'd16384; // 1 << 14
+                    bit     <= 16'd16384; // 1 << 14
                     state   <= 3'd3;
                 end
                 3'd3: begin
-                    if (b > num)
-                        b <= b >> 2;
+                    if (bit > num)
+                        bit <= bit >> 2;
                     else
                         state <= 3'd4;
                 end
                 3'd4: begin
-                    if (b != 0) begin
-                        temp_result <= result + b;
-                        if (num >= temp_result) begin
-                            num <= num - temp_result;
-                            result <= temp_result;
+                    if (bit != 0) begin
+                        if (num >= result + bit) begin
+                            num     <= num - (result + bit);
+                            result  <= result + bit;
                         end
-                        b <= b >> 2;
+                        bit <= bit >> 2;
                     end else begin
                         state <= 3'd5;
                     end
