@@ -3,8 +3,8 @@ module tt_um_addon (
     input wire clk,
     input wire rst_n,
     input wire ena,
-    input wire [7:0] x,
-    input wire [7:0] y,
+    input wire [7:0] ui_in,
+    input wire [7:0] uio_in,
     output reg [7:0] uo_out
 );
 
@@ -21,7 +21,7 @@ module tt_um_addon (
             i <= 0;
             uo_out <= 0;
         end else if (ena) begin
-            sum_squares <= (x * x) + (y * y);
+            sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
             temp <= 0;
             sqrt_result <= 0;
             i <= 7;
