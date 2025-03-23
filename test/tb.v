@@ -1,57 +1,55 @@
+`timescale 1ns / 1ps
 `default_nettype none
 
-module tt_um_addon (
-    input wire [7:0] ui_in, 
-    input wire [7:0] uio_in, 
-    input wire clk, 
-    input wire rst_n, 
-    output reg [7:0] uo_out
-);
+module tb_tt_um_addon;
+    reg [7:0] ui_in, uio_in;
+    reg clk, rst_n;
+    wire [7:0] uo_out;
 
-    reg [15:0] sum_squares;
-    reg [15:0] square_x, square_y;
-    reg [7:0] result;
-    reg [15:0] temp, temp_square;
-    integer i, j;
+    // Instantiate the DUT
+    tt_um_addon dut (
+        .ui_in(ui_in),
+        .uio_in(uio_in),
+        .clk(clk),
+        .rst_n(rst_n),
+        .uo_out(uo_out)
+    );
 
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            square_x <= 0;
-            square_y <= 0;
-            sum_squares <= 0;
-            uo_out <= 0;
-        end else begin
-            // Compute ui_in^2 using repeated addition
-            square_x = 0;
-            for (j = 0; j < 8; j = j + 1) begin
-                if (ui_in[j]) square_x = square_x + (ui_in << j);
-            end
+    // Clock generation
+    always #5 clk = ~clk;
 
-            // Compute uio_in^2 using repeated addition
-            square_y = 0;
-            for (j = 0; j < 8; j = j + 1) begin
-                if (uio_in[j]) square_y = square_y + (uio_in << j);
-            end
+    initial begin
+        // Initialize signals
+        clk = 0;
+        rst_n = 0;
+        ui_in = 0;
+        uio_in = 0;
 
-            sum_squares = square_x + square_y;
+        // Reset sequence
+        #10 rst_n = 1;
 
-            // Compute square root using bitwise method (no multiplication)
-            result = 0;
-            for (i = 7; i >= 0; i = i - 1) begin
-                temp = result + (1 << i);
+        // Test cases
+        #10 ui_in = 20; uio_in = 99;
+        #50 $display("Input: ui_in=%d, uio_in=%d | Output uo_out=%d (Expected: 101)", ui_in, uio_in, uo_out);
 
-                // Compute temp^2 using repeated addition
-                temp_square = 0;
-                for (j = 0; j < 8; j = j + 1) begin
-                    if (temp[j]) temp_square = temp_square + (temp << j);
-                end
+        #10 ui_in = 6; uio_in = 8;
+        #50 $display("Input: ui_in=%d, uio_in=%d | Output uo_out=%d (Expected: 10)", ui_in, uio_in, uo_out);
 
-                if (temp_square <= sum_squares)
-                    result = temp;
-            end
+        #10 ui_in = 15; uio_in = 112;
+        #50 $display("Input: ui_in=%d, uio_in=%d | Output uo_out=%d (Expected: 113)", ui_in, uio_in, uo_out);
 
-            uo_out <= result;
-        end
+        #10 ui_in = 8; uio_in = 15;
+        #50 $display("Input: ui_in=%d, uio_in=%d | Output uo_out=%d (Expected: 17)", ui_in, uio_in, uo_out);
+
+        #10 ui_in = 20; uio_in = 21;
+        #50 $display("Input: ui_in=%d, uio_in=%d | Output uo_out=%d (Expected: 29)", ui_in, uio_in, uo_out);
+
+        // Stop simulation
+        #50 $finish;
     end
 
+    initial begin
+        $dumpfile("wave.vcd");
+      $dumpvars(0, tb_tt_um_addon);
+    end
 endmodule
