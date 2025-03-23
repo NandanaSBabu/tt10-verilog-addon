@@ -1,36 +1,37 @@
-# test_project.py (cocotb testbench)
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge
+from cocotb.triggers import RisingEdge, Timer
 
 @cocotb.test()
 async def test_project(dut):
-    clock = Clock(dut.clk, 10, units="ns")  # Create a 10ns period clock
+    clock = Clock(dut.clk, 10, units="ns")
     cocotb.start_soon(clock.start())
 
-    dut.rst_n.value = 0  # Reset
+    dut.rst_n.value = 0
     await RisingEdge(dut.clk)
-    dut.rst_n.value = 1  # Release reset
+    dut.rst_n.value = 1
 
-    # Test case 1: 3^2 + 4^2 = 25, sqrt(25) = 5
-    dut.ui_in.value = 3
-    dut.uio_in.value = 4
-    dut.ena.value = 1  # Enable calculation
+    test_vectors = [
+        (3, 4, 5),
+        (7, 24, 25),
+        (10, 15, 25),
+        (8, 6, 10),
+        (1, 1, 1),
+        (20,21,29),
+        (2,2,2)
+    ]
 
-    # Wait for the calculation to complete (adjust time as needed)
-    for _ in range(20): # increased the number of clock cycles.
-        await RisingEdge(dut.clk)
+    for x, y, expected_sqrt in test_vectors:
+        dut.ui_in.value = x
+        dut.uio_in.value = y
+        dut.ena.value = 1
 
-    dut.ena.value = 0 # disable calculation.
+        for _ in range(200):
+            await RisingEdge(dut.clk)
 
-    assert dut.uo_out.value == 5, f"Test failed! Expected 5, got {dut.uo_out.value}"
+        dut.ena.value = 0
+        await Timer(200, units="ns")
 
-    # Test case 2: 7^2 + 24^2 = 625, sqrt(625) = 25, output = 25[7:0]=25.
-    dut.ui_in.value = 7
-    dut.uio_in.value = 24
-    dut.ena.value = 1
-    for _ in range(20):
-        await RisingEdge(dut.clk)
-    dut.ena.value = 0
-
-    assert dut.uo_out.value == 25, f"Test failed! Expected 25, got {dut.uo_out.value}"
+        actual_sqrt = dut.uo_out.value
+        print(f"x={x}, y={y}, expected={expected_sqrt}, actual={actual_sqrt}")
+        assert actual_sqrt == expected_sqrt, f"Test failed for x={x}, y={y}. Expected {expected_sqrt}, got {actual_sqrt}"
