@@ -12,7 +12,7 @@ async def test_project(dut):
     dut.rst_n.value = 1
     dut.ena.value = 1
 
-    # Test case 1: x = 3, y = 4 (Expected sqrt(3^2 + 4^2) = 5)
+    # Test case 1: x = 3, y = 4 (Expected sqrt(3^2 + 4^2) =5)
     dut.ui_in.value = 3
     dut.uio_in.value = 4
     await RisingEdge(dut.clk)
