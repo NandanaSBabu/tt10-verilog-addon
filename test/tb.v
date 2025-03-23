@@ -1,47 +1,57 @@
-`timescale 1ns/1ps
 `default_nettype none
 
-module tb;
-    reg [7:0] ui_in;
-    reg [7:0] uio_in;
-    wire [7:0] uo_out;
-    reg clk, rst_n, ena;
+module tt_um_addon (
+    input wire [7:0] ui_in, 
+    input wire [7:0] uio_in, 
+    input wire clk, 
+    input wire rst_n, 
+    output reg [7:0] uo_out
+);
 
-    // Instantiate DUT
-    tt_um_addon dut (
-        .ui_in(ui_in),
-        .uio_in(uio_in),
-        .uo_out(uo_out),
-        .clk(clk),
-        .rst_n(rst_n),
-        .ena(ena),
-        .uio_out(),
-        .uio_oe()
-    );
+    reg [15:0] sum_squares;
+    reg [15:0] square_x, square_y;
+    reg [7:0] result;
+    reg [15:0] temp, temp_square;
+    integer i, j;
 
-    // Clock generation
-    always #5 clk = ~clk;
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            square_x <= 0;
+            square_y <= 0;
+            sum_squares <= 0;
+            uo_out <= 0;
+        end else begin
+            // Compute ui_in^2 using repeated addition
+            square_x = 0;
+            for (j = 0; j < 8; j = j + 1) begin
+                if (ui_in[j]) square_x = square_x + (ui_in << j);
+            end
 
-    initial begin
-        $dumpfile("tb.vcd");
-        $dumpvars(0, tb);
+            // Compute uio_in^2 using repeated addition
+            square_y = 0;
+            for (j = 0; j < 8; j = j + 1) begin
+                if (uio_in[j]) square_y = square_y + (uio_in << j);
+            end
 
-        clk = 0;
-        rst_n = 0;
-        ena = 0;
-        ui_in = 0;
-        uio_in = 0;
+            sum_squares = square_x + square_y;
 
-        #10 rst_n = 1;
-        #10 ena = 1;
+            // Compute square root using bitwise method (no multiplication)
+            result = 0;
+            for (i = 7; i >= 0; i = i - 1) begin
+                temp = result + (1 << i);
 
-        #10 ui_in = 3; uio_in = 4;  // sqrt(3^2 + 4^2) = 5
-        #20 $display("x = %d, y = %d, sqrt_out = %d", ui_in, uio_in, uo_out);
+                // Compute temp^2 using repeated addition
+                temp_square = 0;
+                for (j = 0; j < 8; j = j + 1) begin
+                    if (temp[j]) temp_square = temp_square + (temp << j);
+                end
 
-        #10 ui_in = 6; uio_in = 8;  // sqrt(6^2 + 8^2) = 10
-        #20 $display("x = %d, y = %d, sqrt_out = %d", ui_in, uio_in, uo_out);
+                if (temp_square <= sum_squares)
+                    result = temp;
+            end
 
-        #10 $finish;
+            uo_out <= result;
+        end
     end
 
 endmodule
