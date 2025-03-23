@@ -13,7 +13,7 @@ module tt_um_addon (
 
     reg [15:0] sum_squares;
     reg [15:0] square_x, square_y;
-    reg [7:0] result;
+    reg [7:0] result, bit;
     reg [2:0] state; // State machine for sequential operations
 
     always @(posedge clk or negedge rst_n) begin
@@ -23,6 +23,7 @@ module tt_um_addon (
             square_y    <= 16'b0;
             result      <= 8'b0;
             uo_out      <= 8'b0;
+            bit         <= 8'b10000000; // Start with the highest bit
             state       <= 0;
         end else if (ena) begin
             case (state)
@@ -33,32 +34,21 @@ module tt_um_addon (
                 end
                 1: begin
                     sum_squares <= square_x + square_y;
+                    result <= 0;
+                    bit <= 8'b10000000; // Start checking from the highest bit
                     state <= 2;
                 end
                 2: begin
-                    result <= 0;
-                    state <= 3;
+                    if (bit > 0) begin
+                        if ((result | bit) * (result | bit) <= sum_squares) begin
+                            result <= result | bit;
+                        end
+                        bit <= bit >> 1; // Move to the next lower bit
+                    end else begin
+                        state <= 3;
+                    end
                 end
                 3: begin
-                    if ((result + (1 << 7)) * (result + (1 << 7)) <= sum_squares)
-                        result <= result + (1 << 7);
-                    if ((result + (1 << 6)) * (result + (1 << 6)) <= sum_squares)
-                        result <= result + (1 << 6);
-                    if ((result + (1 << 5)) * (result + (1 << 5)) <= sum_squares)
-                        result <= result + (1 << 5);
-                    if ((result + (1 << 4)) * (result + (1 << 4)) <= sum_squares)
-                        result <= result + (1 << 4);
-                    if ((result + (1 << 3)) * (result + (1 << 3)) <= sum_squares)
-                        result <= result + (1 << 3);
-                    if ((result + (1 << 2)) * (result + (1 << 2)) <= sum_squares)
-                        result <= result + (1 << 2);
-                    if ((result + (1 << 1)) * (result + (1 << 1)) <= sum_squares)
-                        result <= result + (1 << 1);
-                    if ((result + (1 << 0)) * (result + (1 << 0)) <= sum_squares)
-                        result <= result + (1 << 0);
-                    state <= 4;
-                end
-                4: begin
                     uo_out <= result; // Store the final result
                     state <= 0;
                 end
