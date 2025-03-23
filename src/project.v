@@ -12,66 +12,47 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [15:0] square_x, square_y;
-    reg [15:0] result; // Changed to 16 bits to avoid width issues
+    reg [7:0] result;
+    integer b;
 
-    // Squaring function using multiplication
+    // Function to compute square using repeated addition
     function [15:0] square;
-        input [7:0] value;
+        input [7:0] a;
+        reg [15:0] s;
+        reg [7:0] count;
         begin
-            square = value * value;  // Direct multiplication
+            s = 0;
+            count = a;
+            while (count > 0) begin
+                s = s + a;  // Repeated addition (avoiding multiplication)
+                count = count - 1;
+            end
+            square = s;
         end
     endfunction
 
-    // Always block with non-blocking assignments
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            square_x <= 16'b0;
-            square_y <= 16'b0;
-            result <= 16'b0;
+            result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute square of x (ui_in) and y (uio_in) using the square function
-            square_x <= square(ui_in);
-            square_y <= square(uio_in);
-
             // Compute sum of squares
-            sum_squares <= square_x + square_y;
+            sum_squares = square(ui_in) + square(uio_in);
 
-            // Simple square root approximation (no unrolling)
-            result <= 0; // Reset the result before approximation
-            if ((result + (1 << 7)) * (result + (1 << 7)) <= sum_squares) begin
-                result <= result + (1 << 7);
-            end
-            if ((result + (1 << 6)) * (result + (1 << 6)) <= sum_squares) begin
-                result <= result + (1 << 6);
-            end
-            if ((result + (1 << 5)) * (result + (1 << 5)) <= sum_squares) begin
-                result <= result + (1 << 5);
-            end
-            if ((result + (1 << 4)) * (result + (1 << 4)) <= sum_squares) begin
-                result <= result + (1 << 4);
-            end
-            if ((result + (1 << 3)) * (result + (1 << 3)) <= sum_squares) begin
-                result <= result + (1 << 3);
-            end
-            if ((result + (1 << 2)) * (result + (1 << 2)) <= sum_squares) begin
-                result <= result + (1 << 2);
-            end
-            if ((result + (1 << 1)) * (result + (1 << 1)) <= sum_squares) begin
-                result <= result + (1 << 1);
-            end
-            if ((result + (1 << 0)) * (result + (1 << 0)) <= sum_squares) begin
-                result <= result + (1 << 0);
+            // Compute square root using bitwise method (avoiding multiplication)
+            result = 0;
+            for (b = 7; b >= 0; b = b - 1) begin
+                if ((result + (1 << b)) <= sum_squares / (result + (1 << b)))
+                    result = result + (1 << b);
             end
 
-            // Assign the output (only 8 bits of the result)
-            uo_out <= result[7:0];
+            // Assign output in the same cycle
+            uo_out <= result;
         end
     end
 
-    // Assign unused outputs to avoid warnings
+    // Assign unused outputs to 0 to avoid warnings
     assign uio_out = 8'b0;
     assign uio_oe  = 8'b0;
 
