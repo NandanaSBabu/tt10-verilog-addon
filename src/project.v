@@ -12,47 +12,50 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [7:0] result;
-    integer b;
+    reg [15:0] square_x, square_y;
+    reg [15:0] result; // Changed to 16 bits to avoid width issues
 
-    // Function to compute square using repeated addition
+    // Squaring function using repeated addition
     function [15:0] square;
-        input [7:0] a;
-        reg [15:0] s;
-        reg [7:0] count;
+        input [7:0] value;
+        integer i;
         begin
-            s = 0;
-            count = a;
-            while (count > 0) begin
-                s = s + a;  // Repeated addition (avoiding multiplication)
-                count = count - 1;
+            square = 16'b0;
+            for (i = 0; i < value; i = i + 1) begin
+                square = square + value;
             end
-            square = s;
         end
     endfunction
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            result <= 8'b0;
+            square_x <= 16'b0;
+            square_y <= 16'b0;
+            result <= 16'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute sum of squares
-            sum_squares = square(ui_in) + square(uio_in);
+            // Compute square of x (ui_in) and y (uio_in) using the square function
+            square_x = square(ui_in);
+            square_y = square(uio_in);
 
-            // Compute square root using bitwise method (avoiding multiplication)
-            result = 0;
-            for (b = 7; b >= 0; b = b - 1) begin
-                if ((result + (1 << b)) <= sum_squares / (result + (1 << b)))
+            // Compute sum of squares
+            sum_squares = square_x + square_y;
+
+            // Compute square root using bitwise approximation
+            result = 16'b0; // Reset the result before approximation
+            for (integer b = 15; b >= 0; b = b - 1) begin
+                if ((result + (1 << b)) * (result + (1 << b)) <= sum_squares) begin
                     result = result + (1 << b);
+                end
             end
 
-            // Assign output in the same cycle
-            uo_out <= result;
+            // Assign the output (only 8 bits of the result)
+            uo_out <= result[7:0];
         end
     end
 
-    // Assign unused outputs to 0 to avoid warnings
+    // Assign unused outputs to avoid warnings
     assign uio_out = 8'b0;
     assign uio_oe  = 8'b0;
 
