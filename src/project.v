@@ -13,38 +13,49 @@ module tt_um_addon (
 
     reg [15:0] sum_squares;
     reg [15:0] square_x, square_y;
-    reg [15:0] result;  // Increased width to 16 bits for intermediate calculations
-    
+    reg [15:0] result; // Changed to 16 bits to avoid width issues
+
+    // Squaring function using repeated addition
+    function [15:0] square;
+        input [7:0] value;
+        integer i;
+        begin
+            square = 16'b0;
+            for (i = 0; i < value; i = i + 1) begin
+                square = square + value;
+            end
+        end
+    endfunction
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
             square_x <= 16'b0;
             square_y <= 16'b0;
-            result <= 16'b0;  // Use 16 bits for result
+            result <= 16'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute square of x (ui_in) and y (uio_in) using repeated addition
-            square_x <= ui_in * ui_in; // Use non-blocking assignment
-            square_y <= uio_in * uio_in; // Use non-blocking assignment
+            // Compute square of x (ui_in) and y (uio_in) using the square function
+            square_x = square(ui_in);
+            square_y = square(uio_in);
 
             // Compute sum of squares
-            sum_squares <= square_x + square_y; // Use non-blocking assignment
+            sum_squares = square_x + square_y;
 
             // Compute square root using bitwise approximation
-            result <= 16'b0; // Initialize result to 0
-            
-            for (integer b = 7; b >= 0; b = b - 1) begin
+            result = 16'b0; // Reset the result before approximation
+            for (integer b = 15; b >= 0; b = b - 1) begin
                 if ((result + (1 << b)) * (result + (1 << b)) <= sum_squares) begin
-                    result <= result + (1 << b); // Use non-blocking assignment
+                    result = result + (1 << b);
                 end
             end
 
-            // Assign output
-            uo_out <= result[7:0];  // Only output 8 bits of the result
+            // Assign the output (only 8 bits of the result)
+            uo_out <= result[7:0];
         end
     end
 
-    // Assign unused outputs to 0 to avoid warnings
+    // Assign unused outputs to avoid warnings
     assign uio_out = 8'b0;
     assign uio_oe  = 8'b0;
 
