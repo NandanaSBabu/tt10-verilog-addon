@@ -44,7 +44,10 @@ module tt_um_addon (
 
             // Compute square root using bitwise approximation
             result = 16'b0; // Reset the result before approximation
-            for (integer b = 15; b >= 0; b = b - 1) begin
+
+            // Use a fixed loop to avoid procedural non-constant bounds
+            integer b;
+            for (b = 15; b >= 0; b = b - 1) begin
                 if ((result + (1 << b)) * (result + (1 << b)) <= sum_squares) begin
                     result = result + (1 << b);
                 end
