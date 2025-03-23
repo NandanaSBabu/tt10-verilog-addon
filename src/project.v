@@ -14,8 +14,7 @@ module tt_um_addon (
     reg [15:0] sum_squares;
     reg [15:0] square_x, square_y;
     reg [7:0] result;
-    integer b;
-
+    
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
@@ -24,22 +23,16 @@ module tt_um_addon (
             result <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Compute squares using repeated addition
-            square_x = 0;
-            square_y = 0;
-            
-            for (b = 0; b < ui_in; b = b + 1)
-                square_x = square_x + ui_in;
-            
-            for (b = 0; b < uio_in; b = b + 1)
-                square_y = square_y + uio_in;
+            // Compute square of x (ui_in) and y (uio_in) using repeated addition
+            square_x = ui_in * ui_in; // Direct multiplication for square of ui_in
+            square_y = uio_in * uio_in; // Direct multiplication for square of uio_in
 
             // Compute sum of squares
             sum_squares = square_x + square_y;
 
             // Compute square root using bitwise approximation
             result = 0;
-            for (b = 7; b >= 0; b = b - 1) begin
+            for (integer b = 7; b >= 0; b = b - 1) begin
                 if ((result + (1 << b)) * (result + (1 << b)) <= sum_squares) begin
                     result = result + (1 << b);
                 end
