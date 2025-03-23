@@ -12,37 +12,51 @@ module tt_um_addon (
 );
 
     reg [15:0] sum_squares;
-    reg [7:0] result;
     reg [7:0] approx_sqrt;
+    reg [7:0] bitmask;
     reg [15:0] temp;
-    reg [3:0] shift;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'b0;
-            result <= 8'b0;
             approx_sqrt <= 8'b0;
             uo_out <= 8'b0;
         end else if (ena) begin
-            // Calculate sum of squares
+            // Compute sum of squares
             sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
-
-            // Approximate square root using bitwise method
-            approx_sqrt = 0;
-            temp = 0;
-            shift = 15; // Highest bit position
             
-            while (shift >= 0) begin
-                temp = (approx_sqrt | (1 << shift));
-                if (temp * temp <= sum_squares) begin
-                    approx_sqrt = temp;
-                end
-                shift = shift - 1;
-            end
+            // Approximate square root using shift-subtract method (no loops)
+            approx_sqrt = 0;
+            bitmask = 8'b10000000;  // Start with the highest bit
+            
+            temp = 0;
+            
+            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
+            bitmask = bitmask >> 1;
+            
+            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
+            bitmask = bitmask >> 1;
+            
+            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
+            bitmask = bitmask >> 1;
+            
+            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
+            bitmask = bitmask >> 1;
+            
+            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
+            bitmask = bitmask >> 1;
+            
+            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
+            bitmask = bitmask >> 1;
+            
+            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
+            bitmask = bitmask >> 1;
+            
+            if ((temp | bitmask) * (temp | bitmask) <= sum_squares) temp = temp | bitmask;
 
-            // Assign final square root output
-            result <= approx_sqrt;
-            uo_out <= result;
+            // Assign final output
+            approx_sqrt = temp[7:0];
+            uo_out <= approx_sqrt;
         end
     end
 
