@@ -1,76 +1,43 @@
-`default_nettype none
+import cocotb
+from cocotb.triggers import RisingEdge
 
-module tt_um_addon (
-    input  wire [7:0] ui_in,    // x input
-    input  wire [7:0] uio_in,   // y input
-    output reg  [7:0] uo_out,   // sqrt_out output
-    output wire [7:0] uio_out,  // IOs: Output path (unused)
-    output wire [7:0] uio_oe,   // IOs: Enable path (unused)
-    input  wire       clk,      // clock
-    input  wire       rst_n,    // active-low reset
-    input  wire       ena       // Enable signal
-);
+@cocotb.test()
+async def test_project(dut):
+    """Test the square root computation."""
+    
+    # Reset logic
+    dut.rst_n.value = 0
+    dut.ena.value = 0
+    await RisingEdge(dut.clk)
+    dut.rst_n.value = 1
+    dut.ena.value = 1
 
-    reg [15:0] sum_squares;
-    reg [15:0] square_x, square_y;
-    reg [15:0] result; // Changed to 16 bits to avoid width issues
+    # Test case 1: x = 3, y = 4 (Expected sqrt(3^2 + 4^2) = 5)
+    dut.ui_in.value = 3
+    dut.uio_in.value = 4
+    await RisingEdge(dut.clk)
+    await RisingEdge(dut.clk)
+    assert dut.uo_out.value == 5, f"Test failed! Expected 5, got {dut.uo_out.value}"
+    
+    # Test case 2: x = 7, y = 24 (Expected sqrt(7^2 + 24^2) = 25)
+    dut.ui_in.value = 7
+    dut.uio_in.value = 24
+    await RisingEdge(dut.clk)
+    await RisingEdge(dut.clk)
+    assert dut.uo_out.value == 25, f"Test failed! Expected 25, got {dut.uo_out.value}"
 
-    // Squaring function using shift-and-add (replacing multiplication)
-    function [15:0] square;
-        input [7:0] value;
-        reg [15:0] temp;
-        integer n;
-        begin
-            temp = 16'b0;
-            for (n = 0; n < 8; n = n + 1) begin
-                if (value[n])
-                    temp = temp + (value << n);
-            end
-            square = temp;
-        end
-    endfunction
+    # Test case 3: x = 10, y = 15 (Expected sqrt(10^2 + 15^2) = 18)
+    dut.ui_in.value = 10
+    dut.uio_in.value = 15
+    await RisingEdge(dut.clk)
+    await RisingEdge(dut.clk)
+    assert dut.uo_out.value == 18, f"Test failed! Expected 18, got {dut.uo_out.value}"
 
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            sum_squares <= 16'b0;
-            square_x <= 16'b0;
-            square_y <= 16'b0;
-            result <= 16'b0;
-            uo_out <= 8'b0;
-        end else if (ena) begin
-            // Compute square of x (ui_in) and y (uio_in)
-            square_x <= square(ui_in);
-            square_y <= square(uio_in);
+    # Test case 4: x = 8, y = 6 (Expected sqrt(8^2 + 6^2) = 10)
+    dut.ui_in.value = 8
+    dut.uio_in.value = 6
+    await RisingEdge(dut.clk)
+    await RisingEdge(dut.clk)
+    assert dut.uo_out.value == 10, f"Test failed! Expected 10, got {dut.uo_out.value}"
 
-            // Compute sum of squares
-            sum_squares <= square_x + square_y;
-
-            // Compute square root using bitwise approximation (manual unrolling)
-            result <= 16'b0; // Reset the result before approximation
-            if ((result + (1 << 15)) * (result + (1 << 15)) <= sum_squares) result <= result + (1 << 15);
-            if ((result + (1 << 14)) * (result + (1 << 14)) <= sum_squares) result <= result + (1 << 14);
-            if ((result + (1 << 13)) * (result + (1 << 13)) <= sum_squares) result <= result + (1 << 13);
-            if ((result + (1 << 12)) * (result + (1 << 12)) <= sum_squares) result <= result + (1 << 12);
-            if ((result + (1 << 11)) * (result + (1 << 11)) <= sum_squares) result <= result + (1 << 11);
-            if ((result + (1 << 10)) * (result + (1 << 10)) <= sum_squares) result <= result + (1 << 10);
-            if ((result + (1 << 9)) * (result + (1 << 9)) <= sum_squares) result <= result + (1 << 9);
-            if ((result + (1 << 8)) * (result + (1 << 8)) <= sum_squares) result <= result + (1 << 8);
-            if ((result + (1 << 7)) * (result + (1 << 7)) <= sum_squares) result <= result + (1 << 7);
-            if ((result + (1 << 6)) * (result + (1 << 6)) <= sum_squares) result <= result + (1 << 6);
-            if ((result + (1 << 5)) * (result + (1 << 5)) <= sum_squares) result <= result + (1 << 5);
-            if ((result + (1 << 4)) * (result + (1 << 4)) <= sum_squares) result <= result + (1 << 4);
-            if ((result + (1 << 3)) * (result + (1 << 3)) <= sum_squares) result <= result + (1 << 3);
-            if ((result + (1 << 2)) * (result + (1 << 2)) <= sum_squares) result <= result + (1 << 2);
-            if ((result + (1 << 1)) * (result + (1 << 1)) <= sum_squares) result <= result + (1 << 1);
-            if ((result + (1 << 0)) * (result + (1 << 0)) <= sum_squares) result <= result + (1 << 0);
-
-            // Assign the output (only 8 bits of the result)
-            uo_out <= result[7:0];
-        end
-    end
-
-    // Assign unused outputs to avoid warnings
-    assign uio_out = 8'b0;
-    assign uio_oe  = 8'b0;
-
-endmodule
+    cocotb.log.info("All test cases passed!")
