@@ -9,44 +9,42 @@ project:
   # Design tile size
   tiles: "1x1"  # Valid values: 1x1, 1x2, 2x2, etc.
 
-  # Top module name
+  # Top module name (Ensure this matches your Verilog module name)
   top_module:  "tt_um_addon"
 
-  # Source files
+  # Source files (Ensure this file exists in your src directory)
   source_files:
     - "project.v"
 
 # Pinout for datasheet/website
 pinout:
-  # Inputs
-  ui[0]: "x"
-  ui[1]: "y"
-  ui[2]: ""
-  ui[3]: ""
-  ui[4]: ""
-  ui[5]: ""
-  ui[6]: ""
-  ui[7]: ""
-
-  # Outputs
-  uo[0]: "output"
-  uo[1]: ""
-  uo[2]: ""
-  uo[3]: ""
-  uo[4]: ""
-  uo[5]: ""
-  uo[6]: ""
-  uo[7]: ""
-
-  # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  inputs:
+    ui[0]: "x"
+    ui[1]: "y"
+    ui[2]: ""
+    ui[3]: ""
+    ui[4]: ""
+    ui[5]: ""
+    ui[6]: ""
+    ui[7]: ""
+  outputs:
+    uo[0]: "output"
+    uo[1]: ""
+    uo[2]: ""
+    uo[3]: ""
+    uo[4]: ""
+    uo[5]: ""
+    uo[6]: ""
+    uo[7]: ""
+  bidirectional:
+    uio[0]: ""
+    uio[1]: ""
+    uio[2]: ""
+    uio[3]: ""
+    uio[4]: ""
+    uio[5]: ""
+    uio[6]: ""
+    uio[7]: ""
 
 # Do not change!
 yaml_version: 6
