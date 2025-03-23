@@ -30,14 +30,17 @@ module tt_um_addon (
                     square_x <= ui_in * ui_in;
                     square_y <= uio_in * uio_in;
                     state <= 1;
+                    $display("State 0: x^2=%d, y^2=%d", square_x, square_y);
                 end
                 1: begin
                     sum_squares <= square_x + square_y;
                     state <= 2;
+                    $display("State 1: Sum=%d", sum_squares);
                 end
                 2: begin
                     result <= 0;
                     state <= 3;
+                    $display("State 2: Reset result");
                 end
                 3: begin
                     if ((result + (1 << 7)) * (result + (1 << 7)) <= sum_squares)
@@ -57,10 +60,12 @@ module tt_um_addon (
                     if ((result + (1 << 0)) * (result + (1 << 0)) <= sum_squares)
                         result <= result + (1 << 0);
                     state <= 4;
+                    $display("State 3: Computed sqrt=%d", result);
                 end
                 4: begin
                     uo_out <= result; // Store the final result
                     state <= 0;
+                    $display("State 4: Output=%d", uo_out);
                 end
             endcase
         end
