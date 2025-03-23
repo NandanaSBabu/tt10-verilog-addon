@@ -11,7 +11,7 @@ async def test_project(dut):
     dut.ui_in.value = 0
     dut.uio_in.value = 0
     await RisingEdge(dut.clk)  
-    await RisingEdge(dut.clk)  # Extra cycle to ensure reset is applied
+    await RisingEdge(dut.clk)  #Extra cycle to ensure reset is applied
     dut.rst_n.value = 1
     dut.ena.value = 1
     await RisingEdge(dut.clk)  # Allow hardware to settle
