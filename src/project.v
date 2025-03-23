@@ -6,52 +6,62 @@
 `default_nettype none
 
 module tt_um_addon (
-    input  wire [7:0] ui_in,    // Dedicated input X
-    output wire [7:0] uo_out,   // Output (sqrt result)
-    input  wire [7:0] uio_in,   // Dedicated input Y
-    output wire [7:0] uio_out,  // IOs: Output path (unused)
-    output wire [7:0] uio_oe,   // IOs: Enable path (unused)
-    input  wire       ena,      // Always 1 when design is powered
-    input  wire       clk,      // Clock
-    input  wire       rst_n     // Reset (active low)
+    input  wire [7:0] ui_in,    // Dedicated inputs
+    output wire [7:0] uo_out,   // Dedicated outputs
+    input  wire [7:0] uio_in,   // IOs: Input path
+    output wire [7:0] uio_out,  // IOs: Output path
+    output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
+    input  wire       ena,      // always 1 when the design is powered, so you can ignore it
+    input  wire       clk,      // clock
+    input  wire       rst_n     // reset_n - low to reset
 );
 
     reg [15:0] square_x, square_y;
     reg [15:0] sum_squares;
-    reg [15:0] sqrt_result;
+    reg [7:0] result;
+    reg [15:0] temp_sqrt;
 
-    // Squaring logic
+    // Squaring function
+    function [15:0] square;
+        input [7:0] value;
+        begin
+            square = value * value;
+        end
+    endfunction
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             square_x <= 16'b0;
             square_y <= 16'b0;
             sum_squares <= 16'b0;
+            result <= 8'b0;
         end else if (ena) begin
-            square_x <= ui_in * ui_in;   // X^2
-            square_y <= uio_in * uio_in; // Y^2
-            sum_squares <= square_x + square_y; // Sum of squares
+            square_x <= square(ui_in);
+            square_y <= square(uio_in);
+            sum_squares <= square_x + square_y;
         end
     end
 
-    // Iterative square root calculation using bitwise method
+    // Integer square root calculation using bitwise method
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            sqrt_result <= 16'b0;
+            temp_sqrt <= 16'b0;
+            result <= 8'b0;
         end else if (ena) begin
-            sqrt_result = 0;
-            for (integer n = 15; n >= 0; n = n - 1) begin
-                if ((sqrt_result | (1 << n)) * (sqrt_result | (1 << n)) <= sum_squares)
-                    sqrt_result = sqrt_result | (1 << n);
+            temp_sqrt = 0;
+            for (integer n = 7; n >= 0; n = n - 1) begin
+                if ((temp_sqrt | (1 << n)) * (temp_sqrt | (1 << n)) <= sum_squares)
+                    temp_sqrt = temp_sqrt | (1 << n);
             end
+            result <= temp_sqrt[7:0];
         end
     end
 
-    // Assigning output (lower 8 bits of sqrt_result)
-    assign uo_out = sqrt_result[7:0];
-    assign uio_out = 8'b0; // Not used
-    assign uio_oe = 8'b0;  // Not used
+    assign uo_out = result; // Output the computed sqrt value
+    assign uio_out = 8'b0; // No output on uio_out
+    assign uio_oe = 8'b0;  // All uio pins are set as inputs
 
-    // Prevent unused signal warnings
+    // List all unused inputs to prevent warnings
     wire _unused = &{ena, 1'b0};
 
 endmodule
