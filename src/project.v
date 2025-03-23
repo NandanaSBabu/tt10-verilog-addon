@@ -49,7 +49,6 @@ module tt_um_addon (
             if ((result + (1 << 13)) * (result + (1 << 13)) <= sum_squares) begin
                 result <= result + (1 << 13);
             end
-            // Continue the same for other bits (unrolling manually)
             if ((result + (1 << 12)) * (result + (1 << 12)) <= sum_squares) begin
                 result <= result + (1 << 12);
             end
