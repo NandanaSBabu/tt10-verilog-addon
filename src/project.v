@@ -42,15 +42,56 @@ module tt_um_addon (
             // Compute sum of squares
             sum_squares = square_x + square_y;
 
-            // Compute square root using bitwise approximation
+            // Compute square root using bitwise approximation (manual unrolling)
             result = 16'b0; // Reset the result before approximation
-            integer b; // Declare 'b' outside the loop
-
-            // Use fixed loop bounds and avoid procedural loop issues
-            for (b = 15; b >= 0; b = b - 1) begin
-                if ((result + (1 << b)) * (result + (1 << b)) <= sum_squares) begin
-                    result = result + (1 << b);
-                end
+            if ((result + (1 << 15)) * (result + (1 << 15)) <= sum_squares) begin
+                result = result + (1 << 15);
+            end
+            if ((result + (1 << 14)) * (result + (1 << 14)) <= sum_squares) begin
+                result = result + (1 << 14);
+            end
+            if ((result + (1 << 13)) * (result + (1 << 13)) <= sum_squares) begin
+                result = result + (1 << 13);
+            end
+            // Continue the same for other bits (unrolling manually)
+            if ((result + (1 << 12)) * (result + (1 << 12)) <= sum_squares) begin
+                result = result + (1 << 12);
+            end
+            if ((result + (1 << 11)) * (result + (1 << 11)) <= sum_squares) begin
+                result = result + (1 << 11);
+            end
+            if ((result + (1 << 10)) * (result + (1 << 10)) <= sum_squares) begin
+                result = result + (1 << 10);
+            end
+            if ((result + (1 << 9)) * (result + (1 << 9)) <= sum_squares) begin
+                result = result + (1 << 9);
+            end
+            if ((result + (1 << 8)) * (result + (1 << 8)) <= sum_squares) begin
+                result = result + (1 << 8);
+            end
+            if ((result + (1 << 7)) * (result + (1 << 7)) <= sum_squares) begin
+                result = result + (1 << 7);
+            end
+            if ((result + (1 << 6)) * (result + (1 << 6)) <= sum_squares) begin
+                result = result + (1 << 6);
+            end
+            if ((result + (1 << 5)) * (result + (1 << 5)) <= sum_squares) begin
+                result = result + (1 << 5);
+            end
+            if ((result + (1 << 4)) * (result + (1 << 4)) <= sum_squares) begin
+                result = result + (1 << 4);
+            end
+            if ((result + (1 << 3)) * (result + (1 << 3)) <= sum_squares) begin
+                result = result + (1 << 3);
+            end
+            if ((result + (1 << 2)) * (result + (1 << 2)) <= sum_squares) begin
+                result = result + (1 << 2);
+            end
+            if ((result + (1 << 1)) * (result + (1 << 1)) <= sum_squares) begin
+                result = result + (1 << 1);
+            end
+            if ((result + (1 << 0)) * (result + (1 << 0)) <= sum_squares) begin
+                result = result + (1 << 0);
             end
 
             // Assign the output (only 8 bits of the result)
