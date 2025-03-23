@@ -8,16 +8,15 @@ async def test_project(dut):
     # Reset logic
     dut.rst_n.value = 0
     dut.ena.value = 0
-    await RisingEdge(dut.clk)  # Wait for one rising edge
-    dut.rst_n.value = 1  # De-assert reset
-    dut.ena.value = 1  # Enable DUT
-    await RisingEdge(dut.clk)  # Wait for one rising edge
+    await RisingEdge(dut.clk)
+    dut.rst_n.value = 1
+    dut.ena.value = 1
 
     # Test case 1: x = 3, y = 4 (Expected sqrt(3^2 + 4^2) = 5)
     dut.ui_in.value = 3
     dut.uio_in.value = 4
     await RisingEdge(dut.clk)
-    await RisingEdge(dut.clk)  # Wait for output to stabilize
+    await RisingEdge(dut.clk)
     assert dut.uo_out.value == 5, f"Test failed! Expected 5, got {dut.uo_out.value}"
     
     # Test case 2: x = 7, y = 24 (Expected sqrt(7^2 + 24^2) = 25)
