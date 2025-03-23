@@ -1,17 +1,22 @@
 `default_nettype none
 module tt_um_addon (
-    input wire clk,
-    input wire rst_n,
-    input wire ena,
-    input wire [7:0] ui_in,
-    input wire [7:0] uio_in,
-    output reg [7:0] uo_out
+    input wire clk,          // Clock signal
+    input wire rst_n,        // Active-low reset
+    input wire ena,          // Enable signal
+    input wire [7:0] ui_in,  // Input x
+    input wire [7:0] uio_in, // Input y
+    output reg [7:0] uo_out, // Output sqrt(x^2 + y^2)
+    output wire [7:0] uio_out, // Extra output (set to 0)
+    output wire [7:0] uio_oe   // Output enable (set to 0)
 );
 
     reg [15:0] sum_squares;
     reg [7:0] sqrt_result;
     reg [7:0] temp;
     reg [3:0] i;
+
+    assign uio_out = 8'b0; // Default output to prevent errors
+    assign uio_oe = 8'b0;  // Default output enable to prevent errors
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
