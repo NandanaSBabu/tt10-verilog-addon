@@ -42,24 +42,26 @@ module tt_um_addon (
             // Compute sum of squares
             sum_squares = square_x + square_y;
 
-            // Compute square root using a series of conditions instead of a loop
+            // Compute square root using bitwise approximation without procedural loops
             result = 16'b0; // Reset the result before approximation
-            if ((result + (1 << 15)) * (result + (1 << 15)) <= sum_squares) result = result + (1 << 15);
-            if ((result + (1 << 14)) * (result + (1 << 14)) <= sum_squares) result = result + (1 << 14);
-            if ((result + (1 << 13)) * (result + (1 << 13)) <= sum_squares) result = result + (1 << 13);
-            if ((result + (1 << 12)) * (result + (1 << 12)) <= sum_squares) result = result + (1 << 12);
-            if ((result + (1 << 11)) * (result + (1 << 11)) <= sum_squares) result = result + (1 << 11);
-            if ((result + (1 << 10)) * (result + (1 << 10)) <= sum_squares) result = result + (1 << 10);
-            if ((result + (1 << 9)) * (result + (1 << 9)) <= sum_squares) result = result + (1 << 9);
-            if ((result + (1 << 8)) * (result + (1 << 8)) <= sum_squares) result = result + (1 << 8);
-            if ((result + (1 << 7)) * (result + (1 << 7)) <= sum_squares) result = result + (1 << 7);
-            if ((result + (1 << 6)) * (result + (1 << 6)) <= sum_squares) result = result + (1 << 6);
-            if ((result + (1 << 5)) * (result + (1 << 5)) <= sum_squares) result = result + (1 << 5);
-            if ((result + (1 << 4)) * (result + (1 << 4)) <= sum_squares) result = result + (1 << 4);
-            if ((result + (1 << 3)) * (result + (1 << 3)) <= sum_squares) result = result + (1 << 3);
-            if ((result + (1 << 2)) * (result + (1 << 2)) <= sum_squares) result = result + (1 << 2);
-            if ((result + (1 << 1)) * (result + (1 << 1)) <= sum_squares) result = result + (1 << 1);
-            if ((result + (1 << 0)) * (result + (1 << 0)) <= sum_squares) result = result + (1 << 0);
+            
+            // Unroll the loop manually (each line simulates one loop iteration)
+            if ((result + 16'b1000000000000000) * (result + 16'b1000000000000000) <= sum_squares) result = result + 16'b1000000000000000;
+            if ((result + 16'b0100000000000000) * (result + 16'b0100000000000000) <= sum_squares) result = result + 16'b0100000000000000;
+            if ((result + 16'b0010000000000000) * (result + 16'b0010000000000000) <= sum_squares) result = result + 16'b0010000000000000;
+            if ((result + 16'b0001000000000000) * (result + 16'b0001000000000000) <= sum_squares) result = result + 16'b0001000000000000;
+            if ((result + 16'b0000100000000000) * (result + 16'b0000100000000000) <= sum_squares) result = result + 16'b0000100000000000;
+            if ((result + 16'b0000010000000000) * (result + 16'b0000010000000000) <= sum_squares) result = result + 16'b0000010000000000;
+            if ((result + 16'b0000001000000000) * (result + 16'b0000001000000000) <= sum_squares) result = result + 16'b0000001000000000;
+            if ((result + 16'b0000000100000000) * (result + 16'b0000000100000000) <= sum_squares) result = result + 16'b0000000100000000;
+            if ((result + 16'b0000000010000000) * (result + 16'b0000000010000000) <= sum_squares) result = result + 16'b0000000010000000;
+            if ((result + 16'b0000000001000000) * (result + 16'b0000000001000000) <= sum_squares) result = result + 16'b0000000001000000;
+            if ((result + 16'b0000000000100000) * (result + 16'b0000000000100000) <= sum_squares) result = result + 16'b0000000000100000;
+            if ((result + 16'b0000000000010000) * (result + 16'b0000000000010000) <= sum_squares) result = result + 16'b0000000000010000;
+            if ((result + 16'b0000000000001000) * (result + 16'b0000000000001000) <= sum_squares) result = result + 16'b0000000000001000;
+            if ((result + 16'b0000000000000100) * (result + 16'b0000000000000100) <= sum_squares) result = result + 16'b0000000000000100;
+            if ((result + 16'b0000000000000010) * (result + 16'b0000000000000010) <= sum_squares) result = result + 16'b0000000000000010;
+            if ((result + 16'b0000000000000001) * (result + 16'b0000000000000001) <= sum_squares) result = result + 16'b0000000000000001;
 
             // Assign the output (only 8 bits of the result)
             uo_out <= result[7:0];
