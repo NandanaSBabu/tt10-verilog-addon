@@ -5,7 +5,9 @@ module tt_um_addon (
     input  wire ena,
     input  wire [7:0] ui_in,
     input  wire [7:0] uio_in,
-    output reg  [7:0] uo_out
+    output reg  [7:0] uo_out,
+    output wire [7:0] uio_out,  // Added output
+    output wire [7:0] uio_oe    // Added output enable
 );
 
     reg [15:0] square_x, square_y;
@@ -56,5 +58,8 @@ module tt_um_addon (
         else if (ena)
             uo_out <= result[7:0];
     end
+
+    assign uio_out = 8'b0; // No output on uio_out
+    assign uio_oe = 8'b0;  // All uio pins are set as inputs
 
 endmodule
