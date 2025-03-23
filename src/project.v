@@ -1,22 +1,22 @@
 `default_nettype none
 
 module tt_um_addon (
-    input  wire [7:0] ui_in,    // x input
-    input  wire [7:0] uio_in,   // y input
-    output reg  [7:0] uo_out,   // sqrt_out output
-    output wire [7:0] uio_out,  // Unused IO output path
-    output wire [7:0] uio_oe,   // Unused IO enable path (0 = input)
-    input  wire        ena,      // Enable signal (when high, compute)
-    input  wire        clk,      // Clock
-    input  wire        rst_n     // Active-low reset
+    input  wire [7:0] ui_in,     // x input
+    input  wire [7:0] uio_in,    // y input
+    output reg  [7:0] uo_out,    // sqrt_out output
+    output wire [7:0] uio_out,   // Unused IO output path
+    output wire [7:0] uio_oe,    // Unused IO enable path (0 = input)
+    input  wire       ena,       // Enable signal (when high, compute)
+    input  wire       clk,       // Clock
+    input  wire       rst_n      // Active-low reset
 );
 
     // Internal registers
     reg [15:0] square_x, square_y, sum_squares;
-    reg [15:0] num;      // Working copy of sum_squares for sqrt calculation
-    reg [15:0] result;   // Intermediate sqrt result (16 bits)
-    reg [15:0] b;        // Current bit value for testing
-    reg [2:0]  state;    // State machine (0 to 5)
+    reg [15:0] num;         // Working copy of sum_squares for sqrt calculation
+    reg [15:0] result;      // Intermediate sqrt result (16 bits)
+    reg [15:0] b;           // Current bit value for testing
+    reg [2:0]  state;       // State machine (0 to 5)
 
     // State encoding:
     // 0: Compute squares
@@ -40,8 +40,8 @@ module tt_um_addon (
             case (state)
                 3'd0: begin
                     // Compute squares using multiplication
-                    square_x    <= ui_in * ui_in;  // e.g., 3*3 = 9
-                    square_y    <= uio_in * uio_in; // e.g., 4*4 = 16
+                    square_x    <= ui_in * ui_in;    // e.g., 3*3 = 9
+                    square_y    <= uio_in * uio_in;   // e.g., 4*4 = 16
                     state       <= 3'd1;
                 end
                 3'd1: begin
@@ -72,7 +72,7 @@ module tt_um_addon (
                             num     <= num - (result + b);
                             result  <= (result >> 1) + b;
                         end else begin
-                            result <= result >> 1;
+                            result <= result >> 2; // Corrected line: Shift by 2 bits
                         end
                         b <= b >> 2;
                     end else begin
