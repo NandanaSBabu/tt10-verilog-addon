@@ -1,5 +1,3 @@
-# test.py
-
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, Timer
@@ -33,7 +31,7 @@ async def test_project(dut):
             await RisingEdge(dut.clk)
         
         output = int(dut.uo_out.value)
-        cocotb.log.info(f"For inputs x={a}, y={b}, computed sqrt={output}, expected={expected}")
+        cocotb.log.info(f"Time: {cocotb.utils.get_sim_time('ns')}ns, For inputs x={a}, y={b}, computed sqrt={output}, expected={expected}")
         assert output == expected, f"Test failed for (x={a}, y={b}): Expected {expected}, got {output}"
 
     await Timer(500, units="ns")
