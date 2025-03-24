@@ -19,18 +19,18 @@ async def test_project(dut):
 
     # Define test vectors: (ui_in, uio_in, expected sqrt)
     test_vectors = [
-        (3, 4, 5),    # 9+16 = 25, sqrt=5
+        (3, 4, 5),   # 9+16 = 25, sqrt=5
         (7, 24, 25),  # 49+576 = 625, sqrt=25
-        (10,15,18),   # 100+225 = 325, sqrt=18 (integer part)
+        (10, 15, 18),  # 100+225 = 325, sqrt=18 (integer part)
         (8, 6, 10),   # 64+36 = 100, sqrt=10
-        (12,16,20)    # 144+256 = 400, sqrt=20
+        (12, 16, 20)  # 144+256 = 400, sqrt=20
     ]
 
     for a, b, expected in test_vectors:
         dut.ui_in.value = a
         dut.uio_in.value = b
         # Wait enough clock cycles for the state machine to finish computation
-        for _ in range(1000):
+        for _ in range(100):
             await RisingEdge(dut.clk)
         output = int(dut.uo_out.value)
         cocotb.log.info(f"For inputs x={a}, y={b}, computed sqrt={output}, expected={expected}")
