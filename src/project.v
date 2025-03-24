@@ -15,8 +15,8 @@ module tt_um_addon (
     assign uio_oe  = 8'b0;
 
     reg [15:0] sum_squares;
-    reg [7:0] estimate;
-    reg [7:0] step;
+    reg [15:0] estimate;
+    reg [15:0] b;
     reg [15:0] temp_sum;
     integer i;
 
@@ -24,22 +24,31 @@ module tt_um_addon (
         if (!rst_n) begin
             uo_out      <= 8'd0;
             sum_squares <= 16'd0;
-            estimate    <= 8'd0;
-            step        <= 8'd0;
+            estimate    <= 16'd0;
+            b           <= 16'd0;
         end else begin
             sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
-            estimate    <= 8'd0;
-            step        <= 8'd64;  // Start with highest bit for binary search
+            estimate    <= 0;
             temp_sum    <= sum_squares;
+            b           <= 16'h4000; // Highest power of 4 within 16-bit range
 
-            // Binary search for square root approximation
-            for (i = 0; i < 7; i = i + 1) begin
-                if ((estimate + step) * (estimate + step) <= sum_squares)
-                    estimate <= estimate + step;
-                step <= step >> 1;
+            // Fixed iteration loop instead of while (GDS-safe)
+            for (i = 0; i < 8; i = i + 1) begin
+                if (b > temp_sum)
+                    b <= b >> 2; // Non-blocking assignment to avoid GDS issue
+            end
+
+            // Approximate square root calculation
+            for (i = 0; i < 8; i = i + 1) begin
+                if (temp_sum >= estimate + b) begin
+                    temp_sum  <= temp_sum - (estimate + b);
+                    estimate  <= estimate + (b << 1);
+                end
+                estimate <= estimate >> 1; // Correct shift
+                b <= b >> 2;
             end
             
-            uo_out <= estimate;  // Non-blocking assignment for final output
+            uo_out <= estimate[7:0]; // Non-blocking assignment for final output
         end
     end
 
