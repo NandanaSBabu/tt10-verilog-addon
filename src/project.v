@@ -32,9 +32,10 @@ module tt_um_addon (
             b           <= 16'h4000; // Start from highest power of 4 below 16-bit range
             temp_sum    <= sum_squares;
 
-            // Ensure b is within range using a blocking assignment inside sequential logic
-            while (b > temp_sum) begin
-                b = b >> 2; // Blocking assignment is correct here
+            // Ensure b is within range using a for loop
+            for (i = 0; i < 8; i = i + 1) begin
+                if (b > temp_sum) 
+                    b = b >> 2;
             end
 
             // Correct Approximate Square Root Calculation
@@ -44,7 +45,7 @@ module tt_um_addon (
                         temp_sum  = temp_sum - (estimate + b); 
                         estimate  = estimate + b;  // Corrected calculation
                     end 
-                    b = b >> 2;  // Correct shift using blocking assignment
+                    b = b >> 2;  // Correct shift
                 end
             end
             
