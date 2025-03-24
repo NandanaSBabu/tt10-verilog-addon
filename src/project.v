@@ -29,22 +29,23 @@ module tt_um_addon (
         end else begin
             sum_squares = (ui_in * ui_in) + (uio_in * uio_in);
             estimate = 0;
-            b = 1 << 14; // Start from the highest power of 4
+            b = 16'h4000; // Start from the highest power of 4 within 16-bit range
 
-            // Use a `for` loop instead of `while`
-            for (i = 0; i < 8; i = i + 1) begin
-                if (b > sum_squares)
+            // Replace `while` with a `for` loop (Ensures b is within range)
+            for (i = 0; i < 15; i = i + 1) begin
+                if (b > sum_squares) begin
                     b = b >> 2;
+                end
             end
 
-            // Square root approximation using shift operations
+            // Square root approximation using bitwise operations
             for (i = 0; i < 8; i = i + 1) begin
                 if (b != 0) begin
                     if (sum_squares >= (estimate + b)) begin
                         sum_squares = sum_squares - (estimate + b);
                         estimate = estimate + (b << 1);
                     end 
-                    estimate = estimate >> 1;
+                    estimate = estimate + (b >> 1); // Correct bit shift
                     b = b >> 2;
                 end
             end
