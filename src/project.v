@@ -15,8 +15,8 @@ module tt_um_addon (
     assign uio_oe  = 8'b0;
 
     reg [15:0] sum_squares;
-    reg [15:0] estimate;
-    reg [15:0] b;
+    reg [7:0] estimate;
+    reg [7:0] step;
     reg [15:0] temp_sum;
     integer i;
 
@@ -24,32 +24,22 @@ module tt_um_addon (
         if (!rst_n) begin
             uo_out      <= 8'd0;
             sum_squares <= 16'd0;
-            estimate    <= 16'd0;
-            b           <= 16'd0;
+            estimate    <= 8'd0;
+            step        <= 8'd0;
         end else begin
             sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
-            estimate    <= 0;
+            estimate    <= 8'd0;
+            step        <= 8'd64;  // Start with highest bit for binary search
             temp_sum    <= sum_squares;
-            b           <= 16'h4000; // Start at 16384 (largest power of 4 in 16-bit)
 
-            // Use a fixed loop instead of while to avoid GDS issues
-            for (i = 0; i < 8; i = i + 1) begin
-                if (b > temp_sum)
-                    b <= b >> 2; // **Non-blocking to avoid synthesis issues**
-            end
-
-            // Approximate square root using subtraction and shifting
-            for (i = 0; i < 8; i = i + 1) begin
-                if (b != 0) begin
-                    if (temp_sum >= (estimate + b)) begin
-                        temp_sum  <= temp_sum - (estimate + b); 
-                        estimate  <= estimate + (b << 1);
-                    end 
-                    b <= b >> 2;
-                end
+            // Binary search for square root approximation
+            for (i = 0; i < 7; i = i + 1) begin
+                if ((estimate + step) * (estimate + step) <= sum_squares)
+                    estimate <= estimate + step;
+                step <= step >> 1;
             end
             
-            uo_out <= estimate[7:0]; // Final square root estimate
+            uo_out <= estimate;  // Non-blocking assignment for final output
         end
     end
 
