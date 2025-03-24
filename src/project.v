@@ -6,9 +6,9 @@ module tt_um_addon (
     output reg  [7:0] uo_out,   // Approximate Square root output
     output wire [7:0] uio_out,  // IOs: Output path
     output wire [7:0] uio_oe,   // IOs: Enable path
-    input  wire        ena,      // Enable (ignored)
-    input  wire        clk,      // Clock signal
-    input  wire        rst_n     // Active-low reset
+    input  wire       ena,      // Enable (ignored)
+    input  wire       clk,      // Clock signal
+    input  wire       rst_n     // Active-low reset
 );
 
     assign uio_out = 8'b0;
@@ -25,31 +25,28 @@ module tt_um_addon (
             uo_out      <= 8'd0;
             sum_squares <= 16'd0;
             estimate    <= 16'd0;
-            b           <= 16'd0;
+            b           <= 16'h4000; // Start from highest power of 4
         end else begin
             sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
             estimate    <= 0;
-            b           <= 16'h4000; // Start from highest power of 4 below 16-bit range
             temp_sum    <= sum_squares;
 
-            // Ensure b is within range using a for loop
-            for (i = 0; i < 8; i = i + 1) begin
-                if (b > temp_sum) 
-                    b = b >> 2;
-            end
+            // Sequentially adjust 'b' instead of using a loop
+            if (b > temp_sum)
+                b <= b >> 2; // ✅ Fixed blocking assignment issue
 
             // Correct Approximate Square Root Calculation
-            for (i = 0; i < 8; i = i + 1) begin
+            for (i = 0; i < 15; i = i + 1) begin
                 if (b != 0) begin
                     if (temp_sum >= (estimate + b)) begin
-                        temp_sum  = temp_sum - (estimate + b); 
-                        estimate  = estimate + b;  // Corrected calculation
+                        temp_sum  <= temp_sum - (estimate + b); 
+                        estimate  <= estimate + (b << 1); // Adjust shift
                     end 
-                    b = b >> 2;  // Correct shift
+                    b <= b >> 2; // ✅ Fixed issue
                 end
             end
             
-            uo_out <= estimate[7:0]; // Use non-blocking assignment for final output
+            uo_out <= estimate[7:0]; // Non-blocking assignment for final output
         end
     end
 
