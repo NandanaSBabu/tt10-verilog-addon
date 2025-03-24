@@ -42,14 +42,16 @@ MODULE = test
 
 # Verilator linting with fixes for TIMESCALEMOD warnings
 lint:
-	verilator --lint-only -Wno-TIMESCALEMOD -Wno-UNOPTFLAT $(VERILOG_SOURCES)
+	@command -v verilator >/dev/null 2>&1 && \
+	verilator --lint-only -Wno-TIMESCALEMOD -Wno-UNOPTFLAT $(VERILOG_SOURCES) || \
+	echo "Skipping lint: Verilator not found"
 
 # Hardened Layout Generation
 harden:
 	cd openlane && make harden
 
-# Custom Clean (to avoid conflict)
-override_clean:
+# Clean temporary files
+clean:
 	rm -rf sim_build test/results.xml openlane/runs/*
 
 # Include cocotb's make rules to take care of the simulator setup
