@@ -1,14 +1,14 @@
 `default_nettype none
 
 module tt_um_addon (
-    input  wire [7:0] ui_in,    // X input
-    input  wire [7:0] uio_in,   // Y input
-    output reg  [7:0] uo_out,   // Approximate Square root output
-    output wire [7:0] uio_out,  // IOs: Output path
-    output wire [7:0] uio_oe,   // IOs: Enable path
-    input  wire        ena,      // Enable (ignored)
-    input  wire        clk,      // Clock signal
-    input  wire        rst_n     // Active-low reset
+    input  wire [7:0] ui_in,    
+    input  wire [7:0] uio_in,   
+    output reg  [7:0] uo_out,   
+    output wire [7:0] uio_out,  
+    output wire [7:0] uio_oe,   
+    input  wire        ena,      
+    input  wire        clk,      
+    input  wire        rst_n     
 );
 
     assign uio_out = 8'b0;
@@ -27,30 +27,29 @@ module tt_um_addon (
             estimate    <= 16'd0;
             b           <= 16'd0;
         end else begin
-            // Compute sum of squares
             sum_squares = (ui_in * ui_in) + (uio_in * uio_in);
             estimate = 0;
-            b = 16'h4000;  // Start from the highest power of 4 within range
-            temp_sum = sum_squares;
+            b = 1 << 14; // Start from the highest power of 4
 
-            // Ensure 'b' is within range before starting approximation
-            for (i = 0; i < 15; i = i + 1) begin
-                if (b > temp_sum)
-                    b = b >> 2; // Use blocking '=' for immediate update
+            // Use a `for` loop instead of `while`
+            for (i = 0; i < 8; i = i + 1) begin
+                if (b > sum_squares)
+                    b = b >> 2;
             end
 
-            // Approximate square root using binary search method
-            for (i = 0; i < 15; i = i + 1) begin
+            // Square root approximation using shift operations
+            for (i = 0; i < 8; i = i + 1) begin
                 if (b != 0) begin
-                    if (temp_sum >= (estimate + b)) begin
-                        temp_sum = temp_sum - (estimate + b);  
-                        estimate = estimate + b; // Correctly add b
+                    if (sum_squares >= (estimate + b)) begin
+                        sum_squares = sum_squares - (estimate + b);
+                        estimate = estimate + (b << 1);
                     end 
-                    b = b >> 2;   // Move to the next bit
+                    estimate = estimate >> 1;
+                    b = b >> 2;
                 end
             end
             
-            uo_out <= estimate[7:0]; // Final output uses non-blocking '<='
+            uo_out <= estimate[7:0]; // Final output
         end
     end
 
