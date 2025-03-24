@@ -34,5 +34,5 @@ async def test_project(dut):
 
         actual_sqrt = dut.uo_out.value
         print(f"x={x}, y={y}, expected={expected_sqrt}, actual={actual_sqrt}")
-        print(f"num={dut.num.value}, result={dut.result.value}, b={dut.b.value}, state={dut.state.value}") #added debug print
+        print(f"num={dut.num.value}, result={dut.result.value}, b={dut.b.value}, state={dut.state.value}")
         assert actual_sqrt == expected_sqrt, f"Test failed for x={x}, y={y}. Expected {expected_sqrt}, got {actual_sqrt}"
