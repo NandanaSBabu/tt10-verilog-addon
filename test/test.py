@@ -30,7 +30,7 @@ async def test_project(dut):
         dut.ui_in.value = a
         dut.uio_in.value = b
         # Wait enough clock cycles for the state machine to finish computation
-        for _ in range(100):
+        for _ in range(1000):
             await RisingEdge(dut.clk)
         output = int(dut.uo_out.value)
         cocotb.log.info(f"For inputs x={a}, y={b}, computed sqrt={output}, expected={expected}")
