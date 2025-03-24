@@ -18,11 +18,23 @@ module tt_um_addon (
     
     // LUT Initialization
     integer x, y, index;
+    function [7:0] sqrt_approx;
+        input [15:0] value;
+        integer n;
+        begin
+            sqrt_approx = 0;
+            for (n = 15; n >= 0; n = n - 1) begin
+                if ((sqrt_approx | (1 << n)) * (sqrt_approx | (1 << n)) <= value)
+                    sqrt_approx = sqrt_approx | (1 << n);
+            end
+        end
+    endfunction
+
     initial begin
         for (x = 0; x < 256; x = x + 1) begin
             for (y = 0; y < 256; y = y + 1) begin
                 index = (x << 8) | y;  // Proper LUT indexing
-                sqrt_lut[index] = $clog2((x*x) + (y*y)); // Approximate sqrt without division
+                sqrt_lut[index] = sqrt_approx((x*x) + (y*y)); // Approximate sqrt
             end
         end
     end
