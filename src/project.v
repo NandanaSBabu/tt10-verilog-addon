@@ -35,18 +35,18 @@ module tt_um_addon (
             // Ensure b is within range
             for (i = 0; i < 15; i = i + 1) begin
                 if (b > temp_sum)
-                    b = b >> 2; // Use blocking assignment inside loops
+                    b <= b >> 2; // Use non-blocking assignment inside sequential logic
             end
 
             // Correct Approximate Square Root Calculation
             for (i = 0; i < 15; i = i + 1) begin
                 if (b != 0) begin
                     if (temp_sum >= (estimate + b)) begin
-                        temp_sum  = temp_sum - (estimate + b); 
-                        estimate  = estimate + (b << 1); // Adjust shift
+                        temp_sum  <= temp_sum - (estimate + b); 
+                        estimate  <= estimate + (b << 1); // Adjust shift
                     end 
-                    estimate = estimate >> 1; // Proper bit shift
-                    b = b >> 2;
+                    estimate <= estimate >> 1; // Proper bit shift
+                    b <= b >> 2;
                 end
             end
             
