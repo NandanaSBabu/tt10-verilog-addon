@@ -1,5 +1,4 @@
-# Makefile
-# See https://docs.cocotb.org/en/stable/quickstart.html for more info
+# Makefile for Cocotb test
 
 # Defaults
 SIM ?= icarus
@@ -9,48 +8,33 @@ PROJECT_SOURCES = project.v
 
 ifneq ($(GATES),yes)
 
-# RTL Simulation
+# RTL simulation
 SIM_BUILD = sim_build/rtl
-VERILOG_SOURCES += $(addprefix $(SRC_DIR)/, $(PROJECT_SOURCES))
+VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
 
 else
 
-# Gate-Level Simulation
+# Gate-level simulation
 SIM_BUILD = sim_build/gl
-COMPILE_ARGS += -DGL_TEST
-COMPILE_ARGS += -DFUNCTIONAL
-COMPILE_ARGS += -DUSE_POWER_PINS
-COMPILE_ARGS += -DSIM
-COMPILE_ARGS += -DUNIT_DELAY=\#1
-
-# Verify PDK_ROOT is set
-ifndef PDK_ROOT
-$(error "PDK_ROOT is not set. Please set it to the path of the Sky130 PDK.")
-endif
-
-# Add Sky130 Libraries
+COMPILE_ARGS += -DGL_TEST -DFUNCTIONAL -DUSE_POWER_PINS -DSIM -DUNIT_DELAY=\#1
 VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v
 VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
 
-# Add gate-level netlist (ensure it exists)
-ifeq ($(wildcard $(PWD)/gate_level_netlist.v),)
-$(error "gate_level_netlist.v is missing. Run synthesis before GDS simulation.")
-endif
-
+# Gate-level netlist
 VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
 
 endif
 
-# Include the design sources
-COMPILE_ARGS += -I$(SRC_DIR)
-
-# Testbench
+# Include the testbench sources
 VERILOG_SOURCES += $(PWD)/tb.v
 TOPLEVEL = tb
 
-# MODULE is the basename of the Python test file
+# Python test module
 MODULE = test
 
-# Include Cocotb's make rules
+# Include cocotb's make rules
 include $(shell cocotb-config --makefiles)/Makefile.sim
 
+# Clean rule (FIXED: Removed duplicate definition)
+clean:
+	rm -rf sim_build
