@@ -1,5 +1,3 @@
-// project.v
-
 `default_nettype none
 /* verilator lint_off TIMESCALEMOD */
 `timescale 1ns / 1ps
@@ -43,22 +41,41 @@ module tt_um_addon (
         end else if (ena) begin
             sum_squares = mul_shift_add(ui_in, ui_in) + mul_shift_add(uio_in, uio_in);
 
-            // Square root approximation
-            sqrt_temp = 8'd0;
+            // Square root approximation (Babylonian method - no division)
             begin
-                reg [15:0] r;
-                integer n;
-                r = 0;
-                for (n = 7; n >= 0; n = n - 1) begin
-                    if ((r | (1 << n)) * (r | (1 << n)) <= sum_squares)
-                        r = r | (1 << n);
+                reg [15:0] guess;
+                reg [15:0] next_guess;
+                integer i;
+
+                guess = sum_squares >> 1; // Initial guess (sum_squares / 2)
+                if (guess == 0) begin
+                    sqrt_temp <= 8'd0;
+                end else begin
+                    next_guess = (guess + (sum_squares / guess)) >> 1;
+                    next_guess = (guess + (sum_squares >> ($clog2(guess)))) >> 1; // Approximation for division
+                    for (i = 0; i < 4; i = i + 1) begin // Iterate for better approximation
+                        guess = next_guess;
+                        next_guess = (guess + (sum_squares >> ($clog2(guess)))) >> 1; // Approximation for division
+                    end
+                    sqrt_temp <= next_guess[7:0]; // Take lower 8 bits
                 end
-                sqrt_temp = r[7:0];
             end
 
             uo_out <= sqrt_temp;
         end else begin
             uo_out <= uo_out;
+        end
+    end
+
+    function integer clog2 (input integer value);
+        integer result;
+        begin
+            result = 0;
+            while (value > 1) begin
+                value = value >> 1;
+                result = result + 1;
+            end
+            clog2 = result;
         end
     end
 
