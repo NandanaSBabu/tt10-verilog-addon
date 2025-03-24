@@ -1,64 +1,63 @@
-`default_nettype none
 `timescale 1ns / 1ps
 
-module tb ();
+module tb;
 
-    // Dump signals to a VCD file for waveform debugging
-    initial begin
-        $dumpfile("tb.vcd");
-        $dumpvars(0, tb);
-    end
+    // DUT signals
+    reg [7:0] ui_in;      // X input
+    reg [7:0] uio_in;     // Y input
+    wire [7:0] uo_out;    // Output (sqrt result)
+    reg ena;              // Enable signal
+    reg clk;              // Clock
+    reg rst_n;            // Active-low reset
 
-    // Declare signals
-    reg clk;
-    reg rst_n;
-    reg [7:0] ui_in;
-    reg [7:0] uio_in;
-    reg ena;
-    wire [7:0] uo_out;
-    wire [7:0] uio_out;
-    wire [7:0] uio_oe;
-
-    // Instantiate the DUT (Device Under Test)
-    tt_um_addon user_project (
-        .ui_in  (ui_in),
-        .uo_out (uo_out),
-        .uio_in (uio_in),
-        .uio_out(uio_out),
-        .uio_oe (uio_oe),
-        .clk    (clk),
-        .rst_n  (rst_n),
-        .ena    (ena)
+    // Instantiate DUT (Device Under Test)
+    tt_um_addon dut (
+        .ui_in(ui_in),
+        .uio_in(uio_in),
+        .uo_out(uo_out),
+        .uio_out(),   // Not used
+        .uio_oe(),    // Not used
+        .ena(ena),
+        .clk(clk),
+        .rst_n(rst_n)
     );
 
-    // Clock generation: 10ns period (100MHz)
-    always #10 clk = ~clk;
+    // Clock Generation: 10 ns period (100 MHz)
+    always #5 clk = ~clk;
 
     initial begin
         // Initialize signals
         clk = 0;
         rst_n = 0;
+        ena = 0;
         ui_in = 0;
         uio_in = 0;
-        ena = 0;
 
-        // Apply reset
-        #20 rst_n = 1;
-        
-        // Enable calculations
-        #10 ena = 1;
+        // Reset
+        #10 rst_n = 1;
+        #10;
 
-        // Apply test cases
-        #20 ui_in = 3; uio_in = 4;  
-        #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
+        // Test cases
+        test_case(3, 4);  // sqrt(3^2 + 4^2) = 5
+        test_case(5, 12); // sqrt(5^2 + 12^2) = 13
+        test_case(6, 8);  // sqrt(6^2 + 8^2) = 10
+        test_case(7, 24); // sqrt(7^2 + 24^2) = 25
+        test_case(0, 0);  // sqrt(0^2 + 0^2) = 0
+        test_case(1, 1);  // sqrt(1^2 + 1^2) ≈ 1
 
-        #20 ui_in = 7; uio_in = 24;
-        #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
-
-        #20 ui_in = 10; uio_in = 15;
-        #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
-
-        #100 $finish;
+        #50;
+        $finish;
     end
+
+    // Task to apply inputs and display results
+    task test_case(input [7:0] x, input [7:0] y);
+        begin
+            ui_in = x;
+            uio_in = y;
+            ena = 1;
+            #10;
+            $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, x, y, uo_out);
+        end
+    endtask
 
 endmodule
