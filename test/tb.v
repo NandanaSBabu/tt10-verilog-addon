@@ -11,7 +11,7 @@ module tb ();
     #1;
   end
 
-  // Wire up the inputs and outputs
+  // Wire up the inputs and output
   reg clk;
   reg rst_n;
   reg ena;
