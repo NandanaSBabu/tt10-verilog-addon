@@ -48,10 +48,7 @@ lint:
 harden:
 	cd openlane && make harden
 
-# Clean temporary files
-# REMOVE THIS if `Makefile.sim` already has a 'clean:' target!
-clean:
-	rm -rf sim_build test/results.xml openlane/runs/*
+# Do not add 'clean' here!
 
 # Include cocotb's make rules
 include $(shell cocotb-config --makefiles)/Makefile.sim
