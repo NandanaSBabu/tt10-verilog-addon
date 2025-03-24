@@ -1,16 +1,20 @@
+`default_nettype none
+`timescale 1ns/1ps
+
 module tt_um_addon (
     input  wire [7:0] ui_in,
     input  wire [7:0] uio_in,
     output reg  [7:0] uo_out,
-    output wire [7:0] uio_out,  // Add this line
-    output wire [7:0] uio_oe,   // Add this line
+    output wire [7:0] uio_out,  // Define uio_out as wire
+    output wire [7:0] uio_oe,   // Define uio_oe as wire
     input  wire       ena,
     input  wire       clk,
     input  wire       rst_n
 );
 
-    assign uio_out = 8'b0; // Default assignment (modify as needed)
-    assign uio_oe  = 8'b0; // Default assignment (modify as needed)
+    // Default assignments to avoid syntax errors
+    assign uio_out = 8'b0; 
+    assign uio_oe  = 8'b0; 
 
     reg [15:0] square_x, square_y;
     reg [15:0] sum_squares;
