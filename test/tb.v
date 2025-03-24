@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module tb;
+module tb ();
 
     // DUT signals
     reg [7:0] ui_in;      // X input
@@ -11,7 +11,7 @@ module tb;
     reg rst_n;            // Active-low reset
 
     // Instantiate DUT (Device Under Test)
-    tt_um_addon dut (
+    tt_um_addon user_project (
         .ui_in(ui_in),
         .uio_in(uio_in),
         .uo_out(uo_out),
