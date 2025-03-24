@@ -41,11 +41,12 @@ module tt_um_addon (
         end else if (ena) begin
             sum_squares = mul_shift_add(ui_in, ui_in) + mul_shift_add(uio_in, uio_in);
 
-            // Simplified Square root approximation
+            // Simplified Square root approximation with dynamic correction
             begin
                 reg [15:0] guess;
                 reg [15:0] next_guess;
                 integer shift_amount;
+                integer correction;
 
                 guess = sum_squares >> 1; // Initial guess
 
@@ -71,7 +72,13 @@ module tt_um_addon (
                     else shift_amount = 0;
 
                     next_guess = (guess + (sum_squares >> shift_amount)) >> 1;
-                    sqrt_temp <= next_guess[7:0]; // Take lower 8 bits
+
+                    // Dynamic correction based on input range (example)
+                    if (sum_squares > 100) correction = 2;
+                    else if (sum_squares > 25) correction = 1;
+                    else correction = 0;
+
+                    sqrt_temp <= next_guess[7:0] - correction; // Dynamic correction
                 end
             end
 
