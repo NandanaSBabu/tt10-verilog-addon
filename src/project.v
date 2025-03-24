@@ -40,15 +40,15 @@ module tt_um_addon (
 
             // Approximate square root calculation with constant loop iteration
             for (i = 0; i < 15; i = i + 1) begin
-                if (b == 0)
-                    break;
-                if (sum_squares >= (estimate + b)) begin
-                    sum_squares = sum_squares - (estimate + b);
-                    estimate = (estimate >> 1) + b;
-                end else begin
-                    estimate = estimate >> 1;
+                if (b != 0) begin
+                    if (sum_squares >= (estimate + b)) begin
+                        sum_squares = sum_squares - (estimate + b);
+                        estimate = (estimate >> 1) + b;
+                    end else begin
+                        estimate = estimate >> 1;
+                    end
+                    b = b >> 2;
                 end
-                b = b >> 2;
             end
             
             sqrt_approx <= estimate[7:0];
