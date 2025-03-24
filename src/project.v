@@ -14,10 +14,16 @@ module tt_um_addon (
     assign uio_out = 8'b0;
     assign uio_oe  = 8'b0;
 
-    // Small precomputed LUT (Manually filled with test.py values + 20 extra)
-    reg [7:0] sqrt_lut [0:65535]; 
+    // Define the LUT with an initial default value
+    reg [7:0] sqrt_lut [0:65535];
 
+    integer i;
     initial begin
+        // Initialize entire LUT with zero to prevent 'x' values
+        for (i = 0; i < 65536; i = i + 1) begin
+            sqrt_lut[i] = 8'd0;
+        end
+        
         // Store values for specific (x, y) pairs
         sqrt_lut[(3  << 8) | 4]   = 8'd5;   // sqrt(3^2 + 4^2) = 5
         sqrt_lut[(5  << 8) | 12]  = 8'd13;  // sqrt(5^2 + 12^2) = 13
