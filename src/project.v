@@ -18,6 +18,7 @@ module tt_um_addon (
     reg [7:0] sqrt_approx;
     reg [15:0] estimate;
     reg [15:0] b;
+    integer i;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -29,12 +30,18 @@ module tt_um_addon (
         end else begin
             sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
             estimate    <= 0;
-            b         <= 16'h4000; // Start from highest power of 4 below 16-bit range
+            b           <= 16'h4000; // Start from highest power of 4 below 16-bit range
 
-            while (b > sum_squares)
-                b = b >> 2;
+            // Ensure b is within range
+            for (i = 0; i < 15; i = i + 1) begin
+                if (b > sum_squares)
+                    b = b >> 2;
+            end
 
-            while (b > 0) begin
+            // Approximate square root calculation with constant loop iteration
+            for (i = 0; i < 15; i = i + 1) begin
+                if (b == 0)
+                    break;
                 if (sum_squares >= (estimate + b)) begin
                     sum_squares = sum_squares - (estimate + b);
                     estimate = (estimate >> 1) + b;
