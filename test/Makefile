@@ -25,7 +25,7 @@ lint:
         @if command -v verilator >/dev/null 2>&1; then \
                 verilator --lint-only -Wno-TIMESCALEMOD -Wno-UNOPTFLAT $(VERILOG_SOURCES); \
         else \
-                echo "Skipping lint: Verilator not found"; \
+                echo "Skipping lint: Verilator not found"; \ # Line 25 fixed!
         fi
 
 # Hardened Layout Generation
