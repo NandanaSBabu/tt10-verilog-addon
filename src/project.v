@@ -1,14 +1,9 @@
-/*
- * Copyright (c) 2024 Your Name
- * SPDX-License-Identifier: Apache-2.0
- */
-
 `default_nettype none
 
 module tt_um_addon (
     input  wire [7:0] ui_in,    // X input
     input  wire [7:0] uio_in,   // Y input
-    output reg  [7:0] uo_out,   // Approximate Square root output
+    output reg  [7:0] uo_out,   // Approximate Square Root output
     output wire [7:0] uio_out,  // IOs: Output path
     output wire [7:0] uio_oe,   // IOs: Enable path
     input  wire        ena,      // Enable (ignored)
@@ -20,25 +15,41 @@ module tt_um_addon (
     assign uio_oe  = 8'b0;
 
     reg [15:0] sum_squares;
-    reg [7:0] approx_sqrt;
+    reg [7:0] sqrt_result;
+    reg [7:0] b;
+    integer n;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             uo_out      <= 8'd0;
             sum_squares <= 16'd0;
-            approx_sqrt <= 8'd0;
-        end else begin // ena signal is ignored as requested.
+            sqrt_result <= 8'd0;
+        end else begin
+            // Compute sum of squares
             sum_squares <= ui_in * ui_in + uio_in * uio_in;
 
-            // Simple approximation: take the upper 8 bits.
-            approx_sqrt <= sum_squares[15:8];
+            // Start binary search for square root
+            sqrt_result = 0;
+            b = 8'h80; // Start with highest bit
 
-            // Optional refinement (example - tune for accuracy/area):
-            if (sum_squares[7:0] > 8'h80) begin
-                approx_sqrt <= approx_sqrt + 1;
-            end
+            // Manually unrolling the loop (8-bit precision)
+            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
+            b = b >> 1;
+            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
+            b = b >> 1;
+            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
+            b = b >> 1;
+            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
+            b = b >> 1;
+            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
+            b = b >> 1;
+            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
+            b = b >> 1;
+            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
+            b = b >> 1;
+            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
 
-            uo_out <= approx_sqrt;
+            uo_out <= sqrt_result; // Output the square root
         end
     end
 
