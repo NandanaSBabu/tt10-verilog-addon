@@ -49,7 +49,7 @@ harden:
 	cd openlane && make harden
 
 # Clean temporary files
-clean:
+clean:  # Only one definition of 'clean' (fixed)
 	rm -rf sim_build test/results.xml openlane/runs/*
 
 # include cocotb's make rules to take care of the simulator setup
