@@ -35,6 +35,7 @@ MODULE = test
 # Include cocotb's make rules
 include $(shell cocotb-config --makefiles)/Makefile.sim
 
-# Clean rule (FIXED: Removed duplicate definition)
+# Clean rule (Fixed duplicate issue)
+.PHONY: clean
 clean:
 	rm -rf sim_build
