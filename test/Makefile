@@ -50,7 +50,7 @@ lint:
 harden:
 	cd openlane && make harden
 
-# Clean temporary files and ensure test/results.xml exists
+# Clean temporary files (FIXED ERROR)
 clean:
 	rm -rf sim_build openlane/runs/*
 	mkdir -p test
