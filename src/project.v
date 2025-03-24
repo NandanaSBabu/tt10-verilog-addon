@@ -7,14 +7,14 @@
 `timescale 1ns / 1ps
 
 module tt_um_addon (
-    input  wire [7:0] ui_in,    // x input
-    input  wire [7:0] uio_in,   // y input
-    output reg  [7:0] uo_out,   // sqrt output (integer)
-    output wire [7:0] uio_out,  // Unused IO output
-    output wire [7:0] uio_oe,   // Unused IO enable (0 = input)
-    input  wire       ena,      // Enable signal
-    input  wire       clk,      // Clock
-    input  wire       rst_n     // Active-low reset
+    input  wire [7:0] ui_in,     // x input
+    input  wire [7:0] uio_in,    // y input
+    output reg  [7:0] uo_out,    // sqrt output (integer)
+    output wire [7:0] uio_out,   // Unused IO output
+    output wire [7:0] uio_oe,    // Unused IO enable (0 = input)
+    input  wire       ena,       // Enable signal
+    input  wire       clk,       // Clock
+    input  wire       rst_n      // Active-low reset
 );
 
     // Internal registers for binary search
@@ -28,7 +28,7 @@ module tt_um_addon (
     // 2: Compute mid = (low+high)>>1.
     // 3: Compare mid^2 with sum_squares and update low/high/result.
     // 4: Check termination (low > high); if done, output result.
-    
+
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             sum_squares <= 16'd0;
@@ -61,7 +61,7 @@ module tt_um_addon (
                     // Compare mid^2 with sum_squares
                     if (mid * mid <= sum_squares) begin
                         result <= mid;      // Record candidate
-                        low <= mid + 1;     // Search in upper half
+                        low    <= mid + 1;    // Search in upper half
                     end else begin
                         high <= mid - 1;    // Search in lower half
                     end
