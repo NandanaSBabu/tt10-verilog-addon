@@ -29,7 +29,7 @@ module tt_um_addon (
         end else begin
             sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
             estimate    <= 0;
-            bit         <= 16'h4000; // Start from highest power of 4 below 16-bit range
+            b         <= 16'h4000; // Start from highest power of 4 below 16-bit range
 
             while (b > sum_squares)
                 b = b >> 2;
