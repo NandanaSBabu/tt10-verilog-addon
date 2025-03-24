@@ -4,14 +4,14 @@
 /* verilator lint_on TIMESCALEMOD */
 
 module tt_um_addon (
-    input  wire [7:0] ui_in,
-    input  wire [7:0] uio_in,
-    output reg  [7:0] uo_out,
+    input  wire [7:0] ui_in,   // X input
+    input  wire [7:0] uio_in,  // Y input
+    output reg  [7:0] uo_out,  // Square root output
     output wire [7:0] uio_out,
     output wire [7:0] uio_oe,
-    input  wire       ena,
-    input  wire       clk,
-    input  wire       rst_n
+    input  wire       ena,     // Enable signal
+    input  wire       clk,     // Clock signal
+    input  wire       rst_n    // Active-low reset
 );
 
     assign uio_out = 8'b0;
@@ -20,19 +20,15 @@ module tt_um_addon (
     reg [15:0] sum_squares;
     reg [7:0] sqrt_temp;
 
-    // ✅ Fixed: Unrolled multiplication loop (for GDS compatibility)
+    // Multiplication using shift-and-add (No *)
     function [15:0] mul_shift_add(input [7:0] a, input [7:0] b);
         reg [15:0] result;
+        integer n;
         begin
             result = 0;
-            if (b[0]) result = result + (a << 0);
-            if (b[1]) result = result + (a << 1);
-            if (b[2]) result = result + (a << 2);
-            if (b[3]) result = result + (a << 3);
-            if (b[4]) result = result + (a << 4);
-            if (b[5]) result = result + (a << 5);
-            if (b[6]) result = result + (a << 6);
-            if (b[7]) result = result + (a << 7);
+            for (n = 0; n < 8; n = n + 1)
+                if (b[n])
+                    result = result + (a << n);
             mul_shift_add = result;
         end
     endfunction
@@ -45,18 +41,26 @@ module tt_um_addon (
         end else if (ena) begin
             sum_squares = mul_shift_add(ui_in, ui_in) + mul_shift_add(uio_in, uio_in);
 
-            // ✅ Fixed: Square root approximation using bitwise search
-            begin
-                reg [15:0] r;
-                integer n;
-                r = 0;
-                for (n = 7; n >= 0; n = n - 1) begin
-                    if ((r | (1 << n)) * (r | (1 << n)) <= sum_squares)
-                        r = r | (1 << n);
+            // Bitwise Square Root Calculation (No division)
+            reg [15:0] num, res, bit;
+            num = sum_squares;
+            res = 0;
+            bit = 1 << 14;  // Start with highest bit (2^14)
+
+            while (bit > num) 
+                bit = bit >> 2; // Adjust bit to range
+
+            while (bit != 0) begin
+                if (num >= res + bit) begin
+                    num = num - (res + bit);
+                    res = (res >> 1) + bit;
+                end else begin
+                    res = res >> 1;
                 end
-                sqrt_temp = r[7:0]; // Only keep lower 8 bits
+                bit = bit >> 2;
             end
 
+            sqrt_temp <= res[7:0]; // Final sqrt result
             uo_out <= sqrt_temp;
         end
     end
