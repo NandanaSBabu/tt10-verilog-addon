@@ -14,41 +14,22 @@ module tt_um_addon (
     assign uio_out = 8'b0;
     assign uio_oe  = 8'b0;
 
-    reg [15:0] sum_squares;
-    reg [15:0] estimate;
-    reg [15:0] b;
-    reg [15:0] temp_sum;
-    integer i;
+    reg [7:0] sqrt_lut [0:65535]; // Lookup table for sqrt(x^2 + y^2)
+    
+    initial begin
+        integer x, y;
+        for (x = 0; x < 256; x = x + 1) begin
+            for (y = 0; y < 256; y = y + 1) begin
+                sqrt_lut[{x, y}] = $clog2(x*x + y*y); // Precompute sqrt values
+            end
+        end
+    end
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            uo_out      <= 8'd0;
-            sum_squares <= 16'd0;
-            estimate    <= 16'd0;
-            b           <= 16'd0;
+            uo_out <= 8'd0;
         end else begin
-            sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
-            estimate    <= 0;
-            temp_sum    <= sum_squares;
-            b           <= 16'h4000; // Highest power of 4 within 16-bit range
-
-            // Fixed iteration loop instead of while (GDS-safe)
-            for (i = 0; i < 8; i = i + 1) begin
-                if (b > temp_sum)
-                    b <= b >> 2; // Non-blocking assignment to avoid GDS issue
-            end
-
-            // Approximate square root calculation
-            for (i = 0; i < 8; i = i + 1) begin
-                if (temp_sum >= estimate + b) begin
-                    temp_sum  <= temp_sum - (estimate + b);
-                    estimate  <= estimate + (b << 1);
-                end
-                estimate <= estimate >> 1; // Correct shift
-                b <= b >> 2;
-            end
-            
-            uo_out <= estimate[7:0]; // Non-blocking assignment for final output
+            uo_out <= sqrt_lut[{ui_in, uio_in}]; // Fetch precomputed sqrt value
         end
     end
 
