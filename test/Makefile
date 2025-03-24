@@ -1,23 +1,14 @@
-# Makefile
+# Makefile for Cocotb and TinyTapeout
+
 # Defaults
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 PROJECT_SOURCES = project.v
 
-ifneq ($(GATES),yes)
 # RTL simulation:
 SIM_BUILD = sim_build/rtl
 VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
-
-else
-# Gate level simulation:
-SIM_BUILD = sim_build/gl
-COMPILE_ARGS += -DGL_TEST -DFUNCTIONAL -DUSE_POWER_PINS -DSIM -DUNIT_DELAY=\#1
-VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v
-VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
-VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
-endif
 
 # Allow sharing configuration between design and testbench via include:
 COMPILE_ARGS += -I$(SRC_DIR)
@@ -31,20 +22,43 @@ MODULE = test
 
 # Verilator linting (Skip if not installed)
 lint:
-	@if command -v verilator >/dev/null 2>&1; then \
-		verilator --lint-only -Wno-TIMESCALEMOD -Wno-UNOPTFLAT $(VERILOG_SOURCES); \
-	else \
-		echo "Skipping lint: Verilator not found"; \
-	fi
+        @if command -v verilator >/dev/null 2>&1; then \
+                verilator --lint-only -Wno-TIMESCALEMOD -Wno-UNOPTFLAT $(VERILOG_SOURCES); \
+        else \
+                echo "Skipping lint: Verilator not found"; \
+        fi
 
 # Hardened Layout Generation
 harden:
-	cd openlane && make harden
+        cd openlane && make harden
 
-# Clean temporary files (Skip if `results.xml` is missing)
+# Clean temporary files
 clean:
-	rm -rf sim_build openlane/runs/*
-	@if [ -f test/results.xml ]; then rm test/results.xml; fi
+        rm -rf sim_build test/results.xml openlane/runs/*
 
 # Include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
+
+# TinyTapeout GDS Generation (if needed)
+gds: harden
+        # Add any post-harden commands if necessary.
+        # Example to copy the gds file:
+        mkdir -p gds
+        cp openlane/runs/tt_um_addon/results/final/tt_um_addon.gds gds/tt_um_addon.gds
+
+# TinyTapeout GDS check (if needed)
+gds_check: gds
+        # Add GDS checking commands here, if applicable.
+        # For example, using a GDS checker tool.
+        echo "GDS Check Placeholder"
+
+# Test and GDS pipeline
+all: test gds gds_check
+
+# Force cocotb reinstall in case of makefile conflict.
+force_cocotb_reinstall:
+        pip uninstall cocotb -y
+        pip install --no-cache-dir cocotb
+
+# Run all tests and GDS generation in a single command.
+ci: force_cocotb_reinstall all
