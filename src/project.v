@@ -3,7 +3,7 @@
 module tt_um_addon (
     input  wire [7:0] ui_in,    // X input
     input  wire [7:0] uio_in,   // Y input
-    output reg  [7:0] uo_out,   // Approximate Square Root output
+    output reg  [7:0] uo_out,   // Approximate Square root output
     output wire [7:0] uio_out,  // IOs: Output path
     output wire [7:0] uio_oe,   // IOs: Enable path
     input  wire        ena,      // Enable (ignored)
@@ -15,45 +15,40 @@ module tt_um_addon (
     assign uio_oe  = 8'b0;
 
     reg [15:0] sum_squares;
-    reg [7:0] sqrt_result;
-    reg [7:0] b;
-    integer n;
+    reg [7:0] sqrt_approx;
+    reg [15:0] estimate;
+    reg [15:0] b;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             uo_out      <= 8'd0;
             sum_squares <= 16'd0;
-            sqrt_result <= 8'd0;
+            sqrt_approx <= 8'd0;
+            estimate    <= 16'd0;
+            b           <= 16'd0;
         end else begin
-            // Compute sum of squares
-            sum_squares <= ui_in * ui_in + uio_in * uio_in;
+            sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
+            estimate    <= 0;
+            bit         <= 16'h4000; // Start from highest power of 4 below 16-bit range
 
-            // Start binary search for square root
-            sqrt_result = 0;
-            b = 8'h80; // Start with highest bit
+            while (b > sum_squares)
+                b = b >> 2;
 
-            // Manually unrolling the loop (8-bit precision)
-            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
-            b = b >> 1;
-            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
-            b = b >> 1;
-            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
-            b = b >> 1;
-            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
-            b = b >> 1;
-            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
-            b = b >> 1;
-            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
-            b = b >> 1;
-            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
-            b = b >> 1;
-            if ((sqrt_result | b) * (sqrt_result | b) <= sum_squares) sqrt_result = sqrt_result | b;
-
-            uo_out <= sqrt_result; // Output the square root
+            while (b > 0) begin
+                if (sum_squares >= (estimate + b)) begin
+                    sum_squares = sum_squares - (estimate + b);
+                    estimate = (estimate >> 1) + b;
+                end else begin
+                    estimate = estimate >> 1;
+                end
+                b = b >> 2;
+            end
+            
+            sqrt_approx <= estimate[7:0];
+            uo_out <= sqrt_approx;
         end
     end
 
-    // Prevent warnings for unused signals
     wire _unused = &{ena, 1'b0};
 
 endmodule
