@@ -25,24 +25,27 @@ module tt_um_addon (
             uo_out      <= 8'd0;
             sum_squares <= 16'd0;
             estimate    <= 16'd0;
-            b           <= 16'h4000; // Start from highest power of 4
+            b           <= 16'd0;
         end else begin
             sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
             estimate    <= 0;
+            b           <= 16'h4000; // Start from highest power of 4 below 16-bit range
             temp_sum    <= sum_squares;
 
-            // Sequentially adjust 'b' instead of using a loop
-            if (b > temp_sum)
-                b <= b >> 2; // ✅ Fixed blocking assignment issue
+            // Ensure b is within range
+            for (i = 0; i < 15; i = i + 1) begin
+                if (b > temp_sum)
+                    b = b >> 2; // Blocking assignment in loop
+            end
 
             // Correct Approximate Square Root Calculation
             for (i = 0; i < 15; i = i + 1) begin
                 if (b != 0) begin
                     if (temp_sum >= (estimate + b)) begin
-                        temp_sum  <= temp_sum - (estimate + b); 
-                        estimate  <= estimate + (b << 1); // Adjust shift
+                        temp_sum  = temp_sum - (estimate + b); 
+                        estimate  = estimate + (b << 1); // Adjust shift
                     end 
-                    b <= b >> 2; // ✅ Fixed issue
+                    b = b >> 2;
                 end
             end
             
