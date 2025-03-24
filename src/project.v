@@ -28,29 +28,28 @@ module tt_um_addon (
             b           <= 16'd0;
         end else begin
             sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
-            estimate    <= 16'd0;
-            b           <= 16'h4000; // Start from highest power of 4 within 16-bit range
+            estimate    <= 0;
             temp_sum    <= sum_squares;
+            b           <= 16'h4000; // Start at 16384 (largest power of 4 in 16-bit)
 
-            // Fixed iteration loop instead of while to avoid GDS issues
+            // Use a fixed loop instead of while to avoid GDS issues
             for (i = 0; i < 8; i = i + 1) begin
                 if (b > temp_sum)
-                    b <= b >> 2; // Non-blocking assignment to avoid GDS issue
+                    b <= b >> 2; // **Non-blocking to avoid synthesis issues**
             end
 
-            // Approximate square root calculation
-            for (i = 0; i < 15; i = i + 1) begin
+            // Approximate square root using subtraction and shifting
+            for (i = 0; i < 8; i = i + 1) begin
                 if (b != 0) begin
                     if (temp_sum >= (estimate + b)) begin
                         temp_sum  <= temp_sum - (estimate + b); 
                         estimate  <= estimate + (b << 1);
                     end 
-                    estimate <= estimate >> 1; // Correct shift
                     b <= b >> 2;
                 end
             end
             
-            uo_out <= estimate[7:0]; // Non-blocking assignment for final output
+            uo_out <= estimate[7:0]; // Final square root estimate
         end
     end
 
