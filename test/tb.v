@@ -36,7 +36,7 @@ module tb ();
     .uo_out (uo_out),  // Square root output
     .uio_in (uio_in),  // Y input
     .uio_out(uio_out), // Unused
-    .uio_oe (uio_oe),  // Unused
+    .uio_oe (uio_oe),  // Output Enable
     .ena    (ena),     // Enable
     .clk    (clk),     // Clock
     .rst_n  (rst_n)    // Active-low reset
@@ -65,7 +65,7 @@ module tb ();
     test_case(0, 0, 0);   // sqrt(0^2 + 0^2) = 0
     test_case(1, 1, 1);   // sqrt(1^2 + 1^2) ≈ 1
 
-    #50;
+    #100;
     $finish;
   end
 
@@ -75,8 +75,9 @@ module tb ();
       ui_in = x;
       uio_in = y;
       ena = 1;
-      
-      #50; // Wait for module to compute
+
+      @(posedge clk); // Synchronize with clock
+      #100; // Allow module time to compute
 
       $display("Time = %t | x = %d | y = %d | sqrt_out = %d (Expected: %d)", 
                 $time, x, y, uo_out, expected);
