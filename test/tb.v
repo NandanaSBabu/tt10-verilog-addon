@@ -22,7 +22,7 @@ module tb ();
     wire [7:0] uio_oe;
 
     // Instantiate the DUT (Device Under Test)
-    tt_um_addon uut (
+    tt_um_addon user_project (
         .ui_in  (ui_in),
         .uo_out (uo_out),
         .uio_in (uio_in),
