@@ -15,18 +15,8 @@ module tt_um_addon (
     // Registers for squared values and sum
     reg [15:0] square_x, square_y;
     reg [15:0] sum_squares;
-
-    // Integer square root calculation
     reg [7:0] sqrt_temp;
     integer n;
-
-    always @(*) begin
-        sqrt_temp = 8'd0;
-        for (n = 7; n >= 0; n = n - 1) begin
-            if (((sqrt_temp | (1 << n)) * (sqrt_temp | (1 << n))) <= sum_squares)
-                sqrt_temp = sqrt_temp | (1 << n);
-        end
-    end
 
     // Synchronous process for computation
     always @(posedge clk or negedge rst_n) begin
@@ -41,7 +31,12 @@ module tt_um_addon (
             square_y    <= uio_in * uio_in;
             sum_squares <= square_x + square_y;
 
-            // Register the computed integer square root
+            // Integer square root calculation (AFTER sum_squares is updated)
+            sqrt_temp = 8'd0;
+            for (n = 7; n >= 0; n = n - 1) begin
+                if (((sqrt_temp | (1 << n)) * (sqrt_temp | (1 << n))) <= sum_squares)
+                    sqrt_temp = sqrt_temp | (1 << n);
+            end
             uo_out <= sqrt_temp;
         end
     end
