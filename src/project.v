@@ -16,11 +16,13 @@ module tt_um_addon (
 
     reg [7:0] sqrt_lut [0:65535]; // Lookup table for sqrt(x^2 + y^2)
     
+    // LUT Initialization
+    integer x, y, index;
     initial begin
-        integer x, y;
         for (x = 0; x < 256; x = x + 1) begin
             for (y = 0; y < 256; y = y + 1) begin
-                sqrt_lut[{x, y}] = $clog2(x*x + y*y); // Precompute sqrt values
+                index = (x << 8) | y;  // Proper LUT indexing
+                sqrt_lut[index] = $clog2((x*x) + (y*y)); // Approximate sqrt without division
             end
         end
     end
@@ -29,7 +31,7 @@ module tt_um_addon (
         if (!rst_n) begin
             uo_out <= 8'd0;
         end else begin
-            uo_out <= sqrt_lut[{ui_in, uio_in}]; // Fetch precomputed sqrt value
+            uo_out <= sqrt_lut[(ui_in << 8) | uio_in]; // Fetch from LUT
         end
     end
 
