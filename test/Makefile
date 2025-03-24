@@ -54,7 +54,3 @@ MODULE = test
 # Include Cocotb's make rules
 include $(shell cocotb-config --makefiles)/Makefile.sim
 
-# Clean target (only one definition)
-.PHONY: clean
-clean:
-	rm -rf sim_build *.vcd *.log *.out *.vvp
