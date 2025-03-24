@@ -1,5 +1,3 @@
-// tb.v
-
 `default_nettype none
 `timescale 1ns / 1ps
 
@@ -40,28 +38,25 @@ module tb ();
         // Initialize signals
         clk = 0;
         rst_n = 0;
-        ui_in = 8'd0;
-        uio_in = 8'd0;
+        ui_in = 0;
+        uio_in = 0;
         ena = 0;
 
         // Apply reset
         #20 rst_n = 1;
-
+        
         // Enable calculations
-        #30 ena = 1;
+        #10 ena = 1;
 
-        // Apply test cases with delays for stabilization
-        #50 ui_in = 8'd3; uio_in = 8'd4; #100;
-        $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
+        // Apply test cases
+        #20 ui_in = 3; uio_in = 4;  
+        #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
 
-        #50 ui_in = 8'd7; uio_in = 8'd24; #100;
-        $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
+        #20 ui_in = 7; uio_in = 24;
+        #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
 
-        #50 ui_in = 8'd10; uio_in = 8'd15; #100;
-        $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
-
-        #50 ui_in = 8'd8; uio_in = 8'd6; #100;
-        $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
+        #20 ui_in = 10; uio_in = 15;
+        #50 $display("Time = %t | x = %d | y = %d | sqrt_out = %d", $time, ui_in, uio_in, uo_out);
 
         #100 $finish;
     end
