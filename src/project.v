@@ -41,17 +41,18 @@ module tt_um_addon (
         end else if (ena) begin
             sum_squares = mul_shift_add(ui_in, ui_in) + mul_shift_add(uio_in, uio_in);
 
-            // Square root approximation (Babylonian method - no division)
+            // Simplified Square root approximation
             begin
                 reg [15:0] guess;
                 reg [15:0] next_guess;
                 integer shift_amount;
 
-                guess = sum_squares >> 1; // Initial guess (sum_squares / 2)
+                guess = sum_squares >> 1; // Initial guess
+
                 if (guess == 0) begin
                     sqrt_temp <= 8'd0;
                 end else begin
-                    // Determine shift_amount without $clog2
+                    // Determine shift_amount
                     if (guess >= 32768) shift_amount = 15;
                     else if (guess >= 16384) shift_amount = 14;
                     else if (guess >= 8192) shift_amount = 13;
@@ -69,70 +70,7 @@ module tt_um_addon (
                     else if (guess >= 2) shift_amount = 1;
                     else shift_amount = 0;
 
-                    next_guess = (guess + (sum_squares >> shift_amount)) >> 1; // Approximation for division
-                    guess = next_guess;
-
-                    // 1st iteration
-                    if (guess >= 32768) shift_amount = 15;
-                    else if (guess >= 16384) shift_amount = 14;
-                    else if (guess >= 8192) shift_amount = 13;
-                    else if (guess >= 4096) shift_amount = 12;
-                    else if (guess >= 2048) shift_amount = 11;
-                    else if (guess >= 1024) shift_amount = 10;
-                    else if (guess >= 512) shift_amount = 9;
-                    else if (guess >= 256) shift_amount = 8;
-                    else if (guess >= 128) shift_amount = 7;
-                    else if (guess >= 64) shift_amount = 6;
-                    else if (guess >= 32) shift_amount = 5;
-                    else if (guess >= 16) shift_amount = 4;
-                    else if (guess >= 8) shift_amount = 3;
-                    else if (guess >= 4) shift_amount = 2;
-                    else if (guess >= 2) shift_amount = 1;
-                    else shift_amount = 0;
                     next_guess = (guess + (sum_squares >> shift_amount)) >> 1;
-
-                    guess = next_guess;
-
-                    // 2nd iteration
-                    if (guess >= 32768) shift_amount = 15;
-                    else if (guess >= 16384) shift_amount = 14;
-                    else if (guess >= 8192) shift_amount = 13;
-                    else if (guess >= 4096) shift_amount = 12;
-                    else if (guess >= 2048) shift_amount = 11;
-                    else if (guess >= 1024) shift_amount = 10;
-                    else if (guess >= 512) shift_amount = 9;
-                    else if (guess >= 256) shift_amount = 8;
-                    else if (guess >= 128) shift_amount = 7;
-                    else if (guess >= 64) shift_amount = 6;
-                    else if (guess >= 32) shift_amount = 5;
-                    else if (guess >= 16) shift_amount = 4;
-                    else if (guess >= 8) shift_amount = 3;
-                    else if (guess >= 4) shift_amount = 2;
-                    else if (guess >= 2) shift_amount = 1;
-                    else shift_amount = 0;
-                    next_guess = (guess + (sum_squares >> shift_amount)) >> 1;
-
-                    guess = next_guess;
-
-                    // 3rd iteration
-                    if (guess >= 32768) shift_amount = 15;
-                    else if (guess >= 16384) shift_amount = 14;
-                    else if (guess >= 8192) shift_amount = 13;
-                    else if (guess >= 4096) shift_amount = 12;
-                    else if (guess >= 2048) shift_amount = 11;
-                    else if (guess >= 1024) shift_amount = 10;
-                    else if (guess >= 512) shift_amount = 9;
-                    else if (guess >= 256) shift_amount = 8;
-                    else if (guess >= 128) shift_amount = 7;
-                    else if (guess >= 64) shift_amount = 6;
-                    else if (guess >= 32) shift_amount = 5;
-                    else if (guess >= 16) shift_amount = 4;
-                    else if (guess >= 8) shift_amount = 3;
-                    else if (guess >= 4) shift_amount = 2;
-                    else if (guess >= 2) shift_amount = 1;
-                    else shift_amount = 0;
-                    next_guess = (guess + (sum_squares >> shift_amount)) >> 1;
-
                     sqrt_temp <= next_guess[7:0]; // Take lower 8 bits
                 end
             end
