@@ -48,8 +48,8 @@ lint:
 harden:
 	cd openlane && make harden
 
-# Clean temporary files
-clean:
+# Custom Clean (to avoid conflict)
+override_clean:
 	rm -rf sim_build test/results.xml openlane/runs/*
 
 # Include cocotb's make rules to take care of the simulator setup
