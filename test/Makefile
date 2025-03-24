@@ -48,7 +48,7 @@ lint:
 harden:
 	cd openlane && make harden
 
-# Clean temporary files (fix: removed duplicate `clean` target)
+# Clean temporary files (fixed issue)
 clean:
 	rm -rf sim_build test/results.xml openlane/runs/*
 
