@@ -51,6 +51,7 @@ harden:
 	cd openlane && make harden
 
 # Clean temporary files (FIXED ERROR)
+.PHONY: clean
 clean:
 	rm -rf sim_build openlane/runs/*
 	mkdir -p test
