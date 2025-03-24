@@ -1,7 +1,7 @@
 # Makefile
 # See https://docs.cocotb.org/en/stable/quickstart.html for more info
 
-# defaults
+# Defaults
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
@@ -42,15 +42,15 @@ MODULE = test
 
 # Verilator linting with fixes for TIMESCALEMOD warnings
 lint:
-        verilator --lint-only -Wno-TIMESCALEMOD -Wno-UNOPTFLAT $(VERILOG_SOURCES)
+	verilator --lint-only -Wno-TIMESCALEMOD -Wno-UNOPTFLAT $(VERILOG_SOURCES)
 
 # Hardened Layout Generation
 harden:
-        cd openlane && make harden
+	cd openlane && make harden
 
 # Clean temporary files
 clean:
-        rm -rf sim_build test/results.xml openlane/runs/*
+	rm -rf sim_build test/results.xml openlane/runs/*
 
-# include cocotb's make rules to take care of the simulator setup
+# Include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
