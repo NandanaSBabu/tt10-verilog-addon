@@ -26,7 +26,7 @@ async def test_project(dut):
         dut.uio_in.value = y
         dut.ena.value = 1
 
-        for _ in range(200):
+        for _ in range(500):  # Increase simulation cycles
             await RisingEdge(dut.clk)
 
         dut.ena.value = 0
@@ -34,4 +34,5 @@ async def test_project(dut):
 
         actual_sqrt = dut.uo_out.value
         print(f"x={x}, y={y}, expected={expected_sqrt}, actual={actual_sqrt}")
+        print(f"num={dut.num.value}, result={dut.result.value}, b={dut.b.value}, state={dut.state.value}") #added debug print
         assert actual_sqrt == expected_sqrt, f"Test failed for x={x}, y={y}. Expected {expected_sqrt}, got {actual_sqrt}"
