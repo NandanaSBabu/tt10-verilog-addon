@@ -27,7 +27,8 @@ async def test_project(dut):
         dut.ui_in.value = a
         dut.uio_in.value = b
 
-        for _ in range(30):
+        # Increase the delay before the assert statement.
+        for _ in range(10000): #wait for 100,000ns.
             await RisingEdge(dut.clk)
         
         output = int(dut.uo_out.value)
