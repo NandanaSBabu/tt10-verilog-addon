@@ -1,61 +1,42 @@
-`default_nettype none
+`timescale 1ns / 1ps
 
-module tt_um_addon (
-    input  wire [7:0] ui_in,    // X input
-    input  wire [7:0] uio_in,   // Y input
-    output reg  [7:0] uo_out,   // Approximate Square root output
-    output wire [7:0] uio_out,  // IOs: Output path
-    output wire [7:0] uio_oe,   // IOs: Enable path
-    input  wire        ena,      // Enable (ignored)
-    input  wire        clk,      // Clock signal
-    input  wire        rst_n     // Active-low reset
+module tt_um_rect_cyl (
+    input  wire [7:0] ui_in,    // x input
+    input  wire [7:0] uio_in,   // y input
+    output reg [7:0] uio_out,   // theta output (integer part only)
+    output reg [7:0] uo_out,    // r output
+    output wire [7:0] uio_oe,   // IO enable (set to output mode)
+    input  wire       ena,      // Enable signal
+    input  wire       clk,      // Clock signal
+    input  wire       rst_n     // Active-low reset
 );
 
-    assign uio_out = 8'b0;
-    assign uio_oe  = 8'b0;
-
-    reg [15:0] sum_squares;
-    reg [7:0] sqrt_approx;
-    reg [15:0] estimate;
-    reg [15:0] b;
+    reg [15:0] sum;
     integer i;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            uo_out      <= 8'd0;
-            sum_squares <= 16'd0;
-            sqrt_approx <= 8'd0;
-            estimate    <= 16'd0;
-            b           <= 16'd0;
-        end else begin
-            sum_squares <= (ui_in * ui_in) + (uio_in * uio_in);
-            estimate    <= 0;
-            b           <= 16'h4000; // Start from highest power of 4 below 16-bit range
-
-            // Ensure b is within range
-            for (i = 0; i < 15; i = i + 1) begin
-                if (b > sum_squares)
-                    b = b >> 2;
-            end
-
-            // Approximate square root calculation with constant loop iteration
-            for (i = 0; i < 15; i = i + 1) begin
-                if (b != 0) begin
-                    if (sum_squares >= (estimate + b)) begin
-                        sum_squares = sum_squares - (estimate + b);
-                        estimate = (estimate >> 1) + b;
-                    end else begin
-                        estimate = estimate >> 1;
-                    end
-                    b = b >> 2;
-                end
+            uo_out <= 8'd0;
+            uio_out <= 8'd0;
+        end else if (ena) begin
+            // Compute sum = x^2 + y^2
+            sum = (ui_in * ui_in) + (uio_in * uio_in);
+            
+            // Compute sqrt(sum) using bitwise method
+            uo_out = 0;
+            for (i = 7; i >= 0; i = i - 1) begin
+                if ((uo_out + (1 << i)) * (uo_out + (1 << i)) <= sum)
+                    uo_out = uo_out + (1 << i);
             end
             
-            sqrt_approx <= estimate[7:0];
-            uo_out <= sqrt_approx;
+            // Compute atan(y/x) using LUT-based approximation (integer degrees only)
+            if (ui_in == 0)
+                uio_out = (uio_in > 0) ? 8'd90 : 8'd270; // 90° or 270°
+            else
+                uio_out = (uio_in * 45) / ui_in; // Approximate atan(y/x) in degrees
         end
     end
 
-    wire _unused = &{ena, 1'b0};
+    assign uio_oe = 8'b11111111; // Set all IOs to output mode
 
 endmodule
