@@ -1,6 +1,6 @@
 `default_nettype none
 
-module tt_um_addon (
+module tt_um_mag_calctr (
     input  wire [7:0] ui_in,     // X input
     input  wire [7:0] uio_in,    // Y input
     output reg  [7:0] uo_out,    // Approximate Square root output
