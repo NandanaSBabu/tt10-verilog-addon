@@ -1,57 +1,61 @@
 `default_nettype none
 
 module tt_um_mag_calctr (
-    input  wire [7:0] ui_in,     // X input
-    output wire [7:0] uo_out,    // Output: sqrt(x² + y²)
-    input  wire [7:0] uio_in,    // Y input
-    output wire [7:0] uio_out,   // Not used
-    output wire [7:0] uio_oe,    // Not used
-    input  wire       ena,       // Always 1 when powered
-    input  wire       clk,       // Clock
-    input  wire       rst_n      // Active low reset
+    input  wire [7:0] ui_in,
+    output wire [7:0] uo_out,
+    input  wire [7:0] uio_in,
+    output wire [7:0] uio_out,
+    output wire [7:0] uio_oe,
+    input  wire       ena,
+    input  wire       clk,
+    input  wire       rst_n
 );
 
-    assign uio_out = 8'b0;
-    assign uio_oe  = 8'b0;
+    assign uio_out = 8'b00000000;
+    assign uio_oe  = 8'b00000000;
 
-    reg [15:0] value;     // x² + y²
-    reg [7:0]  result;    // sqrt(x² + y²)
-    reg [7:0]  b;
-    reg [7:0]  temp;
+    reg [15:0] ss_temp;
+    reg [15:0] est_temp;
+    reg [15:0] b_temp;
+    reg [3:0]  step; // max 15 iterations
+
     reg [7:0]  out_reg;
-    reg [3:0]  step;
     reg        busy;
 
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            value   <= 0;
-            result  <= 0;
-            b     <= 0;
-            temp    <= 0;
-            out_reg <= 0;
-            step    <= 0;
-            busy    <= 0;
+            ss_temp   <= 0;
+            est_temp  <= 0;
+            b_temp    <= 16'h4000;
+            step      <= 0;
+            out_reg   <= 0;
+            busy      <= 0;
         end else if (ena && !busy) begin
-            value   <= ui_in * ui_in + uio_in * uio_in;
-            result  <= 0;
-            b    <= 8'h40;  // Start from MSB (64)
-            step    <= 0;
-            busy    <= 1;
+            // Start square root approximation
+            ss_temp   <= (ui_in * ui_in) + (uio_in * uio_in);
+            est_temp  <= 0;
+            b_temp    <= 16'h4000;
+            step      <= 0;
+            busy      <= 1;
         end else if (busy) begin
-            if (step < 8) begin
-                temp = result | b;
-                if (temp * temp <= value)
-                    result <= temp;
-                step <= step + 1;
-                b  <= b >> 1;
+            if (step < 15) begin
+                if (ss_temp >= (est_temp + b_temp)) begin
+                    ss_temp  <= ss_temp - (est_temp + b_temp);
+                    est_temp <= (est_temp >> 1) + b_temp;
+                end else begin
+                    est_temp <= est_temp >> 1;
+                end
+                b_temp <= b_temp >> 2;
+                step   <= step + 1;
             end else begin
-                out_reg <= result;
-                busy <= 0;
+                out_reg <= est_temp[7:0]; // Output 8-bit approx sqrt
+                busy    <= 0;
             end
         end
     end
 
     assign uo_out = out_reg;
+
     wire _unused = &{ena, 1'b0};
 
 endmodule
