@@ -33,14 +33,14 @@ pinout:
   ui[7]: "x[7]"
 
   # Outputs
-  uo[0]: "mag[0]"
-  uo[1]: "mag[1]"
-  uo[2]: "mag[2]"
-  uo[3]: "mag[3]"
-  uo[4]: "mag[4]"
-  uo[5]: "mag[5]"
-  uo[6]: "mag[6]"
-  uo[7]: "mag[7]"
+  uo[0]: "approx[0]"
+  uo[1]: "approx[1]"
+  uo[2]: "approx[2]"
+  uo[3]: "approx[3]"
+  uo[4]: "approx[4]"
+  uo[5]: "approx[5]"
+  uo[6]: "approx[6]"
+  uo[7]: "approx[7]"
 
   # Bidirectional pins
   uio[0]: "y[0]"
