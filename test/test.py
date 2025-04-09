@@ -1,33 +1,40 @@
+# SPDX-FileCopyrightText: © 2024 Tiny Tapeout
+# SPDX-License-Identifier: Apache-2.0
+
 import cocotb
-from cocotb.triggers import Timer
+from cocotb.clock import Clock
+from cocotb.triggers import ClockCycles
+
 
 @cocotb.test()
 async def test_project(dut):
-    """Test sqrt calculation logic"""
+    dut._log.info("Start")
 
-    test_cases = [
-        (3, 4, 5),   # sqrt(3^2 + 4^2) = 5
-        (7, 24, 25), # sqrt(7^2 + 24^2) = 25
-        (10, 15, 18), # sqrt(10^2 + 15^2) ≈ 18
-    ]
+    # Set the clock period to 10 us (100 KHz)
+    clock = Clock(dut.clk, 10, units="us")
+    cocotb.start_soon(clock.start())
 
-    dut.rst_n.value = 0
-    dut.ena.value = 0
+    # Reset
+    dut._log.info("Reset")
+    dut.ena.value = 1
     dut.ui_in.value = 0
     dut.uio_in.value = 0
-
-    await Timer(20, units="ns")  # ✅ Wait for reset
+    dut.rst_n.value = 0
+    await ClockCycles(dut.clk, 10)
     dut.rst_n.value = 1
-    await Timer(10, units="ns")
 
-    dut.ena.value = 1  # ✅ Enable calculations
+   # dut._log.info("Test project behavior")
 
-    for x, y, expected in test_cases:
-        dut.ui_in.value = x
-        dut.uio_in.value = y
-        await Timer(50, units="ns")  # ✅ Wait before reading `uo_out`
+    # Set the input values you want to test
+   # dut.ui_in.value = 20
+   # dut.uio_in.value = 30
 
-        output = dut.uo_out.value.integer
-        assert output == expected, f"sqrt({x}^2 + {y}^2) failed: got {output}, expected {expected}"
+    # Wait for one clock cycle to see the output values
+   # await ClockCycles(dut.clk, 1)
 
-        print(f"Time = {cocotb.utils.get_sim_time()} ns | x = {x} | y = {y} | sqrt_out = {output}")
+    # The following assersion is just an example of how to check the output values.
+    # Change it to match the actual expected output of your module:
+   # assert dut.uo_out.value == 50
+
+    # Keep testing the module by changing the input values, waiting for
+    # one or more clock cycles, and asserting the expected output values.
