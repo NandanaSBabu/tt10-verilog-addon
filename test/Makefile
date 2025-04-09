@@ -5,7 +5,7 @@
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = project.v # Changed to your Verilog filename
+PROJECT_SOURCES = project.v
 
 ifneq ($(GATES),yes)
 
@@ -17,11 +17,11 @@ else
 
 # Gate level simulation:
 SIM_BUILD				= sim_build/gl
-COMPILE_ARGS 		+= -DGL_TEST
-COMPILE_ARGS 		+= -DFUNCTIONAL
-COMPILE_ARGS 		+= -DUSE_POWER_PINS
-COMPILE_ARGS 		+= -DSIM
-COMPILE_ARGS 		+= -DUNIT_DELAY=\#1
+COMPILE_ARGS    += -DGL_TEST
+COMPILE_ARGS    += -DFUNCTIONAL
+COMPILE_ARGS    += -DUSE_POWER_PINS
+COMPILE_ARGS    += -DSIM
+COMPILE_ARGS    += -DUNIT_DELAY=\#1
 VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v
 VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
 
@@ -34,11 +34,11 @@ endif
 COMPILE_ARGS 		+= -I$(SRC_DIR)
 
 # Include the testbench sources:
-VERILOG_SOURCES += $(PWD)/tb.v # Changed to your testbench filename
-TOPLEVEL = tb # Changed to your testbench top level
+VERILOG_SOURCES += $(PWD)/tb.v
+TOPLEVEL = tb
 
 # MODULE is the basename of the Python test file
-MODULE = test # If you have a python test file. otherwise remove this line.
+MODULE = test
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
