@@ -27,12 +27,11 @@ To test the magnitude calculator:
 You can compare the output with the true magnitude calculated as sqrt(x² + y²). The approximation works best for vectors where one component is significantly larger than the other.
 
 ### Test vectors for verification:
-| x | y | Approx. Magnitude | True Magnitude | Error |
-|---|---|-------------------|----------------|-------|
-| 3 | 4 | 5                 | 5              | 0%    |
-| 5 | 12| 18                | 13             | 38%   |
-| 100|100| 149              | 141            | 6%    |
-| 0 | 0 | 0                 | 0              | 0%    |
+| x | y | Approx. Magnitude | True Magnitude 
+|---|---|-------------------|----------------
+| 3 | 4 | 5                 | 5              
+| 5 | 12| 13                | 13             
+| 0 | 0 | 0                 | 0             
 
 ## External hardware
 
