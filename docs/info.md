@@ -5,7 +5,7 @@
 This project implements an approximate magnitude calculator for 2D vectors. Given inputs x and y (the vector components), it approximates the magnitude (length) of the vector using the formula:
 
 ```
-approx = max_val + (min_val >> 1) - 1
+magnitude ≈ max(x, y) + (min(x, y) >> 1) - 1
 ```
 
 This approximation is faster than computing the exact magnitude (√(x² + y²)) and provides a good approximation for many applications. The algorithm avoids the need for multiplication, division, or square root operations, making it suitable for simple hardware implementation.
@@ -27,12 +27,12 @@ To test the magnitude calculator:
 You can compare the output with the true magnitude calculated as sqrt(x² + y²). The approximation works best for vectors where one component is significantly larger than the other.
 
 ### Test vectors for verification:
-| x | y | Approx. Magnitude | True Magnitude 
-|---|---|-------------------|----------------
-| 3 | 4 | 5                 | 5              
-| 6 | 8 | 10                | 10             
-| 10|10 | 14                | 14.1            
-| 15| 7 | 17                | 16.5              
+| x | y | Approx. Magnitude | True Magnitude | Error |
+|---|---|-------------------|----------------|-------|
+| 3 | 4 | 5                 | 5              | 0%    |
+| 5 | 12| 18                | 13             | 38%   |
+| 100|100| 149              | 141            | 6%    |
+| 0 | 0 | 0                 | 0              | 0%    |
 
 ## External hardware
 
